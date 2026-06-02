@@ -3,15 +3,102 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#000000" />
-    <link rel="icon" type="image/svg+xml" href="/src/assets/logo.svg" />
-    <title>Tauri + Solid + Typescript App</title>
+    <meta name="theme-color" content="#0B0F00" />
+    <title>Rune</title>
   </head>
-
   <body>
+    <script>
+      (function() {
+        try {
+          var theme = localStorage.getItem("rune_theme") || "rune-light";
+          var bg = "#ffffff";
+          var bgSecondary = "#f6f8fa";
+          var border = "#d0d7de";
+          var isLight = true;
+          
+          if (theme === "obsidian-lime") {
+            bg = "#0B0F00";
+            bgSecondary = "#111a00";
+            border = "#1e2a00";
+            isLight = false;
+          } else if (theme === "rune-blue") {
+            bg = "#0d1117";
+            bgSecondary = "#161b22";
+            border = "#30363d";
+            isLight = false;
+          } else if (theme === "pure-dark") {
+            bg = "#000000";
+            bgSecondary = "#0a0a0a";
+            border = "#222222";
+            isLight = false;
+          } else if (theme === "pure-white") {
+            bg = "#ffffff";
+            bgSecondary = "#f7f7f7";
+            border = "#e0e0e0";
+            isLight = true;
+          } else if (theme === "one-dark") {
+            bg = "#282c34";
+            bgSecondary = "#21252b";
+            border = "#181a1f";
+            isLight = false;
+          } else if (theme === "cyan") {
+            bg = "#000000";
+            bgSecondary = "#0a0a0a";
+            border = "#1a1a1a";
+            isLight = false;
+          } else if (theme === "dracula") {
+            bg = "#282a36";
+            bgSecondary = "#21222c";
+            border = "#44475a";
+            isLight = false;
+          } else if (theme === "nord") {
+            bg = "#2e3440";
+            bgSecondary = "#242933";
+            border = "#3b4252";
+            isLight = false;
+          } else if (theme === "solarized-light") {
+            bg = "#fdf6e3";
+            bgSecondary = "#eee8d5";
+            border = "#d3c7a1";
+            isLight = true;
+          } else if (theme === "cyberpunk") {
+            bg = "#0f051d";
+            bgSecondary = "#0a0314";
+            border = "#2b144d";
+            isLight = false;
+          } else if (theme === "custom") {
+            var savedBg = localStorage.getItem("rune_bg");
+            if (savedBg) bg = savedBg;
+            bgSecondary = bg;
+            border = "transparent";
+            try {
+              var c = bg.startsWith("#") ? bg.substring(1) : bg;
+              var rgb = parseInt(c, 16);
+              var r = (rgb >> 16) & 0xff;
+              var g = (rgb >> 8) & 0xff;
+              var b = (rgb >> 0) & 0xff;
+              var luma = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+              isLight = luma > 128;
+            } catch(err) {
+              isLight = false;
+            }
+          }
+          
+          document.documentElement.style.setProperty("--color-bg", bg);
+          document.documentElement.style.setProperty("--color-bg-secondary", bgSecondary);
+          document.documentElement.style.setProperty("--color-sidebar-bg", bgSecondary);
+          document.documentElement.style.setProperty("--color-border", border);
+          document.documentElement.style.backgroundColor = bg;
+          if (isLight) {
+            document.documentElement.setAttribute("data-theme", "light");
+          } else {
+            document.documentElement.setAttribute("data-theme", "dark");
+          }
+        } catch(e) {}
+      })();
+    </script>
     <noscript>You need to enable JavaScript to run this app.</noscript>
     <div id="root"></div>
-
     <script src="/src/index.tsx" type="module"></script>
   </body>
 </html>

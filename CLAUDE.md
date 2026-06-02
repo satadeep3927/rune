@@ -18,7 +18,7 @@ A lightweight, extensible code editor built with Tauri 2 + SolidJS + Rust.
 
 - **Modular design** — every feature lives in its own directory under `src/` with its own components, hooks, and types.
 - **Custom hooks over inline logic** — extract reactive logic into `src/hooks/` or feature-local hooks. Components should be thin wrappers.
-- **Sharp design** — hard edges, no border-radius excessive, crisp lines. Default theme: black bg + lime (#00FF00) accents.
+- **Sharp design** — hard edges, no border-radius excessive, crisp lines. Default theme: dark bg (#0B0F00) + lime (#00ff41) accents.
 
 ## Directory Structure (target)
 
@@ -49,17 +49,18 @@ pnpm build            # Frontend-only build
 
 ## Design System
 
-- Default theme: **Obsidian + Lime** — black backgrounds (`#0a0a0a`), lime accents (`#00ff41`), monospace everything.
+- Default theme: **Obsidian + Lime** — dark backgrounds (`#0B0F00`), lime accents (`#00ff41`), monospace everything.
 - All colors driven by CSS custom properties so themes are swappable.
 - Sharp corners (border-radius: 0 or 2px max). No soft/rounded UI.
 - Thin 1px borders, high contrast.
 
-## Key Dependencies to Add
+## Key Dependencies
 
-- `tailwindcss` + `@tailwindcss/vite`
-- `@codemirror/view`, `@codemirror/state`, `@codemirror/lang-javascript`, etc.
-- `@solid-primitives/context` (or Solid's native createContext)
-- TanStack Query for Solid (if async data flows need it)
+- `tailwindcss` + `@tailwindcss/vite` (v4)
+- `@kobalte/core` (ShadCN-Solid primitives)
+- CodeMirror 6: `@codemirror/view`, `@codemirror/state`, `@codemirror/commands`, `@codemirror/autocomplete`, `@codemirror/language`, `@codemirror/search`, `@codemirror/lang-*`
+- `@tauri-apps/plugin-fs`, `@tauri-apps/plugin-dialog`
+- `tauri-plugin-fs`, `tauri-plugin-dialog` (Rust side)
 
 ## Tauri Notes
 

@@ -1,6 +1,6 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "rune-editor",
+  "productName": "Rune",
   "version": "0.1.0",
   "identifier": "com.runeeditor.app",
   "build": {
@@ -12,9 +12,11 @@
   "app": {
     "windows": [
       {
-        "title": "rune-editor",
-        "width": 800,
-        "height": 600
+        "title": "Rune",
+        "width": 1280,
+        "height": 800,
+        "decorations": false,
+        "visible": false
       }
     ],
     "security": {
@@ -30,6 +32,41 @@
       "icons/128x128@2x.png",
       "icons/icon.icns",
       "icons/icon.ico"
-    ]
+    ],
+    "fileAssociations": [
+      { "ext": ["txt"],                "name": "Text File",        "role": "Editor" },
+      { "ext": ["md", "mdx"],          "name": "Markdown File",    "role": "Editor" },
+      { "ext": ["js", "mjs", "cjs"],   "name": "JavaScript File",  "role": "Editor" },
+      { "ext": ["ts", "mts", "cts"],   "name": "TypeScript File",  "role": "Editor" },
+      { "ext": ["jsx", "tsx"],         "name": "JSX/TSX File",     "role": "Editor" },
+      { "ext": ["json", "jsonc"],      "name": "JSON File",        "role": "Editor" },
+      { "ext": ["css", "scss", "less"],"name": "Stylesheet",       "role": "Editor" },
+      { "ext": ["html", "htm"],        "name": "HTML File",        "role": "Editor" },
+      { "ext": ["rs"],                 "name": "Rust Source",      "role": "Editor" },
+      { "ext": ["py"],                 "name": "Python Script",    "role": "Editor" },
+      { "ext": ["go"],                 "name": "Go Source",        "role": "Editor" },
+      { "ext": ["java"],               "name": "Java Source",      "role": "Editor" },
+      { "ext": ["c", "cpp", "h"],      "name": "C/C++ Source",     "role": "Editor" },
+      { "ext": ["cs"],                 "name": "C# Source",        "role": "Editor" },
+      { "ext": ["sh", "bash", "zsh"],  "name": "Shell Script",     "role": "Editor" },
+      { "ext": ["yaml", "yml"],        "name": "YAML File",        "role": "Editor" },
+      { "ext": ["toml"],               "name": "TOML File",        "role": "Editor" },
+      { "ext": ["xml"],                "name": "XML File",         "role": "Editor" },
+      { "ext": ["sql"],                "name": "SQL File",         "role": "Editor" },
+      { "ext": ["lua"],                "name": "Lua Script",       "role": "Editor" },
+      { "ext": ["php"],                "name": "PHP File",         "role": "Editor" },
+      { "ext": ["rb"],                 "name": "Ruby Script",      "role": "Editor" },
+      { "ext": ["swift"],              "name": "Swift Source",     "role": "Editor" },
+      { "ext": ["kt", "kts"],          "name": "Kotlin Source",    "role": "Editor" },
+      { "ext": ["vue", "svelte"],      "name": "Component File",   "role": "Editor" },
+      { "ext": ["env"],                "name": "Env File",         "role": "Editor" },
+      { "ext": ["ini", "cfg", "conf"], "name": "Config File",      "role": "Editor" },
+      { "ext": ["log"],                "name": "Log File",         "role": "Editor" }
+    ],
+    "windows": {
+      "nsis": {
+        "installerHooks": "nsis/hooks.nsh"
+      }
+    }
   }
 }
