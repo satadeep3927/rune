@@ -12,7 +12,7 @@ import { TerminalPanel } from "./components/TerminalPanel";
 import { useMenuDefinitions } from "./hooks/useMenuDefinitions";
 import { useFileSystem } from "./hooks/useFileSystem";
 import { useKeyboardShortcuts } from "./hooks/useKeyboardShortcuts";
-import { initGlobalSettings, loadWorkspaceSettings, globalSettings, workspaceSettings } from "./stores/settings";
+import { loadAllSettings, globalSettings, workspaceSettings } from "./stores/settings";
 import { tabStore } from "./stores/tabs";
 import { settingsStore } from "./stores/settings";
 import { loadIconMap } from "./utils/iconMap";
@@ -68,9 +68,31 @@ function AppContent() {
   let previousRoot: string | null = null;
 
   onMount(() => {
-    initGlobalSettings();
+    const t0 = performance.now();
+    console.log(`[rune] onMount: ${Math.round(t0)}ms`);
+
+    // Show window immediately — don't wait for I/O
+    (async () => {
+      try {
+        const { getCurrentWebviewWindow } = await import("@tauri-apps/api/webviewWindow");
+        getCurrentWebviewWindow().show().catch(() => {});
+        console.log(`[rune] window.show(): ${Math.round(performance.now() - t0)}ms`);
+      } catch (e) {}
+    })();
+
+    // Init filesystem — this is the hot path for workspace restore
+    console.time("[rune] fs.init");
+    fs.init().then(() => {
+      console.log(`[rune] fs.init done: ${Math.round(performance.now() - t0)}ms`);
+    });
+
+    // Load settings and icons in background — don't block
     loadIconMap();
-    fs.init();
+
+    // Batch-load all settings in a single IPC call
+    loadAllSettings(fs.rootPath()).then(() => {
+      console.log(`[rune] loadAllSettings done: ${Math.round(performance.now() - t0)}ms`);
+    });
 
     (async () => {
       try {
@@ -80,28 +102,54 @@ function AppContent() {
         }, 50);
       } catch (e) {}
 
-      // Handle "Open with Rune" / "Open as Rune Project" CLI arg
+      // Handle "Open with Rune" / "Open as Rune Project" CLI arg + file association
       try {
         const { listen } = await import("@tauri-apps/api/event");
         const { stat } = await import("@tauri-apps/plugin-fs");
+        const { getCurrentWebviewWindow } = await import("@tauri-apps/api/webviewWindow");
         await listen<string>("open-path", async (event) => {
-          const path = event.payload;
+          let path = event.payload;
+          console.log(`[rune] open-path received: ${path}`);
           if (!path) return;
+          // Strip any remaining file:// prefix (safety net)
+          if (path.startsWith("file:///")) {
+            path = decodeURIComponent(path.slice(8)).replace(/\//g, "\\");
+          } else if (path.startsWith("file://")) {
+            path = decodeURIComponent(path.slice(7)).replace(/\//g, "\\");
+          }
+          // Show and focus window
+          getCurrentWebviewWindow().show().catch(() => {});
+          getCurrentWebviewWindow().setFocus().catch(() => {});
           try {
             const info = await stat(path);
             if (info.isDirectory) {
-              // Open as workspace folder
+              console.log(`[rune] open-path: opening folder ${path}`);
               await fs.openFolderByPath(path);
             } else {
-              // Open as file tab
-              const name = path.split(/[/\\]/).pop() ?? "file";
+              // File: open its parent dir as workspace, then open file as tab
+              const sep = path.includes("\\") ? "\\" : "/";
+              const lastSep = path.lastIndexOf(sep);
+              const parentDir = lastSep > 0 ? path.substring(0, lastSep) : null;
+              const name = path.substring(lastSep + 1);
+
+              console.log(`[rune] open-path: file ${path}, parent: ${parentDir}`);
+
+              // Open parent as workspace if it's different from current
+              if (parentDir && parentDir !== fs.rootPath()) {
+                await fs.openFolderByPath(parentDir);
+                // Wait for workspace to load
+                await new Promise(r => setTimeout(r, 300));
+              }
+
               await handleFileClick({ path, name });
             }
           } catch (err) {
             console.error("open-path: failed to open", path, err);
           }
         });
-      } catch (e) {}
+      } catch (e) {
+        console.error("open-path: listener setup failed", e);
+      }
     })();
   });
 
@@ -111,10 +159,12 @@ function AppContent() {
     document.documentElement.style.setProperty("--editor-font-family", globalSettings.editorFontFamily);
   });
 
+  let workspaceReady = false;
+
   createEffect(() => {
-    // track changes to excludeItems
     workspaceSettings.excludeItems;
-    if (fs.rootPath()) {
+    if (fs.rootPath() && workspaceReady) {
+      console.log(`[rune] excludeItems changed → refreshTree`);
       fs.refreshTree();
     }
   });
@@ -131,21 +181,33 @@ function AppContent() {
     previousRoot = root;
 
     if (root) {
-      loadWorkspaceSettings(root);
+      console.log(`[rune] workspace effect: ${root}`);
+
+      // Settings already loaded by loadAllSettings — just mark ready
+      workspaceReady = true;
 
       const stored = tabStore.loadTabsFromStorage(root);
       if (stored) {
+        const tabT0 = performance.now();
         const activePath = tabStore.getStoredActiveFilePath(root);
         const rightActivePath = tabStore.getStoredRightActiveFilePath(root);
         (async () => {
-          for (const t of stored) {
-            try {
+          console.log(`[rune] restoring ${stored.length} tabs...`);
+          const results = await Promise.allSettled(
+            stored.map(async (t) => {
               const { content, language, fileType } = await fs.readFileContent(t.filePath);
               const dataUrl = fileType === "image" || fileType === "pdf" ? content : undefined;
               const tabContent = fileType === "image" || fileType === "pdf" ? "" : content;
-              tabStore.openTab(t.filePath, t.fileName, tabContent, language, fileType, dataUrl, t.pane);
-            } catch { /* file may have been deleted */ }
+              return { ...t, content: tabContent, language, fileType, dataUrl };
+            })
+          );
+          for (const result of results) {
+            if (result.status === "fulfilled") {
+              const t = result.value;
+              tabStore.openTab(t.filePath, t.fileName, t.content, t.language, t.fileType, t.dataUrl, t.pane);
+            }
           }
+          console.log(`[rune] tabs restored: ${Math.round(performance.now() - tabT0)}ms`);
           if (activePath) {
             const match = tabStore.tabs().find((t) => t.filePath === activePath);
             if (match) tabStore.setActiveTabForPane(match.id, "left");
@@ -364,6 +426,9 @@ function AppContent() {
       "ctrl+KeyN": () => tabStore.openUntitledTab(),
       "ctrl+shift+KeyN": menuActions.newWindow,
       "ctrl+shift+KeyW": menuActions.closeWindow,
+      // Block browser defaults
+      "ctrl+KeyP": () => {},
+      "ctrl+KeyR": () => {},
       // Delete selected file/folder in explorer
       "Delete": () => deleteSelectedPath(false),
       "shift+Delete": () => deleteSelectedPath(true),
@@ -419,6 +484,22 @@ function AppContent() {
     showContextMenu(e.clientX, e.clientY, items);
   }
 
+  async function revealInExplorer(path: string) {
+    const { revealItemInDir } = await import("@tauri-apps/plugin-opener");
+    await revealItemInDir(path);
+  }
+
+  function getRelativePath(absolutePath: string): string {
+    const root = fs.rootPath();
+    if (!root) return absolutePath;
+    const normPath = absolutePath.replace(/\\/g, "/");
+    const normRoot = root.replace(/\\/g, "/").replace(/\/$/, "");
+    if (normPath.startsWith(normRoot + "/")) {
+      return normPath.slice(normRoot.length + 1);
+    }
+    return absolutePath;
+  }
+
   function handleFileTreeContextMenu(entry: FileEntry, e: MouseEvent) {
     const items: ContextMenuItem[] = [];
     if (entry.isDirectory) {
@@ -431,8 +512,10 @@ function AppContent() {
         }},
         { separator: true, label: "" },
         { label: "Copy Path", action: () => navigator.clipboard.writeText(entry.path) },
-        { label: "Rename", action: () => setEditingItem({ parentPath: entry.path, mode: "rename" }) },
+        { label: "Copy Relative Path", action: () => navigator.clipboard.writeText(getRelativePath(entry.path)) },
+        { label: "Reveal in Explorer", action: () => revealInExplorer(entry.path) },
         { separator: true, label: "" },
+        { label: "Rename", action: () => setEditingItem({ parentPath: entry.path, mode: "rename" }) },
         { label: "Delete", action: () => confirmDelete(entry.name, async () => {
           await fs.deleteFile(entry.path);
           tabStore.closeTabsForPath(entry.path);
@@ -446,8 +529,10 @@ function AppContent() {
         { label: "Open", action: () => handleFileClick(entry) },
         { separator: true, label: "" },
         { label: "Copy Path", action: () => navigator.clipboard.writeText(entry.path) },
-        { label: "Rename", action: () => setEditingItem({ parentPath: entry.path, mode: "rename" }) },
+        { label: "Copy Relative Path", action: () => navigator.clipboard.writeText(getRelativePath(entry.path)) },
+        { label: "Reveal in Explorer", action: () => revealInExplorer(entry.path) },
         { separator: true, label: "" },
+        { label: "Rename", action: () => setEditingItem({ parentPath: entry.path, mode: "rename" }) },
         { label: "Delete", action: () => confirmDelete(entry.name, async () => {
           await fs.deleteFile(entry.path);
           tabStore.closeTabsForPath(entry.path);

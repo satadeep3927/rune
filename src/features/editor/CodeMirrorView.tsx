@@ -1,11 +1,12 @@
-import { onMount, onCleanup, createEffect } from "solid-js";
+import { onMount, onCleanup, createEffect, createSignal } from "solid-js";
 import { EditorView, keymap, lineNumbers, highlightActiveLineGutter, highlightActiveLine, drawSelection, rectangularSelection, highlightSpecialChars } from "@codemirror/view";
 import { globalSettings } from "../../stores/settings";
 import { EditorState, Compartment, Transaction } from "@codemirror/state";
-import { defaultKeymap, history, historyKeymap, indentWithTab } from "@codemirror/commands";
+import { defaultKeymap, history, historyKeymap, indentWithTab, undo, redo, selectAll } from "@codemirror/commands";
 import { autocompletion, closeBrackets, closeBracketsKeymap, completionKeymap } from "@codemirror/autocomplete";
 import { searchKeymap, highlightSelectionMatches } from "@codemirror/search";
 import { foldGutter, indentOnInput, bracketMatching, foldKeymap, syntaxHighlighting, defaultHighlightStyle } from "@codemirror/language";
+import { ContextMenu, type ContextMenuItem } from "../../components/ContextMenu";
 import { javascript } from "@codemirror/lang-javascript";
 import { html } from "@codemirror/lang-html";
 import { css } from "@codemirror/lang-css";
@@ -49,6 +50,7 @@ function getLanguageExtension(lang: string): Extension {
     case "yaml": return StreamLanguage.define(yaml);
     case "shell": return StreamLanguage.define(shell);
     case "go": return StreamLanguage.define(go);
+    case "blade": return html(); // Blade = HTML + @directives + {{ }}
     default: return [];
   }
 }
@@ -67,6 +69,7 @@ export function CodeMirrorView(props: CodeMirrorViewProps) {
   const wordWrapCompartment = new Compartment();
   let currentContent = props.content;
   let settingContent = false;
+  const [ctxMenu, setCtxMenu] = createSignal<{ x: number; y: number; items: ContextMenuItem[] } | null>(null);
 
   onMount(() => {
     const state = EditorState.create({
@@ -151,5 +154,43 @@ export function CodeMirrorView(props: CodeMirrorViewProps) {
     settingContent = false;
   });
 
-  return <div ref={containerRef} class="h-full w-full overflow-hidden" />;
+  function handleContextMenu(e: MouseEvent) {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!view) return;
+
+    const items: ContextMenuItem[] = [
+      { label: "Cut", action: () => { view?.focus(); document.execCommand("cut"); } },
+      { label: "Copy", action: () => { view?.focus(); document.execCommand("copy"); } },
+      { label: "Paste", action: () => {
+        view?.focus();
+        if (!view) return;
+        navigator.clipboard.readText().then(text => {
+          if (!view) return;
+          view.dispatch(view.state.replaceSelection(text));
+        }).catch(() => { document.execCommand("paste"); });
+      } },
+      { separator: true, label: "" },
+      { label: "Select All", action: () => { view?.focus(); if (view) selectAll(view); } },
+      { separator: true, label: "" },
+      { label: "Undo", action: () => { view?.focus(); undo(view!); } },
+      { label: "Redo", action: () => { view?.focus(); redo(view!); } },
+    ];
+
+    setCtxMenu({ x: e.clientX, y: e.clientY, items });
+  }
+
+  return (
+    <>
+      <div ref={containerRef} class="h-full w-full overflow-hidden" onContextMenu={handleContextMenu} />
+      {ctxMenu() && (
+        <ContextMenu
+          x={ctxMenu()!.x}
+          y={ctxMenu()!.y}
+          items={ctxMenu()!.items}
+          onClose={() => setCtxMenu(null)}
+        />
+      )}
+    </>
+  );
 }

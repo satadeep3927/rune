@@ -46,3 +46,10 @@ jobs:
       - uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tagName: ${{ github.ref_name }}
+          releaseName: "Rune ${{ github.ref_name }}"
+          releaseBody: "See the assets below to download and install Rune."
+          releaseDraft: true
+          prerelease: false
+          updaterJsonPreferNsis: true

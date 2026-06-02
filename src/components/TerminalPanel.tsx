@@ -163,6 +163,9 @@ function TerminalInstance(props: TerminalInstanceProps) {
       fontSize: globalSettings.terminalFontSize,
       fontFamily: "'FiraCode Nerd Font', 'Fira Code', 'JetBrains Mono', monospace",
       theme: getTerminalTheme(),
+      scrollback: 5000,
+      convertEol: true,
+      allowProposedApi: true,
     });
 
     fitAddon = new FitAddon();
@@ -238,9 +241,27 @@ function TerminalInstance(props: TerminalInstanceProps) {
       background: style.getPropertyValue("--color-bg").trim() || "#0B0F00",
       foreground: style.getPropertyValue("--color-fg").trim() || "#d4d4d4",
       cursor: style.getPropertyValue("--color-accent").trim() || "#CDFF07",
+      cursorAccent: "#000000",
       selectionBackground: style.getPropertyValue("--color-accent").trim()
         ? `rgba(255, 255, 255, 0.2)`
         : "rgba(205,255,7,0.3)",
+      selectionForeground: "#ffffff",
+      black: "#1e1e1e",
+      red: "#f44747",
+      green: "#6A9955",
+      yellow: "#d7ba7d",
+      blue: "#569cd6",
+      magenta: "#c586c0",
+      cyan: "#4ec9b0",
+      white: "#d4d4d4",
+      brightBlack: "#666666",
+      brightRed: "#f44747",
+      brightGreen: "#6A9955",
+      brightYellow: "#d7ba7d",
+      brightBlue: "#569cd6",
+      brightMagenta: "#c586c0",
+      brightCyan: "#4ec9b0",
+      brightWhite: "#ffffff",
     };
   }
 
@@ -255,7 +276,8 @@ function TerminalInstance(props: TerminalInstanceProps) {
       ref={terminalRef}
       class="absolute inset-0 p-2"
       style={{
-        display: props.isActive ? "block" : "none",
+        visibility: props.isActive ? "visible" : "hidden",
+        "pointer-events": props.isActive ? "auto" : "none",
       }}
     />
   );

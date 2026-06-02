@@ -1,7 +1,12 @@
 import { createStore } from "solid-js/store";
-import { homeDir, join } from "@tauri-apps/api/path";
-import { readTextFile, writeTextFile, mkdir, exists } from "@tauri-apps/plugin-fs";
+import { invoke } from "@tauri-apps/api/core";
+import { readTextFile, writeTextFile, mkdir } from "@tauri-apps/plugin-fs";
 import type { ThemeColors } from "../types";
+
+function joinPath(...parts: string[]): string {
+  const sep = parts[0]?.includes("\\") ? "\\" : "/";
+  return parts.join(sep).replace(/[/\\]+/g, sep);
+}
 
 export interface GlobalSettings {
   theme: string;
@@ -34,14 +39,19 @@ export const [globalSettings, setGlobalSettings] = createStore<GlobalSettings>(D
 export const [workspaceSettings, setWorkspaceSettings] = createStore<WorkspaceSettings>(DEFAULT_WORKSPACE);
 
 let workspaceRootPath: string | null = null;
+let cachedHomeDir: string | null = null;
+
+interface StartupData {
+  home_dir: string;
+  global_settings: string | null;
+  workspace_settings: string | null;
+}
 
 export async function initGlobalSettings() {
   try {
-    const home = await homeDir();
-    const configDir = await join(home, ".rune");
-    const configPath = await join(configDir, "settings.json");
-
-    if (await exists(configPath)) {
+    if (!cachedHomeDir) cachedHomeDir = await getHomeDir();
+    const configPath = joinPath(cachedHomeDir, ".rune", "settings.json");
+    try {
       const content = await readTextFile(configPath);
       const parsed = JSON.parse(content);
       setGlobalSettings({ ...DEFAULT_GLOBAL, ...parsed });
@@ -49,8 +59,8 @@ export async function initGlobalSettings() {
       if (parsed.theme === "custom" && parsed.customTheme?.bg) {
         localStorage.setItem("rune_bg", parsed.customTheme.bg);
       }
-    } else {
-      await mkdir(configDir, { recursive: true }).catch(() => {});
+    } catch {
+      await mkdir(joinPath(cachedHomeDir, ".rune"), { recursive: true }).catch(() => {});
       await writeTextFile(configPath, JSON.stringify(DEFAULT_GLOBAL, null, 2));
     }
   } catch (e) {
@@ -58,11 +68,61 @@ export async function initGlobalSettings() {
   }
 }
 
+export async function getHomeDir(): Promise<string> {
+  if (cachedHomeDir) return cachedHomeDir;
+  // Try batched load_startup first (also reads settings for free)
+  const data: StartupData = await invoke("load_startup", { workspacePath: null });
+  cachedHomeDir = data.home_dir;
+  // Also apply any settings that came back
+  if (data.global_settings) {
+    try {
+      const parsed = JSON.parse(data.global_settings);
+      setGlobalSettings({ ...DEFAULT_GLOBAL, ...parsed });
+      localStorage.setItem("rune_theme", parsed.theme || DEFAULT_GLOBAL.theme);
+      if (parsed.theme === "custom" && parsed.customTheme?.bg) {
+        localStorage.setItem("rune_bg", parsed.customTheme.bg);
+      }
+    } catch {}
+  }
+  return cachedHomeDir!;
+}
+
+export async function loadAllSettings(workspacePath: string | null): Promise<void> {
+  const t0 = performance.now();
+  try {
+    const data: StartupData = await invoke("load_startup", { workspacePath });
+    cachedHomeDir = data.home_dir;
+
+    if (data.global_settings) {
+      try {
+        const parsed = JSON.parse(data.global_settings);
+        setGlobalSettings({ ...DEFAULT_GLOBAL, ...parsed });
+        localStorage.setItem("rune_theme", parsed.theme || DEFAULT_GLOBAL.theme);
+        if (parsed.theme === "custom" && parsed.customTheme?.bg) {
+          localStorage.setItem("rune_bg", parsed.customTheme.bg);
+        }
+      } catch {}
+    }
+
+    if (data.workspace_settings) {
+      try {
+        const parsed = JSON.parse(data.workspace_settings);
+        setWorkspaceSettings({ ...DEFAULT_WORKSPACE, ...parsed });
+      } catch {}
+    } else {
+      setWorkspaceSettings({ ...DEFAULT_WORKSPACE });
+    }
+
+    console.log(`[rune] loadAllSettings (1 IPC): ${Math.round(performance.now() - t0)}ms`);
+  } catch (e) {
+    console.error("Failed to load settings", e);
+  }
+}
+
 export async function saveGlobalSettings() {
   try {
-    const home = await homeDir();
-    const configPath = await join(home, ".rune", "settings.json");
-    // Deep clone to plain object
+    if (!cachedHomeDir) cachedHomeDir = await getHomeDir();
+    const configPath = joinPath(cachedHomeDir, ".rune", "settings.json");
     const data = JSON.parse(JSON.stringify(globalSettings));
     await writeTextFile(configPath, JSON.stringify(data, null, 2));
     localStorage.setItem("rune_theme", globalSettings.theme);
@@ -77,31 +137,22 @@ export async function saveGlobalSettings() {
 export async function loadWorkspaceSettings(rootPath: string | null) {
   workspaceRootPath = rootPath;
   if (!rootPath) return;
-
   try {
-    const configDir = await join(rootPath, ".rune");
-    const configPath = await join(configDir, "settings.json");
-
-    if (await exists(configPath)) {
-      const content = await readTextFile(configPath);
-      const parsed = JSON.parse(content);
-      setWorkspaceSettings({ ...DEFAULT_WORKSPACE, ...parsed });
-    } else {
-      setWorkspaceSettings({ ...DEFAULT_WORKSPACE });
-    }
-  } catch (e) {
-    console.error("Failed to load workspace settings", e);
+    const configPath = joinPath(rootPath, ".rune", "settings.json");
+    const content = await readTextFile(configPath);
+    const parsed = JSON.parse(content);
+    setWorkspaceSettings({ ...DEFAULT_WORKSPACE, ...parsed });
+  } catch {
+    setWorkspaceSettings({ ...DEFAULT_WORKSPACE });
   }
 }
 
 export async function saveWorkspaceSettings() {
   if (!workspaceRootPath) return;
   try {
-    const configDir = await join(workspaceRootPath, ".rune");
-    const configPath = await join(configDir, "settings.json");
+    const configDir = joinPath(workspaceRootPath, ".rune");
+    const configPath = joinPath(configDir, "settings.json");
     await mkdir(configDir, { recursive: true }).catch(() => {});
-    
-    // Deep clone to plain object
     const data = JSON.parse(JSON.stringify(workspaceSettings));
     await writeTextFile(configPath, JSON.stringify(data, null, 2));
   } catch (e) {

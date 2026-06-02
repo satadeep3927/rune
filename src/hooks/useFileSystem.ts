@@ -1,14 +1,25 @@
 import { createSignal } from "solid-js";
 import { readDir, readTextFile, writeTextFile, readFile, mkdir, remove, rename, watch } from "@tauri-apps/plugin-fs";
 import { open } from "@tauri-apps/plugin-dialog";
-import { join, basename } from "@tauri-apps/api/path";
+import { basename } from "@tauri-apps/api/path";
 import { workspaceSettings } from "../stores/settings";
 import type { FileEntry, FileType } from "../types";
+
+function joinPath(...parts: string[]): string {
+  const sep = parts[0]?.includes("\\") ? "\\" : "/";
+  return parts.join(sep).replace(/[/\\]+/g, sep);
+}
 
 const IMAGE_EXTS = new Set(["png", "jpg", "jpeg", "gif", "svg", "bmp", "webp", "ico"]);
 
 function getExt(path: string): string {
-  return path.includes(".") ? path.split(".").pop()!.toLowerCase() : "";
+  if (!path.includes(".")) return "";
+  const lower = path.toLowerCase();
+  // Handle double extensions like .blade.php, .d.ts, .module.css
+  if (lower.endsWith(".blade.php")) return "blade.php";
+  if (lower.endsWith(".d.ts")) return "d.ts";
+  if (lower.endsWith(".module.css")) return "module.css";
+  return path.split(".").pop()!.toLowerCase();
 }
 
 function getFileType(ext: string): FileType {
@@ -74,6 +85,7 @@ function fileExtensionToLanguage(ext: string): string {
     vue: "vue",
     sh: "shell",
     bash: "shell",
+    "blade.php": "blade",
   };
   return map[ext] ?? "text";
 }
@@ -241,11 +253,15 @@ export function useFileSystem() {
   async function init() {
     const saved = rootPath();
     if (saved) {
+      const t0 = performance.now();
+      console.log(`[rune] fs.init: reading ${saved}`);
       setLoading(true);
       try {
         const entries = await readDirectory(saved);
+        console.log(`[rune] fs.init readDirectory: ${Math.round(performance.now() - t0)}ms (${entries.length} entries)`);
         setTree(entries);
         startWatching(saved);
+        console.log(`[rune] fs.init total: ${Math.round(performance.now() - t0)}ms`);
       } catch {
         setRootPath(null);
         localStorage.removeItem(STORAGE_KEY);
@@ -301,20 +317,20 @@ export function useFileSystem() {
 
     for (let i = 0; i < parts.length - 1; i++) {
       const dirName = parts[i]!;
-      currentPath = (await join(currentPath, dirName)) ?? "";
+      currentPath = joinPath(currentPath, dirName);
       try {
         await mkdir(currentPath);
       } catch { /* dir may already exist */ }
     }
 
     const fileName = parts[parts.length - 1]!;
-    const filePath = (await join(currentPath, fileName)) ?? "";
+    const filePath = joinPath(currentPath, fileName);
     await writeTextFile(filePath, "");
     await refreshPreservingExpanded();
   }
 
   async function createNewFolder(parentPath: string, name: string) {
-    const folderPath = (await join(parentPath, name)) ?? "";
+    const folderPath = joinPath(parentPath, name);
     await mkdir(folderPath);
     await refreshPreservingExpanded();
   }
@@ -344,7 +360,7 @@ export function useFileSystem() {
     const oldName = (await basename(oldPath)) ?? "";
     if (newName === oldName) return;
     const parentDir = oldPath.substring(0, oldPath.length - oldName.length);
-    const newPath = (await join(parentDir, newName)) ?? "";
+    const newPath = joinPath(parentDir, newName);
     await rename(oldPath, newPath);
     function renameInTree(entries: FileEntry[]): FileEntry[] {
       return entries.map((e): FileEntry => {

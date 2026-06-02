@@ -43,26 +43,25 @@ fn start_terminal(app: AppHandle, state: State<'_, TerminalState>, term_id: Stri
 
     let child = pair.slave.spawn_command(cmd).map_err(|e| e.to_string())?;
     let child_arc = Arc::new(Mutex::new(child));
-    
+
     let master = pair.master;
     let reader = master.try_clone_reader().map_err(|e| e.to_string())?;
     let writer = master.take_writer().map_err(|e| e.to_string())?;
-    
+
     sessions.insert(term_id.clone(), TerminalSession {
         writer,
         _master: master,
         child: child_arc.clone(),
     });
 
-    // Spawn a thread to read output from PTY master
     let app_clone = app.clone();
     let thread_term_id = term_id.clone();
     std::thread::spawn(move || {
-        let mut buffer = [0; 1024];
+        let mut buffer = [0; 4096];
         let mut r = reader;
         loop {
             match r.read(&mut buffer) {
-                Ok(0) => break, // EOF
+                Ok(0) => break,
                 Ok(n) => {
                     let text = String::from_utf8_lossy(&buffer[..n]).to_string();
                     let payload = TerminalOutputPayload {
@@ -116,10 +115,47 @@ fn kill_terminal(term_id: String, state: State<'_, TerminalState>) -> Result<(),
     Ok(())
 }
 
+#[derive(serde::Serialize)]
+struct StartupData {
+    home_dir: String,
+    global_settings: Option<String>,
+    workspace_settings: Option<String>,
+}
+
+#[tauri::command]
+fn load_startup(workspace_path: Option<String>) -> Result<StartupData, String> {
+    let home = dirs::home_dir().ok_or("Cannot determine home directory")?;
+    let home_str = home.to_string_lossy().to_string();
+
+    let global_path = home.join(".rune").join("settings.json");
+    let global_settings = if global_path.exists() {
+        Some(std::fs::read_to_string(&global_path).map_err(|e| e.to_string())?)
+    } else {
+        None
+    };
+
+    let workspace_settings = if let Some(ref ws) = workspace_path {
+        let ws_path = std::path::Path::new(ws).join(".rune").join("settings.json");
+        if ws_path.exists() {
+            Some(std::fs::read_to_string(&ws_path).map_err(|e| e.to_string())?)
+        } else {
+            None
+        }
+    } else {
+        None
+    };
+
+    Ok(StartupData {
+        home_dir: home_str,
+        global_settings,
+        workspace_settings,
+    })
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
-    // Collect CLI args at startup – skip the first one (executable path)
-    // and also skip Tauri-internal flags like "--tauri-*"
+    // On Windows, file associations and "Open with Rune" pass the path
+    // as a CLI argument. Collect the first non-flag argument.
     let startup_path: Option<String> = std::env::args()
         .skip(1)
         .find(|a| !a.starts_with("--"));
@@ -129,13 +165,14 @@ pub fn run() {
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_fs::init())
         .plugin(tauri_plugin_dialog::init())
-        .invoke_handler(tauri::generate_handler![start_terminal, send_terminal_input, kill_terminal])
+        .invoke_handler(tauri::generate_handler![start_terminal, send_terminal_input, kill_terminal, load_startup])
         .setup(move |app| {
-            if let Some(path) = startup_path {
+            if let Some(path) = startup_path.clone() {
+                eprintln!("[rune] CLI arg: {}", path);
                 let app_handle = app.handle().clone();
-                // Delay slightly so the webview has time to mount and register its listener
                 std::thread::spawn(move || {
-                    std::thread::sleep(std::time::Duration::from_millis(300));
+                    std::thread::sleep(std::time::Duration::from_millis(800));
+                    eprintln!("[rune] emitting open-path: {}", path);
                     let _ = app_handle.emit("open-path", path);
                 });
             }

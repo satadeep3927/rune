@@ -1,0 +1,462 @@
+{
+  "C:\\Users\\BIT1053\\Documents\\Projects\\rune-editor\\src\\App.tsx": {
+    "mtime": 1780396598.4682643,
+    "ast_hash": "867fa07e6a273e159ba7a60022348a3a",
+    "semantic_hash": "867fa07e6a273e159ba7a60022348a3a"
+  },
+  "C:\\Users\\BIT1053\\Documents\\Projects\\rune-editor\\src\\components\\CommandPalette.tsx": {
+    "mtime": 1780393248.0585,
+    "ast_hash": "86ac3b58374ff1df0ebbf483655a882d",
+    "semantic_hash": "86ac3b58374ff1df0ebbf483655a882d"
+  },
+  "C:\\Users\\BIT1053\\Documents\\Projects\\rune-editor\\src\\components\\ConfirmDialog.tsx": {
+    "mtime": 1780393254.893289,
+    "ast_hash": "5367a6b05313320b1d1cbf5bf3bd84c4",
+    "semantic_hash": "5367a6b05313320b1d1cbf5bf3bd84c4"
+  },
+  "C:\\Users\\BIT1053\\Documents\\Projects\\rune-editor\\src\\components\\ContextMenu.tsx": {
+    "mtime": 1780393286.0617318,
+    "ast_hash": "b877bdda62dc44aeb9e81b71ec88c5f4",
+    "semantic_hash": "b877bdda62dc44aeb9e81b71ec88c5f4"
+  },
+  "C:\\Users\\BIT1053\\Documents\\Projects\\rune-editor\\src\\components\\SettingsView.tsx": {
+    "mtime": 1780393186.0057375,
+    "ast_hash": "077ce1b7f2e0d3f58ab1aa8c97d813bb",
+    "semantic_hash": "077ce1b7f2e0d3f58ab1aa8c97d813bb"
+  },
+  "C:\\Users\\BIT1053\\Documents\\Projects\\rune-editor\\src\\components\\TerminalPanel.tsx": {
+    "mtime": 1780396587.004204,
+    "ast_hash": "1dc6c6eef284ea599fc0b50496cd9c3f",
+    "semantic_hash": "1dc6c6eef284ea599fc0b50496cd9c3f"
+  },
+  "C:\\Users\\BIT1053\\Documents\\Projects\\rune-editor\\src\\components\\WorkspaceSearch.tsx": {
+    "mtime": 1780393250.3232782,
+    "ast_hash": "3ea260462c84152cdede1e712dbdbe4c",
+    "semantic_hash": "3ea260462c84152cdede1e712dbdbe4c"
+  },
+  "C:\\Users\\BIT1053\\Documents\\Projects\\rune-editor\\src\\features\\editor\\CodeMirrorView.tsx": {
+    "mtime": 1780390937.8018737,
+    "ast_hash": "55833cddaa560348621f2333fcca4136",
+    "semantic_hash": "55833cddaa560348621f2333fcca4136"
+  },
+  "C:\\Users\\BIT1053\\Documents\\Projects\\rune-editor\\src\\features\\editor\\Editor.tsx": {
+    "mtime": 1780394680.3490036,
+    "ast_hash": "063815367e8d90d0b2bbf0b9fc501ba8",
+    "semantic_hash": "063815367e8d90d0b2bbf0b9fc501ba8"
+  },
+  "C:\\Users\\BIT1053\\Documents\\Projects\\rune-editor\\src\\features\\editor\\ImageViewer.tsx": {
+    "mtime": 1780324110.272961,
+    "ast_hash": "5d73d5e59472190d13b38fe70849b2be",
+    "semantic_hash": "5d73d5e59472190d13b38fe70849b2be"
+  },
+  "C:\\Users\\BIT1053\\Documents\\Projects\\rune-editor\\src\\features\\editor\\MarkdownPreview.tsx": {
+    "mtime": 1780386305.1782424,
+    "ast_hash": "11540305040be391a392752da3f819f7",
+    "semantic_hash": "11540305040be391a392752da3f819f7"
+  },
+  "C:\\Users\\BIT1053\\Documents\\Projects\\rune-editor\\src\\features\\editor\\PdfViewer.tsx": {
+    "mtime": 1780324122.1018012,
+    "ast_hash": "9c98e75ee71f4f6611aa01ad7057ae78",
+    "semantic_hash": "9c98e75ee71f4f6611aa01ad7057ae78"
+  },
+  "C:\\Users\\BIT1053\\Documents\\Projects\\rune-editor\\src\\features\\editor\\Tab.tsx": {
+    "mtime": 1780324725.288608,
+    "ast_hash": "522d896324e7a62b74f794726757d745",
+    "semantic_hash": "522d896324e7a62b74f794726757d745"
+  },
+  "C:\\Users\\BIT1053\\Documents\\Projects\\rune-editor\\src\\features\\editor\\TabBar.tsx": {
+    "mtime": 1780385304.3860292,
+    "ast_hash": "89bf9a004690d8fffcaf84c6afa9c032",
+    "semantic_hash": "89bf9a004690d8fffcaf84c6afa9c032"
+  },
+  "C:\\Users\\BIT1053\\Documents\\Projects\\rune-editor\\src\\features\\editor\\cmTheme.ts": {
+    "mtime": 1780393594.916665,
+    "ast_hash": "d72dfd88442e3785c3139ab24a8028da",
+    "semantic_hash": "d72dfd88442e3785c3139ab24a8028da"
+  },
+  "C:\\Users\\BIT1053\\Documents\\Projects\\rune-editor\\src\\features\\editor\\index.ts": {
+    "mtime": 1780324172.2458951,
+    "ast_hash": "d2818e86a2372bf91b7d83c5232041a8",
+    "semantic_hash": "d2818e86a2372bf91b7d83c5232041a8"
+  },
+  "C:\\Users\\BIT1053\\Documents\\Projects\\rune-editor\\src\\features\\file-tree\\FileIcon.tsx": {
+    "mtime": 1780322262.0500638,
+    "ast_hash": "335fa88662bc9389273f49f9e4d93878",
+    "semantic_hash": "335fa88662bc9389273f49f9e4d93878"
+  },
+  "C:\\Users\\BIT1053\\Documents\\Projects\\rune-editor\\src\\features\\file-tree\\FileTree.tsx": {
+    "mtime": 1780395333.3550305,
+    "ast_hash": "5ebdd286a89f3bf172a9b0b8b5c4e11d",
+    "semantic_hash": "5ebdd286a89f3bf172a9b0b8b5c4e11d"
+  },
+  "C:\\Users\\BIT1053\\Documents\\Projects\\rune-editor\\src\\features\\file-tree\\FileTreeNode.tsx": {
+    "mtime": 1780395320.2845085,
+    "ast_hash": "6b005edade4eef4ce32e372e4f8c167c",
+    "semantic_hash": "6b005edade4eef4ce32e372e4f8c167c"
+  },
+  "C:\\Users\\BIT1053\\Documents\\Projects\\rune-editor\\src\\features\\file-tree\\index.ts": {
+    "mtime": 1780318932.9185314,
+    "ast_hash": "e76b8b7705c41159b8dbccbe5be3e5e3",
+    "semantic_hash": "e76b8b7705c41159b8dbccbe5be3e5e3"
+  },
+  "C:\\Users\\BIT1053\\Documents\\Projects\\rune-editor\\src\\features\\theme\\ThemeProvider.tsx": {
+    "mtime": 1780394338.59976,
+    "ast_hash": "f1d88fa6ad943f2d6264e9554ed12882",
+    "semantic_hash": "f1d88fa6ad943f2d6264e9554ed12882"
+  },
+  "C:\\Users\\BIT1053\\Documents\\Projects\\rune-editor\\src\\features\\theme\\index.ts": {
+    "mtime": 1780318673.6618085,
+    "ast_hash": "4ea380547df6b5a401a2af230900f4c8",
+    "semantic_hash": "4ea380547df6b5a401a2af230900f4c8"
+  },
+  "C:\\Users\\BIT1053\\Documents\\Projects\\rune-editor\\src\\features\\theme\\themes.ts": {
+    "mtime": 1780394335.618553,
+    "ast_hash": "e584472360f7a428f56711a808ce58a0",
+    "semantic_hash": "e584472360f7a428f56711a808ce58a0"
+  },
+  "C:\\Users\\BIT1053\\Documents\\Projects\\rune-editor\\src\\features\\titlebar\\MenuBar.tsx": {
+    "mtime": 1780321397.1416466,
+    "ast_hash": "0bd10858a8187bcc11f47c6bda38d7fa",
+    "semantic_hash": "0bd10858a8187bcc11f47c6bda38d7fa"
+  },
+  "C:\\Users\\BIT1053\\Documents\\Projects\\rune-editor\\src\\features\\titlebar\\Titlebar.tsx": {
+    "mtime": 1780320461.0385976,
+    "ast_hash": "6d6f63e23912aa2d821ff36d2e08c923",
+    "semantic_hash": "6d6f63e23912aa2d821ff36d2e08c923"
+  },
+  "C:\\Users\\BIT1053\\Documents\\Projects\\rune-editor\\src\\features\\titlebar\\WindowControls.tsx": {
+    "mtime": 1780384878.276665,
+    "ast_hash": "52934b2d45113b5f31c1997f77b51ce9",
+    "semantic_hash": "52934b2d45113b5f31c1997f77b51ce9"
+  },
+  "C:\\Users\\BIT1053\\Documents\\Projects\\rune-editor\\src\\features\\titlebar\\index.ts": {
+    "mtime": 1780318805.2185953,
+    "ast_hash": "1aead2cd94e149137c43805d2113d884",
+    "semantic_hash": "1aead2cd94e149137c43805d2113d884"
+  },
+  "C:\\Users\\BIT1053\\Documents\\Projects\\rune-editor\\src\\hooks\\useCodeMirror.ts": {
+    "mtime": 1780390922.0202012,
+    "ast_hash": "d68a8d172fbb1c97f86647f71ce9f768",
+    "semantic_hash": "d68a8d172fbb1c97f86647f71ce9f768"
+  },
+  "C:\\Users\\BIT1053\\Documents\\Projects\\rune-editor\\src\\hooks\\useFileSystem.ts": {
+    "mtime": 1780395712.4455545,
+    "ast_hash": "b6b7537e311cb24585fc2bf48d1c2951",
+    "semantic_hash": "b6b7537e311cb24585fc2bf48d1c2951"
+  },
+  "C:\\Users\\BIT1053\\Documents\\Projects\\rune-editor\\src\\hooks\\useKeyboardShortcuts.ts": {
+    "mtime": 1780395374.000959,
+    "ast_hash": "948845ff424cc67915aecfc6237ff568",
+    "semantic_hash": "948845ff424cc67915aecfc6237ff568"
+  },
+  "C:\\Users\\BIT1053\\Documents\\Projects\\rune-editor\\src\\hooks\\useMenuDefinitions.ts": {
+    "mtime": 1780385950.550319,
+    "ast_hash": "1c2f02e645aa2d9c6086e19c57500796",
+    "semantic_hash": "1c2f02e645aa2d9c6086e19c57500796"
+  },
+  "C:\\Users\\BIT1053\\Documents\\Projects\\rune-editor\\src\\hooks\\useTheme.ts": {
+    "mtime": 1780318674.9864542,
+    "ast_hash": "79466008645f63bb345b9b83fcced0f2",
+    "semantic_hash": "79466008645f63bb345b9b83fcced0f2"
+  },
+  "C:\\Users\\BIT1053\\Documents\\Projects\\rune-editor\\src\\hooks\\useWindowControls.ts": {
+    "mtime": 1780318802.4470136,
+    "ast_hash": "8cc3d2bb014ef943cf00419f8eaa756a",
+    "semantic_hash": "8cc3d2bb014ef943cf00419f8eaa756a"
+  },
+  "C:\\Users\\BIT1053\\Documents\\Projects\\rune-editor\\src\\index.tsx": {
+    "mtime": 1780318593.3686388,
+    "ast_hash": "bfb3c76eaa814e2b8d5d43ce21ab4d8c",
+    "semantic_hash": "bfb3c76eaa814e2b8d5d43ce21ab4d8c"
+  },
+  "C:\\Users\\BIT1053\\Documents\\Projects\\rune-editor\\src\\stores\\settings.ts": {
+    "mtime": 1780392865.7638905,
+    "ast_hash": "3b8f16dd3b8a6a999074195a0e67e189",
+    "semantic_hash": "3b8f16dd3b8a6a999074195a0e67e189"
+  },
+  "C:\\Users\\BIT1053\\Documents\\Projects\\rune-editor\\src\\stores\\tabs.ts": {
+    "mtime": 1780395178.2178683,
+    "ast_hash": "5360f2b8ef7bd3fb5360d91add32fe53",
+    "semantic_hash": "5360f2b8ef7bd3fb5360d91add32fe53"
+  },
+  "C:\\Users\\BIT1053\\Documents\\Projects\\rune-editor\\src\\types\\index.ts": {
+    "mtime": 1780390834.2372172,
+    "ast_hash": "d71826ef9a94697b9bd8b597d96b7523",
+    "semantic_hash": "d71826ef9a94697b9bd8b597d96b7523"
+  },
+  "C:\\Users\\BIT1053\\Documents\\Projects\\rune-editor\\src\\utils\\iconMap.ts": {
+    "mtime": 1780322565.3142827,
+    "ast_hash": "71b4b970f9041d6d186e5427a283d38d",
+    "semantic_hash": "71b4b970f9041d6d186e5427a283d38d"
+  },
+  "C:\\Users\\BIT1053\\Documents\\Projects\\rune-editor\\src\\vite-env.d.ts": {
+    "mtime": 1780314736.349509,
+    "ast_hash": "8f68c27c3fc38817b2726b20e2d4f1ee",
+    "semantic_hash": "8f68c27c3fc38817b2726b20e2d4f1ee"
+  },
+  "C:\\Users\\BIT1053\\Documents\\Projects\\rune-editor\\src-tauri\\build.rs": {
+    "mtime": 1780314736.336467,
+    "ast_hash": "667702979da61fdc96948886b7cd7a33",
+    "semantic_hash": "667702979da61fdc96948886b7cd7a33"
+  },
+  "C:\\Users\\BIT1053\\Documents\\Projects\\rune-editor\\src-tauri\\capabilities\\default.json": {
+    "mtime": 1780393904.4031916,
+    "ast_hash": "157d0f8fe10e99b7ba29bbe8e5777294",
+    "semantic_hash": "157d0f8fe10e99b7ba29bbe8e5777294"
+  },
+  "C:\\Users\\BIT1053\\Documents\\Projects\\rune-editor\\src-tauri\\src\\lib.rs": {
+    "mtime": 1780395667.0573795,
+    "ast_hash": "2ad69b7a2ef8139eca65a2c463599ecf",
+    "semantic_hash": "2ad69b7a2ef8139eca65a2c463599ecf"
+  },
+  "C:\\Users\\BIT1053\\Documents\\Projects\\rune-editor\\src-tauri\\src\\main.rs": {
+    "mtime": 1780314736.347001,
+    "ast_hash": "62bef15ebed6f1b5b1abc6e219604389",
+    "semantic_hash": "62bef15ebed6f1b5b1abc6e219604389"
+  },
+  "C:\\Users\\BIT1053\\Documents\\Projects\\rune-editor\\src-tauri\\tauri.conf.json": {
+    "mtime": 1780396639.9267433,
+    "ast_hash": "a76acb38281d7d47066ca2b8c93ffd6a",
+    "semantic_hash": "a76acb38281d7d47066ca2b8c93ffd6a"
+  },
+  "C:\\Users\\BIT1053\\Documents\\Projects\\rune-editor\\src-tauri\\icons\\128x128.png": {
+    "mtime": 1780394789.0367346,
+    "ast_hash": "17f63d8ebb265cb38047a706fb219d3f",
+    "semantic_hash": "17f63d8ebb265cb38047a706fb219d3f"
+  },
+  "C:\\Users\\BIT1053\\Documents\\Projects\\rune-editor\\src-tauri\\icons\\128x128@2x.png": {
+    "mtime": 1780394789.0470867,
+    "ast_hash": "906d528f92c06666ffcbe1f0279db981",
+    "semantic_hash": "906d528f92c06666ffcbe1f0279db981"
+  },
+  "C:\\Users\\BIT1053\\Documents\\Projects\\rune-editor\\src-tauri\\icons\\32x32.png": {
+    "mtime": 1780394789.0305524,
+    "ast_hash": "998ec2f711bc070d622ecfdbbc626e3b",
+    "semantic_hash": "998ec2f711bc070d622ecfdbbc626e3b"
+  },
+  "C:\\Users\\BIT1053\\Documents\\Projects\\rune-editor\\src-tauri\\icons\\64x64.png": {
+    "mtime": 1780394789.0331144,
+    "ast_hash": "422cc36e56cac46ba52d415091853a48",
+    "semantic_hash": "422cc36e56cac46ba52d415091853a48"
+  },
+  "C:\\Users\\BIT1053\\Documents\\Projects\\rune-editor\\src-tauri\\icons\\Square107x107Logo.png": {
+    "mtime": 1780394788.7732136,
+    "ast_hash": "5de07762922803c5141027c745f05e70",
+    "semantic_hash": "5de07762922803c5141027c745f05e70"
+  },
+  "C:\\Users\\BIT1053\\Documents\\Projects\\rune-editor\\src-tauri\\icons\\Square142x142Logo.png": {
+    "mtime": 1780394788.7778928,
+    "ast_hash": "368811b27f84a59c14d38d8ef77c560c",
+    "semantic_hash": "368811b27f84a59c14d38d8ef77c560c"
+  },
+  "C:\\Users\\BIT1053\\Documents\\Projects\\rune-editor\\src-tauri\\icons\\Square150x150Logo.png": {
+    "mtime": 1780394788.783241,
+    "ast_hash": "a7ffe66791e112688a93822321fee2ce",
+    "semantic_hash": "a7ffe66791e112688a93822321fee2ce"
+  },
+  "C:\\Users\\BIT1053\\Documents\\Projects\\rune-editor\\src-tauri\\icons\\Square284x284Logo.png": {
+    "mtime": 1780394788.797241,
+    "ast_hash": "598a49ae6907c796e332a78d574fdb3c",
+    "semantic_hash": "598a49ae6907c796e332a78d574fdb3c"
+  },
+  "C:\\Users\\BIT1053\\Documents\\Projects\\rune-editor\\src-tauri\\icons\\Square30x30Logo.png": {
+    "mtime": 1780394788.7654195,
+    "ast_hash": "4ce0c1c6c6f484495fa8b8f74b19b642",
+    "semantic_hash": "4ce0c1c6c6f484495fa8b8f74b19b642"
+  },
+  "C:\\Users\\BIT1053\\Documents\\Projects\\rune-editor\\src-tauri\\icons\\Square310x310Logo.png": {
+    "mtime": 1780394788.810231,
+    "ast_hash": "9d9c144efa397f20740139044e70a3d6",
+    "semantic_hash": "9d9c144efa397f20740139044e70a3d6"
+  },
+  "C:\\Users\\BIT1053\\Documents\\Projects\\rune-editor\\src-tauri\\icons\\Square44x44Logo.png": {
+    "mtime": 1780394788.7664797,
+    "ast_hash": "f7f04ce1b1cebfe06da32d8499919e7c",
+    "semantic_hash": "f7f04ce1b1cebfe06da32d8499919e7c"
+  },
+  "C:\\Users\\BIT1053\\Documents\\Projects\\rune-editor\\src-tauri\\icons\\Square71x71Logo.png": {
+    "mtime": 1780394788.7680423,
+    "ast_hash": "008aefa7401d60b27f6ea66135104bf9",
+    "semantic_hash": "008aefa7401d60b27f6ea66135104bf9"
+  },
+  "C:\\Users\\BIT1053\\Documents\\Projects\\rune-editor\\src-tauri\\icons\\Square89x89Logo.png": {
+    "mtime": 1780394788.770624,
+    "ast_hash": "306723fed557eed7a87b219e87654035",
+    "semantic_hash": "306723fed557eed7a87b219e87654035"
+  },
+  "C:\\Users\\BIT1053\\Documents\\Projects\\rune-editor\\src-tauri\\icons\\StoreLogo.png": {
+    "mtime": 1780394788.7638152,
+    "ast_hash": "e560778fbf1da72da04412f418a5c51c",
+    "semantic_hash": "e560778fbf1da72da04412f418a5c51c"
+  },
+  "C:\\Users\\BIT1053\\Documents\\Projects\\rune-editor\\src-tauri\\icons\\android\\mipmap-hdpi\\ic_launcher.png": {
+    "mtime": 1780394789.2539353,
+    "ast_hash": "5b127037a96bd477a028bbb1ea2948d7",
+    "semantic_hash": "5b127037a96bd477a028bbb1ea2948d7"
+  },
+  "C:\\Users\\BIT1053\\Documents\\Projects\\rune-editor\\src-tauri\\icons\\android\\mipmap-hdpi\\ic_launcher_foreground.png": {
+    "mtime": 1780394789.203273,
+    "ast_hash": "39d94510ce6ca16a35b15931d1ca52da",
+    "semantic_hash": "39d94510ce6ca16a35b15931d1ca52da"
+  },
+  "C:\\Users\\BIT1053\\Documents\\Projects\\rune-editor\\src-tauri\\icons\\android\\mipmap-hdpi\\ic_launcher_round.png": {
+    "mtime": 1780394789.2528956,
+    "ast_hash": "f91abf17075703ec558e5db2f517ae87",
+    "semantic_hash": "f91abf17075703ec558e5db2f517ae87"
+  },
+  "C:\\Users\\BIT1053\\Documents\\Projects\\rune-editor\\src-tauri\\icons\\android\\mipmap-mdpi\\ic_launcher.png": {
+    "mtime": 1780394789.256519,
+    "ast_hash": "24a23683e215fca3dff3bcdfb6bde32b",
+    "semantic_hash": "24a23683e215fca3dff3bcdfb6bde32b"
+  },
+  "C:\\Users\\BIT1053\\Documents\\Projects\\rune-editor\\src-tauri\\icons\\android\\mipmap-mdpi\\ic_launcher_foreground.png": {
+    "mtime": 1780394789.2059054,
+    "ast_hash": "1e7caa3669b7b2bbf58e19ebd83da2e8",
+    "semantic_hash": "1e7caa3669b7b2bbf58e19ebd83da2e8"
+  },
+  "C:\\Users\\BIT1053\\Documents\\Projects\\rune-editor\\src-tauri\\icons\\android\\mipmap-mdpi\\ic_launcher_round.png": {
+    "mtime": 1780394789.2549732,
+    "ast_hash": "5b3c4454d0f17f111a10f6e03c2dfddc",
+    "semantic_hash": "5b3c4454d0f17f111a10f6e03c2dfddc"
+  },
+  "C:\\Users\\BIT1053\\Documents\\Projects\\rune-editor\\src-tauri\\icons\\android\\mipmap-xhdpi\\ic_launcher.png": {
+    "mtime": 1780394789.2617104,
+    "ast_hash": "51048d469442a6af523b10cb1e334d4a",
+    "semantic_hash": "51048d469442a6af523b10cb1e334d4a"
+  },
+  "C:\\Users\\BIT1053\\Documents\\Projects\\rune-editor\\src-tauri\\icons\\android\\mipmap-xhdpi\\ic_launcher_foreground.png": {
+    "mtime": 1780394789.2139528,
+    "ast_hash": "366a2ec35e99b9d278547fb267664506",
+    "semantic_hash": "366a2ec35e99b9d278547fb267664506"
+  },
+  "C:\\Users\\BIT1053\\Documents\\Projects\\rune-editor\\src-tauri\\icons\\android\\mipmap-xhdpi\\ic_launcher_round.png": {
+    "mtime": 1780394789.2596507,
+    "ast_hash": "26bc571205fb17c7bd8889050694f494",
+    "semantic_hash": "26bc571205fb17c7bd8889050694f494"
+  },
+  "C:\\Users\\BIT1053\\Documents\\Projects\\rune-editor\\src-tauri\\icons\\android\\mipmap-xxhdpi\\ic_launcher.png": {
+    "mtime": 1780394789.2720037,
+    "ast_hash": "b20c0db7b61f5064deb62c5f8aa8ba0e",
+    "semantic_hash": "b20c0db7b61f5064deb62c5f8aa8ba0e"
+  },
+  "C:\\Users\\BIT1053\\Documents\\Projects\\rune-editor\\src-tauri\\icons\\android\\mipmap-xxhdpi\\ic_launcher_foreground.png": {
+    "mtime": 1780394789.2284915,
+    "ast_hash": "fa4cf8d64729ae92d7a1d15eff2d3126",
+    "semantic_hash": "fa4cf8d64729ae92d7a1d15eff2d3126"
+  },
+  "C:\\Users\\BIT1053\\Documents\\Projects\\rune-editor\\src-tauri\\icons\\android\\mipmap-xxhdpi\\ic_launcher_round.png": {
+    "mtime": 1780394789.267411,
+    "ast_hash": "36bfe00cb18e8ae20eef985622ea70f5",
+    "semantic_hash": "36bfe00cb18e8ae20eef985622ea70f5"
+  },
+  "C:\\Users\\BIT1053\\Documents\\Projects\\rune-editor\\src-tauri\\icons\\android\\mipmap-xxxhdpi\\ic_launcher.png": {
+    "mtime": 1780394789.2864876,
+    "ast_hash": "ade4c40d594de709b3b63405e5895c25",
+    "semantic_hash": "ade4c40d594de709b3b63405e5895c25"
+  },
+  "C:\\Users\\BIT1053\\Documents\\Projects\\rune-editor\\src-tauri\\icons\\android\\mipmap-xxxhdpi\\ic_launcher_foreground.png": {
+    "mtime": 1780394789.2510352,
+    "ast_hash": "ce58862e00e10c6e6c96a17ac270f704",
+    "semantic_hash": "ce58862e00e10c6e6c96a17ac270f704"
+  },
+  "C:\\Users\\BIT1053\\Documents\\Projects\\rune-editor\\src-tauri\\icons\\android\\mipmap-xxxhdpi\\ic_launcher_round.png": {
+    "mtime": 1780394789.2787275,
+    "ast_hash": "b4fe88e5626096f8e3509c741a3e01a5",
+    "semantic_hash": "b4fe88e5626096f8e3509c741a3e01a5"
+  },
+  "C:\\Users\\BIT1053\\Documents\\Projects\\rune-editor\\src-tauri\\icons\\icon.png": {
+    "mtime": 1780394789.074047,
+    "ast_hash": "ded4df8962a9443cfed48099696cf26e",
+    "semantic_hash": "ded4df8962a9443cfed48099696cf26e"
+  },
+  "C:\\Users\\BIT1053\\Documents\\Projects\\rune-editor\\src-tauri\\icons\\ios\\AppIcon-20x20@1x.png": {
+    "mtime": 1780394789.0755508,
+    "ast_hash": "6e78375c645e997f2d66dfadccb432f8",
+    "semantic_hash": "6e78375c645e997f2d66dfadccb432f8"
+  },
+  "C:\\Users\\BIT1053\\Documents\\Projects\\rune-editor\\src-tauri\\icons\\ios\\AppIcon-20x20@2x-1.png": {
+    "mtime": 1780394789.0755508,
+    "ast_hash": "b0f3c117ebdf91439852180537bade12",
+    "semantic_hash": "b0f3c117ebdf91439852180537bade12"
+  },
+  "C:\\Users\\BIT1053\\Documents\\Projects\\rune-editor\\src-tauri\\icons\\ios\\AppIcon-20x20@2x.png": {
+    "mtime": 1780394789.077059,
+    "ast_hash": "b0f3c117ebdf91439852180537bade12",
+    "semantic_hash": "b0f3c117ebdf91439852180537bade12"
+  },
+  "C:\\Users\\BIT1053\\Documents\\Projects\\rune-editor\\src-tauri\\icons\\ios\\AppIcon-20x20@3x.png": {
+    "mtime": 1780394789.078083,
+    "ast_hash": "ac20f2286836c3ead13f41162adb0e8d",
+    "semantic_hash": "ac20f2286836c3ead13f41162adb0e8d"
+  },
+  "C:\\Users\\BIT1053\\Documents\\Projects\\rune-editor\\src-tauri\\icons\\ios\\AppIcon-29x29@1x.png": {
+    "mtime": 1780394789.0801332,
+    "ast_hash": "60f0957ecc0d2ca63f79094266ffa22b",
+    "semantic_hash": "60f0957ecc0d2ca63f79094266ffa22b"
+  },
+  "C:\\Users\\BIT1053\\Documents\\Projects\\rune-editor\\src-tauri\\icons\\ios\\AppIcon-29x29@2x-1.png": {
+    "mtime": 1780394789.0791092,
+    "ast_hash": "c29f702a85c6fbce3ebe2cd1f79a3c40",
+    "semantic_hash": "c29f702a85c6fbce3ebe2cd1f79a3c40"
+  },
+  "C:\\Users\\BIT1053\\Documents\\Projects\\rune-editor\\src-tauri\\icons\\ios\\AppIcon-29x29@2x.png": {
+    "mtime": 1780394789.081499,
+    "ast_hash": "c29f702a85c6fbce3ebe2cd1f79a3c40",
+    "semantic_hash": "c29f702a85c6fbce3ebe2cd1f79a3c40"
+  },
+  "C:\\Users\\BIT1053\\Documents\\Projects\\rune-editor\\src-tauri\\icons\\ios\\AppIcon-29x29@3x.png": {
+    "mtime": 1780394789.0830626,
+    "ast_hash": "0e3b96779a6492aa69e179ad40c3959e",
+    "semantic_hash": "0e3b96779a6492aa69e179ad40c3959e"
+  },
+  "C:\\Users\\BIT1053\\Documents\\Projects\\rune-editor\\src-tauri\\icons\\ios\\AppIcon-40x40@1x.png": {
+    "mtime": 1780394789.085638,
+    "ast_hash": "b0f3c117ebdf91439852180537bade12",
+    "semantic_hash": "b0f3c117ebdf91439852180537bade12"
+  },
+  "C:\\Users\\BIT1053\\Documents\\Projects\\rune-editor\\src-tauri\\icons\\ios\\AppIcon-40x40@2x-1.png": {
+    "mtime": 1780394789.08461,
+    "ast_hash": "1bce0985aeb1dea2cbb1867bacde7b18",
+    "semantic_hash": "1bce0985aeb1dea2cbb1867bacde7b18"
+  },
+  "C:\\Users\\BIT1053\\Documents\\Projects\\rune-editor\\src-tauri\\icons\\ios\\AppIcon-40x40@2x.png": {
+    "mtime": 1780394789.0872133,
+    "ast_hash": "1bce0985aeb1dea2cbb1867bacde7b18",
+    "semantic_hash": "1bce0985aeb1dea2cbb1867bacde7b18"
+  },
+  "C:\\Users\\BIT1053\\Documents\\Projects\\rune-editor\\src-tauri\\icons\\ios\\AppIcon-40x40@3x.png": {
+    "mtime": 1780394789.0902915,
+    "ast_hash": "829eb38afe18c88ac6aa97e5d4524b2e",
+    "semantic_hash": "829eb38afe18c88ac6aa97e5d4524b2e"
+  },
+  "C:\\Users\\BIT1053\\Documents\\Projects\\rune-editor\\src-tauri\\icons\\ios\\AppIcon-512@2x.png": {
+    "mtime": 1780394789.1964238,
+    "ast_hash": "5b801ea47f914714611522bcc5d4443d",
+    "semantic_hash": "5b801ea47f914714611522bcc5d4443d"
+  },
+  "C:\\Users\\BIT1053\\Documents\\Projects\\rune-editor\\src-tauri\\icons\\ios\\AppIcon-60x60@2x.png": {
+    "mtime": 1780394789.092868,
+    "ast_hash": "829eb38afe18c88ac6aa97e5d4524b2e",
+    "semantic_hash": "829eb38afe18c88ac6aa97e5d4524b2e"
+  },
+  "C:\\Users\\BIT1053\\Documents\\Projects\\rune-editor\\src-tauri\\icons\\ios\\AppIcon-60x60@3x.png": {
+    "mtime": 1780394789.0980823,
+    "ast_hash": "82700d9029b1a9a3d0ddecc7c4aa92f6",
+    "semantic_hash": "82700d9029b1a9a3d0ddecc7c4aa92f6"
+  },
+  "C:\\Users\\BIT1053\\Documents\\Projects\\rune-editor\\src-tauri\\icons\\ios\\AppIcon-76x76@1x.png": {
+    "mtime": 1780394789.0996344,
+    "ast_hash": "63dbe3e00915dc94c1700ba25ce1a731",
+    "semantic_hash": "63dbe3e00915dc94c1700ba25ce1a731"
+  },
+  "C:\\Users\\BIT1053\\Documents\\Projects\\rune-editor\\src-tauri\\icons\\ios\\AppIcon-76x76@2x.png": {
+    "mtime": 1780394789.1027787,
+    "ast_hash": "39a3e3ef219b26d67c57244cb0d22050",
+    "semantic_hash": "39a3e3ef219b26d67c57244cb0d22050"
+  },
+  "C:\\Users\\BIT1053\\Documents\\Projects\\rune-editor\\src-tauri\\icons\\ios\\AppIcon-83.5x83.5@2x.png": {
+    "mtime": 1780394789.1063745,
+    "ast_hash": "f951159af62479ec23b1cbf7792db195",
+    "semantic_hash": "f951159af62479ec23b1cbf7792db195"
+  }
+}

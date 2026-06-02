@@ -1,3 +1,9 @@
 {
+  "runCommand": "echo 'Hello from Rune!'",
+  "excludeItems": [
+    ".git",
+    "node_modules",
+    ".rune"
+  ],
   "run": "echo 'Hello from Rune!'"
 }
