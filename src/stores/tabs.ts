@@ -85,7 +85,7 @@ function openTab(
     filePath,
     fileName,
     content,
-    savedContent: content,
+    savedContent: content.replace(/\r\n/g, "\n"),
     language,
     isDirty: false,
     fileType,
@@ -152,10 +152,11 @@ function closeTab(tabId: string): { paneCleared?: PaneSide } {
 }
 
 function updateTabContent(tabId: string, content: string) {
+  const normalized = content.replace(/\r\n/g, "\n");
   setTabs((prev) =>
     prev.map((t) => {
       if (t.id !== tabId) return t;
-      return { ...t, content, isDirty: content !== t.savedContent };
+      return { ...t, content: normalized, isDirty: normalized !== t.savedContent };
     })
   );
 }
@@ -163,7 +164,7 @@ function updateTabContent(tabId: string, content: string) {
 function markTabClean(tabId: string) {
   setTabs((prev) =>
     prev.map((t) =>
-      t.id === tabId ? { ...t, isDirty: false, savedContent: t.content } : t
+      t.id === tabId ? { ...t, isDirty: false, savedContent: t.content.replace(/\r\n/g, "\n") } : t
     )
   );
 }
@@ -199,7 +200,7 @@ function updateTabAfterSave(tabId: string, filePath: string, fileName: string) {
   setTabs((prev) =>
     prev.map((t) =>
       t.id === tabId
-        ? { ...t, filePath, fileName, savedContent: t.content, isDirty: false }
+        ? { ...t, filePath, fileName, savedContent: t.content.replace(/\r\n/g, "\n"), isDirty: false }
         : t
     )
   );

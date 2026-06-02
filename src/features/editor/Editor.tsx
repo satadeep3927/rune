@@ -225,19 +225,21 @@ export function Editor(props: EditorProps) {
           <PdfViewer dataUrl={props.dataUrl!} fileName={props.fileName ?? ""} />
         </Show>
 
-        <Show when={props.hasOpenFile && props.fileType === "text"}>
+        <Show when={props.hasOpenFile && props.fileType === "text" && props.tabId}>
           <CodeMirrorView
+            tabId={props.tabId}
             content={props.content}
             language={props.language}
             onChange={props.onChange}
           />
         </Show>
 
-        <Show when={props.hasOpenFile && props.fileType === "markdown"}>
+        <Show when={props.hasOpenFile && props.fileType === "markdown" && props.tabId}>
           <div class="flex h-full">
             <Show when={mdMode() === "edit" || mdMode() === "split"}>
               <div class={mdMode() === "split" ? "w-1/2" : "w-full"} style={{ "border-right": mdMode() === "split" ? "1px solid var(--color-border)" : "none" }}>
                 <CodeMirrorView
+                  tabId={props.tabId}
                   content={props.content}
                   language="markdown"
                   onChange={props.onChange}

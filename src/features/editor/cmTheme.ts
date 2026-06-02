@@ -10,6 +10,7 @@ export function createRuneTheme(): Extension {
       color: "var(--color-fg)",
       fontSize: "var(--editor-font-size, 13px)",
       height: "100%",
+      userSelect: "none",
     },
     ".cm-content": {
       caretColor: "var(--color-accent)",
@@ -21,7 +22,7 @@ export function createRuneTheme(): Extension {
       borderLeftWidth: "2px",
     },
     "&.cm-focused .cm-selectionBackground, .cm-selectionBackground, .cm-content ::selection": {
-      backgroundColor: "rgba(205, 255, 7, 0.12) !important",
+      backgroundColor: "rgba(0, 255, 65, 0.18) !important",
     },
     ".cm-activeLine": {
       backgroundColor: "var(--color-bg-secondary)",

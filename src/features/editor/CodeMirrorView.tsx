@@ -60,6 +60,7 @@ interface CodeMirrorViewProps {
   language: string;
   onChange?: (content: string) => void;
   onScrollerRef?: (el: HTMLElement | null) => void;
+  tabId?: string | null;
 }
 
 export function CodeMirrorView(props: CodeMirrorViewProps) {
@@ -69,12 +70,11 @@ export function CodeMirrorView(props: CodeMirrorViewProps) {
   const wordWrapCompartment = new Compartment();
   let currentContent = props.content;
   let settingContent = false;
+  let lastTabId = props.tabId;
   const [ctxMenu, setCtxMenu] = createSignal<{ x: number; y: number; items: ContextMenuItem[] } | null>(null);
 
-  onMount(() => {
-    const state = EditorState.create({
-      doc: props.content,
-      extensions: [
+  function buildExtensions(): Extension[] {
+    return [
         lineNumbers(),
         highlightActiveLineGutter(),
         highlightSpecialChars(),
@@ -90,6 +90,7 @@ export function CodeMirrorView(props: CodeMirrorViewProps) {
         highlightSelectionMatches(),
         syntaxHighlighting(defaultHighlightStyle, { fallback: true }),
         keymap.of([
+          { key: "Mod-Shift-z", run: redo, preventDefault: true },
           ...closeBracketsKeymap,
           ...defaultKeymap,
           ...searchKeymap,
@@ -112,7 +113,13 @@ export function CodeMirrorView(props: CodeMirrorViewProps) {
             }
           }
         }),
-      ],
+    ];
+  }
+
+  onMount(() => {
+    const state = EditorState.create({
+      doc: props.content,
+      extensions: buildExtensions(),
     });
 
     view = new EditorView({ state, parent: containerRef });
@@ -144,8 +151,23 @@ export function CodeMirrorView(props: CodeMirrorViewProps) {
 
   createEffect(() => {
     const newContent = props.content;
+    const tabId = props.tabId;
     if (!view) return;
-    if (currentContent === newContent) return;
+    if (currentContent === newContent && tabId === lastTabId) return;
+
+    // Tab switched — reset editor with fresh undo history
+    if (tabId !== lastTabId) {
+      lastTabId = tabId;
+      currentContent = newContent;
+      const state = EditorState.create({
+        doc: newContent,
+        extensions: buildExtensions(),
+      });
+      view.setState(state);
+      return;
+    }
+
+    // Same tab, content changed externally
     currentContent = newContent;
     settingContent = true;
     view.dispatch({
