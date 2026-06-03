@@ -112,23 +112,35 @@ export function useFileSystem() {
   const [tree, setTree] = createSignal<FileEntry[]>([]);
   const [loading, setLoading] = createSignal(false);
 
-  let unwatchFn: (() => void) | null = null;
+  const activeWatchers = new Map<string, () => void>();
 
   async function startWatching(dirPath: string) {
-    stopWatching();
+    if (activeWatchers.has(dirPath)) return;
     try {
-      unwatchFn = await watch(
+      const unwatchFn = await watch(
         dirPath,
         () => { refreshPreservingExpanded(); },
-        { recursive: true, delayMs: 500 },
+        { recursive: false, delayMs: 500 },
       );
+      activeWatchers.set(dirPath, unwatchFn);
     } catch (e) {
-      console.warn("File watching unavailable:", e);
+      console.warn(`File watching unavailable for ${dirPath}:`, e);
     }
   }
 
-  function stopWatching() {
-    if (unwatchFn) { unwatchFn(); unwatchFn = null; }
+  function stopWatching(dirPath: string) {
+    const unwatchFn = activeWatchers.get(dirPath);
+    if (unwatchFn) {
+      unwatchFn();
+      activeWatchers.delete(dirPath);
+    }
+  }
+
+  function stopAllWatchers() {
+    for (const unwatchFn of activeWatchers.values()) {
+      unwatchFn();
+    }
+    activeWatchers.clear();
   }
 
   async function readDirectory(dirPath: string): Promise<FileEntry[]> {
@@ -200,11 +212,25 @@ export function useFileSystem() {
     if (!entry) return;
 
     if (entry.isExpanded) {
+      // Unwatch when collapsing
+      stopWatching(dirPath);
+      // Also unwatch all children
+      const toRemove: string[] = [];
+      activeWatchers.forEach((_, path) => {
+        if (path.startsWith(dirPath + (dirPath.includes("\\") ? "\\" : "/"))) {
+          toRemove.push(path);
+        }
+      });
+      toRemove.forEach(stopWatching);
+
       setTree(updateTree(tree(), dirPath, (e) => ({ ...e, isExpanded: false })));
     } else {
       const children = entry.children?.length
         ? entry.children
         : await readDirectory(dirPath);
+      
+      startWatching(dirPath);
+
       setTree(
         updateTree(tree(), dirPath, (e) => ({
           ...e,
@@ -221,6 +247,9 @@ export function useFileSystem() {
     const children = entry.children?.length
       ? entry.children
       : await readDirectory(dirPath);
+      
+    startWatching(dirPath);
+
     setTree(
       updateTree(tree(), dirPath, (e) => ({
         ...e,
@@ -257,6 +286,7 @@ export function useFileSystem() {
       console.log(`[rune] fs.init: reading ${saved}`);
       setLoading(true);
       try {
+        stopAllWatchers();
         const entries = await readDirectory(saved);
         console.log(`[rune] fs.init readDirectory: ${Math.round(performance.now() - t0)}ms (${entries.length} entries)`);
         setTree(entries);
@@ -265,6 +295,7 @@ export function useFileSystem() {
       } catch {
         setRootPath(null);
         localStorage.removeItem(STORAGE_KEY);
+        stopAllWatchers();
       } finally {
         setLoading(false);
       }
@@ -295,6 +326,7 @@ export function useFileSystem() {
       const result: FileEntry[] = [];
       for (const e of entries) {
         if (e.isDirectory && expandedPaths.has(e.path)) {
+          startWatching(e.path);
           const children = await readDirectory(e.path);
           result.push({
             ...e,
@@ -309,6 +341,13 @@ export function useFileSystem() {
     }
 
     setTree(await applyExpanded(freshEntries));
+    // Prune watchers for directories that might have been deleted externally
+    const currentExpanded = collectExpandedPaths(tree());
+    for (const watchedPath of activeWatchers.keys()) {
+      if (watchedPath !== root && !currentExpanded.has(watchedPath)) {
+        stopWatching(watchedPath);
+      }
+    }
   }
 
   async function createNewFile(parentPath: string, name: string) {
