@@ -19,8 +19,8 @@ interface FileTreeProps {
   onCancelEdit?: () => void;
   onStartEdit?: (parentPath: string, mode: EditingMode) => void;
   activeFilePath?: string;
-  selectedPath?: string | null;
-  onSelectPath?: (path: string | null) => void;
+  selectedPaths?: Set<string>;
+  onSelectPaths?: (paths: Set<string>) => void;
   onRunScript?: () => void;
   onOpenSettings?: () => void;
   onToggleTerminal?: () => void;
@@ -101,7 +101,7 @@ export function FileTree(props: FileTreeProps) {
         class="flex-1 overflow-y-auto py-1"
         onClick={(e) => {
           if (e.target === e.currentTarget) {
-            props.onSelectPath?.(null);
+            props.onSelectPaths?.(new Set());
           }
         }}
         onContextMenu={(e) => {
@@ -167,8 +167,8 @@ export function FileTree(props: FileTreeProps) {
                   onToggleDir={props.onToggleDir}
                   onContextMenu={props.onContextMenu}
                   activeFilePath={props.activeFilePath}
-                  selectedPath={props.selectedPath}
-                  onSelectPath={props.onSelectPath}
+                  selectedPaths={props.selectedPaths}
+                  onSelectPaths={props.onSelectPaths}
                   editingItem={props.editingItem}
                   onSubmitEdit={props.onSubmitEdit}
                   onCancelEdit={props.onCancelEdit}

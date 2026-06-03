@@ -1,5 +1,5 @@
 import { onMount, onCleanup, createEffect, createSignal } from "solid-js";
-import { EditorView, keymap, lineNumbers, highlightActiveLineGutter, highlightActiveLine, drawSelection, rectangularSelection, highlightSpecialChars } from "@codemirror/view";
+import { EditorView, keymap, lineNumbers, highlightActiveLineGutter, highlightActiveLine, drawSelection, rectangularSelection, highlightSpecialChars, crosshairCursor } from "@codemirror/view";
 import { globalSettings } from "../../stores/settings";
 import { EditorState, Compartment, Transaction } from "@codemirror/state";
 import { defaultKeymap, history, historyKeymap, indentWithTab, undo, redo, selectAll } from "@codemirror/commands";
@@ -86,6 +86,7 @@ export function CodeMirrorView(props: CodeMirrorViewProps) {
         closeBrackets(),
         autocompletion(),
         rectangularSelection(),
+        crosshairCursor(),
         highlightActiveLine(),
         highlightSelectionMatches(),
         syntaxHighlighting(defaultHighlightStyle, { fallback: true }),

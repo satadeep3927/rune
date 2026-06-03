@@ -18,8 +18,8 @@ interface FileTreeNodeProps {
   onToggleDir: (path: string) => void;
   onContextMenu?: (entry: FileEntry, e: MouseEvent) => void;
   activeFilePath?: string;
-  selectedPath?: string | null;
-  onSelectPath?: (path: string | null) => void;
+  selectedPaths?: Set<string>;
+  onSelectPaths?: (paths: Set<string>) => void;
   editingItem?: EditingItem | null;
   onSubmitEdit?: (parentPath: string, name: string, mode: EditingMode, originalName?: string) => void;
   onCancelEdit?: () => void;
@@ -106,16 +106,29 @@ export function InlineInput(props: {
 export function FileTreeNode(props: FileTreeNodeProps) {
   const [isHovered, setIsHovered] = createSignal(false);
 
-  function handleClick() {
-    props.onSelectPath?.(props.entry.path);
-    if (props.entry.isDirectory) {
-      props.onToggleDir(props.entry.path);
+  function handleClick(e: MouseEvent) {
+    if (e.ctrlKey || e.metaKey) {
+      // Toggle this entry in multi-selection
+      const current = props.selectedPaths ?? new Set<string>();
+      const next = new Set(current);
+      if (next.has(props.entry.path)) {
+        next.delete(props.entry.path);
+      } else {
+        next.add(props.entry.path);
+      }
+      props.onSelectPaths?.(next);
     } else {
-      props.onFileClick(props.entry);
+      // Single select
+      props.onSelectPaths?.(new Set([props.entry.path]));
+      if (props.entry.isDirectory) {
+        props.onToggleDir(props.entry.path);
+      } else {
+        props.onFileClick(props.entry);
+      }
     }
   }
 
-  const isSelected = () => props.selectedPath === props.entry.path;
+  const isSelected = () => props.selectedPaths?.has(props.entry.path) ?? false;
   const isActive = () => props.activeFilePath === props.entry.path;
 
   const isRenaming = () =>
@@ -196,8 +209,8 @@ export function FileTreeNode(props: FileTreeNodeProps) {
                 onToggleDir={props.onToggleDir}
                 onContextMenu={props.onContextMenu}
                 activeFilePath={props.activeFilePath}
-                selectedPath={props.selectedPath}
-                onSelectPath={props.onSelectPath}
+                selectedPaths={props.selectedPaths}
+                onSelectPaths={props.onSelectPaths}
                 editingItem={props.editingItem}
                 onSubmitEdit={props.onSubmitEdit}
                 onCancelEdit={props.onCancelEdit}

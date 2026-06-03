@@ -10,12 +10,12 @@ export function createRuneTheme(): Extension {
       color: "var(--color-fg)",
       fontSize: "var(--editor-font-size, 13px)",
       height: "100%",
-      userSelect: "none",
     },
     ".cm-content": {
       caretColor: "var(--color-accent)",
       fontFamily: 'var(--editor-font-family, "JetBrains Mono", "Cascadia Code", "Fira Code", "Consolas", monospace)',
       padding: "4px 0",
+      userSelect: "text",
     },
     ".cm-cursor, .cm-dropCursor": {
       borderLeftColor: "var(--color-accent)",

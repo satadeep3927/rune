@@ -63,7 +63,7 @@ function AppContent() {
   const [terminalHeight, setTerminalHeight] = createSignal(240);
   const [editingItem, setEditingItem] = createSignal<{ parentPath: string; mode: EditingMode } | null>(null);
   const [confirmState, setConfirmState] = createSignal<{ message: string; detail?: string; onConfirm: () => void } | null>(null);
-  const [selectedPath, setSelectedPath] = createSignal<string | null>(null);
+  const [selectedPaths, setSelectedPaths] = createSignal<Set<string>>(new Set());
 
   let previousRoot: string | null = null;
 
@@ -236,26 +236,30 @@ function AppContent() {
     });
   }
 
-  async function deleteSelectedPath(skipConfirm = false) {
-    const path = selectedPath();
-    if (!path) return;
-    const name = path.split(/[\\/]/).pop() ?? "";
+  async function deleteSelectedPaths(skipConfirm = false) {
+    const paths = selectedPaths();
+    if (paths.size === 0) return;
 
     const doDelete = async () => {
-      await fs.deleteFile(path);
-      tabStore.closeTabsForPath(path);
-      setSelectedPath(null);
+      for (const path of paths) {
+        await fs.deleteFile(path);
+        tabStore.closeTabsForPath(path);
+      }
+      setSelectedPaths(new Set<string>());
     };
 
-    if (skipConfirm) {
-      await doDelete();
+    if (paths.size === 1) {
+      const path = [...paths][0]!;
+      const name = path.split(/[\\/]/).pop() ?? "";
+      if (skipConfirm) { await doDelete(); }
+      else { confirmDelete(name, doDelete); }
     } else {
-      confirmDelete(name, doDelete);
+      if (skipConfirm) { await doDelete(); }
+      else { confirmDelete(`${paths.size} items`, doDelete); }
     }
   }
 
   async function handleFileClick(entry: { path: string; name: string }, pane: PaneSide = "left") {
-    setSelectedPath(entry.path);
     try {
       const { content, language, fileType } = await fs.readFileContent(entry.path);
       const dataUrl = fileType === "image" || fileType === "pdf" ? content : undefined;
@@ -284,6 +288,18 @@ function AppContent() {
       tabStore.markTabClean(tab.id);
     } catch (err) {
       console.error("Failed to save file:", err);
+    }
+  }
+
+  async function handleSaveAll() {
+    const dirtyTabs = tabStore.tabs().filter((t) => t.isDirty && t.filePath && !t.filePath.startsWith("rune://"));
+    for (const tab of dirtyTabs) {
+      try {
+        await fs.writeFileContent(tab.filePath, tab.content);
+        tabStore.markTabClean(tab.id);
+      } catch (err) {
+        console.error("Failed to save:", tab.fileName, err);
+      }
     }
   }
 
@@ -351,7 +367,9 @@ function AppContent() {
   const menuActions = {
     openFolder: () => fs.openFolder(),
     save: handleSave,
+    saveAll: handleSaveAll,
     saveAs: handleSaveAs,
+    toggleTerminal: () => setShowTerminal((prev) => !prev),
     closeTab: handleCloseTab,
     closeAllTabs: () => { tabStore.closeAllTabs(); settingsStore.setSplitActive(false); },
     newFile: () => tabStore.openUntitledTab(),
@@ -400,6 +418,7 @@ function AppContent() {
     { id: "file.new-file", label: "New File", shortcut: "Ctrl+N", category: "File", action: () => tabStore.openUntitledTab() },
     { id: "file.open-folder", label: "Open Folder", shortcut: "Ctrl+K Ctrl+O", category: "File", action: () => fs.openFolder() },
     { id: "file.save", label: "Save", shortcut: "Ctrl+S", category: "File", action: handleSave },
+    { id: "file.save-all", label: "Save All", shortcut: "Ctrl+Alt+S", category: "File", action: handleSaveAll },
     { id: "file.save-as", label: "Save As", shortcut: "Ctrl+Shift+S", category: "File", action: handleSaveAs },
     { id: "file.close-tab", label: "Close Tab", shortcut: "Ctrl+W", category: "File", action: handleCloseTab },
     { id: "file.close-all", label: "Close All Tabs", category: "File", action: () => { tabStore.closeAllTabs(); settingsStore.setSplitActive(false); } },
@@ -415,6 +434,7 @@ function AppContent() {
   useKeyboardShortcuts(
     () => ({
       "ctrl+KeyS": handleSave,
+      "ctrl+alt+KeyS": handleSaveAll,
       "ctrl+shift+KeyS": handleSaveAs,
       "ctrl+KeyW": handleCloseTab,
       "ctrl+KeyB": () => settingsStore.toggleSidebar(),
@@ -426,12 +446,32 @@ function AppContent() {
       "ctrl+KeyN": () => tabStore.openUntitledTab(),
       "ctrl+shift+KeyN": menuActions.newWindow,
       "ctrl+shift+KeyW": menuActions.closeWindow,
+      "ctrl+Backquote": () => setShowTerminal((prev) => !prev),
+      // Ctrl+Tab / Ctrl+Shift+Tab navigation
+      "ctrl+Tab": () => {
+        const pane = tabStore.focusedPane();
+        const paneTabs = pane === "right" ? tabStore.rightTabs() : tabStore.leftTabs();
+        if (paneTabs.length < 2) return;
+        const activeId = pane === "right" ? tabStore.rightActiveTabId() : tabStore.activeTabId();
+        const idx = paneTabs.findIndex((t) => t.id === activeId);
+        const next = paneTabs[(idx + 1) % paneTabs.length]!;
+        tabStore.setActiveTabForPane(next.id, pane);
+      },
+      "ctrl+shift+Tab": () => {
+        const pane = tabStore.focusedPane();
+        const paneTabs = pane === "right" ? tabStore.rightTabs() : tabStore.leftTabs();
+        if (paneTabs.length < 2) return;
+        const activeId = pane === "right" ? tabStore.rightActiveTabId() : tabStore.activeTabId();
+        const idx = paneTabs.findIndex((t) => t.id === activeId);
+        const prev = paneTabs[(idx - 1 + paneTabs.length) % paneTabs.length]!;
+        tabStore.setActiveTabForPane(prev.id, pane);
+      },
       // Block browser defaults
       "ctrl+KeyP": () => {},
       "ctrl+KeyR": () => {},
       // Delete selected file/folder in explorer
-      "Delete": () => deleteSelectedPath(false),
-      "shift+Delete": () => deleteSelectedPath(true),
+      "Delete": () => deleteSelectedPaths(false),
+      "shift+Delete": () => deleteSelectedPaths(true),
     }),
     () => [
       {
@@ -501,8 +541,18 @@ function AppContent() {
   }
 
   function handleFileTreeContextMenu(entry: FileEntry, e: MouseEvent) {
+    // If right-clicking an unselected entry, select just that one
+    if (!selectedPaths().has(entry.path)) {
+      setSelectedPaths(new Set([entry.path]));
+    }
+    const multi = selectedPaths().size > 1;
     const items: ContextMenuItem[] = [];
-    if (entry.isDirectory) {
+
+    if (multi) {
+      items.push(
+        { label: `Delete ${selectedPaths().size} Items`, action: () => deleteSelectedPaths() },
+      );
+    } else if (entry.isDirectory) {
       items.push(
         { label: "New File", action: () => {
           fs.ensureExpanded(entry.path).then(() => setEditingItem({ parentPath: entry.path, mode: "new-file" }));
@@ -516,11 +566,7 @@ function AppContent() {
         { label: "Reveal in Explorer", action: () => revealInExplorer(entry.path) },
         { separator: true, label: "" },
         { label: "Rename", action: () => setEditingItem({ parentPath: entry.path, mode: "rename" }) },
-        { label: "Delete", action: () => confirmDelete(entry.name, async () => {
-          await fs.deleteFile(entry.path);
-          tabStore.closeTabsForPath(entry.path);
-          if (selectedPath() === entry.path) setSelectedPath(null);
-        }) },
+        { label: "Delete", action: () => deleteSelectedPaths() },
         { separator: true, label: "" },
         { label: "Collapse All", action: () => fs.collapseAll() },
       );
@@ -533,11 +579,7 @@ function AppContent() {
         { label: "Reveal in Explorer", action: () => revealInExplorer(entry.path) },
         { separator: true, label: "" },
         { label: "Rename", action: () => setEditingItem({ parentPath: entry.path, mode: "rename" }) },
-        { label: "Delete", action: () => confirmDelete(entry.name, async () => {
-          await fs.deleteFile(entry.path);
-          tabStore.closeTabsForPath(entry.path);
-          if (selectedPath() === entry.path) setSelectedPath(null);
-        }) },
+        { label: "Delete", action: () => deleteSelectedPaths() },
       );
     }
     showContextMenu(e.clientX, e.clientY, items);
@@ -819,13 +861,12 @@ function AppContent() {
               onOpenFolder={() => fs.openFolder()}
               onRefresh={handleRefreshTree}
               onContextMenu={(entry, e) => {
-                setSelectedPath(entry.path);
                 handleFileTreeContextMenu(entry, e);
               }}
               onEmptyContextMenu={handleEmptyContextMenu}
               activeFilePath={leftActiveTab()?.filePath}
-              selectedPath={selectedPath()}
-              onSelectPath={setSelectedPath}
+              selectedPaths={selectedPaths()}
+              onSelectPaths={setSelectedPaths}
               editingItem={editingItem()}
               onStartEdit={(parentPath, mode) => setEditingItem({ parentPath, mode })}
               onSubmitEdit={handleSubmitEdit}

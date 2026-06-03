@@ -5,7 +5,9 @@ interface MenuActions {
   openFolder: () => void;
   newFile: () => void;
   save: () => void;
+  saveAll: () => void;
   saveAs: () => void;
+  toggleTerminal: () => void;
   closeTab: () => void;
   closeAllTabs: () => void;
   newWindow: () => void;
@@ -31,6 +33,7 @@ export function useMenuDefinitions(actions: MenuActions) {
         { label: "Open Folder", accelerator: "Ctrl+K Ctrl+O", action: actions.openFolder },
         { separator: true, label: "" },
         { label: "Save", accelerator: "Ctrl+S", action: actions.save },
+        { label: "Save All", accelerator: "Ctrl+Alt+S", action: actions.saveAll },
         { label: "Save As", accelerator: "Ctrl+Shift+S", action: actions.saveAs },
         { separator: true, label: "" },
         { label: "Close Tab", accelerator: "Ctrl+W", action: actions.closeTab },
@@ -55,6 +58,7 @@ export function useMenuDefinitions(actions: MenuActions) {
         { label: "Command Palette", accelerator: "Ctrl+Shift+P", action: actions.commandPalette },
         { separator: true, label: "" },
         { label: "Toggle Sidebar", accelerator: "Ctrl+B", action: actions.toggleSidebar },
+        { label: "Toggle Terminal", accelerator: "Ctrl+`", action: actions.toggleTerminal },
         { separator: true, label: "" },
         { label: "Zoom In", accelerator: "Ctrl+=", action: actions.zoomIn },
         { label: "Zoom Out", accelerator: "Ctrl+-", action: actions.zoomOut },
