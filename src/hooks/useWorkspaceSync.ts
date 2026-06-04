@@ -32,7 +32,6 @@ export function useWorkspaceSync(options: WorkspaceSyncOptions) {
   createEffect(() => {
     workspaceSettings.excludeItems;
     if (fs.rootPath() && workspaceReady) {
-      console.log(`[rune] excludeItems changed → refreshTree`);
       fs.refreshTree();
     }
   });
@@ -50,20 +49,16 @@ export function useWorkspaceSync(options: WorkspaceSyncOptions) {
     previousRoot = root;
 
     if (root) {
-      console.log(`[rune] workspace effect: ${root}`);
-
       loadWorkspaceSettings(root).then(() => {
         workspaceReady = true;
         invoke("index_workspace", { workspacePath: root }).catch(console.error);
 
         const stored = tabStore.loadTabsFromStorage(root);
         if (stored) {
-          const tabT0 = performance.now();
           const activePath = tabStore.getStoredActiveFilePath(root);
           const rightActivePath = tabStore.getStoredRightActiveFilePath(root);
 
           (async () => {
-            console.log(`[rune] restoring ${stored.length} tabs...`);
             const results = await Promise.allSettled(
               stored.map(async (t) => {
                 const { content, language, fileType } =
@@ -97,9 +92,6 @@ export function useWorkspaceSync(options: WorkspaceSyncOptions) {
                 );
               }
             }
-            console.log(
-              `[rune] tabs restored: ${Math.round(performance.now() - tabT0)}ms`,
-            );
 
             if (activePath) {
               const match = tabStore

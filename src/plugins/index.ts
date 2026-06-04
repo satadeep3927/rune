@@ -36,7 +36,6 @@ export function initPlugins(options?: RuneAPIOptions): void {
       const api = createRuneAPI(plugin, options);
       const cleanup = plugin.activate(api);
       pluginRegistry.setCleanup(plugin.id, cleanup ?? undefined);
-      console.log(`[rune] plugin loaded: ${plugin.id} v${plugin.version}`);
     } catch (err) {
       console.error(`[rune] plugin failed: ${plugin.id}`, err);
     }

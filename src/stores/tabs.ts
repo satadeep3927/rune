@@ -75,14 +75,6 @@ function openTab(
   dataUrl?: string,
   pane: PaneSide = "left",
 ): string {
-  console.log(
-    "openTab called for:",
-    filePath,
-    "fileName:",
-    fileName,
-    "fileType:",
-    fileType,
-  );
   const existing = tabs().find((t) => t.filePath === filePath);
   if (existing) {
     if (existing.pane === "left") setActiveTabId(existing.id);

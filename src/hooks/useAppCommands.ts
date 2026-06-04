@@ -77,15 +77,13 @@ export function useAppCommands(options: AppCommandsOptions) {
     find: () => triggerEditorCommand("f"),
     replace: () => triggerEditorCommand("h"),
     about: () => {
-      console.log("Menu action: about clicked!");
-      const id = tabStore.openTab(
+      tabStore.openTab(
         "rune://about",
         "About Rune.md",
         ABOUT_RUNE_MARKDOWN,
         "markdown",
         "markdown",
       );
-      console.log("Opened about tab with ID:", id);
     },
   };
 

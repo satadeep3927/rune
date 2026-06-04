@@ -104,7 +104,6 @@ export async function loadAllSettings(
   workspacePath: string | null,
 ): Promise<void> {
   workspaceRootPath = workspacePath;
-  const t0 = performance.now();
   try {
     const data: StartupData = await invoke("load_startup", { workspacePath });
     cachedHomeDir = data.home_dir;
@@ -134,10 +133,6 @@ export async function loadAllSettings(
     } else {
       setWorkspaceSettings({ ...DEFAULT_WORKSPACE });
     }
-
-    console.log(
-      `[rune] loadAllSettings (1 IPC): ${Math.round(performance.now() - t0)}ms`,
-    );
   } catch (e) {
     console.error("Failed to load settings", e);
   }

@@ -383,15 +383,10 @@ export function useFileSystem() {
   async function init() {
     const saved = rootPath();
     if (saved) {
-      const t0 = performance.now();
-      console.log(`[rune] fs.init: reading ${saved}`);
       setLoading(true);
       try {
         stopAllWatchers();
         const entries = await readDirectory(saved);
-        console.log(
-          `[rune] fs.init readDirectory: ${Math.round(performance.now() - t0)}ms (${entries.length} entries)`,
-        );
         setTree(entries);
         startWatching(saved);
         
@@ -401,10 +396,6 @@ export function useFileSystem() {
         } catch (err) {
           console.error("[rune] register_window_workspace error:", err);
         }
-        
-        console.log(
-          `[rune] fs.init total: ${Math.round(performance.now() - t0)}ms`,
-        );
       } catch {
         setRootPath(null);
         localStorage.removeItem(STORAGE_KEY);

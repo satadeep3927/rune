@@ -38,9 +38,6 @@ export function useAppStartup(options: AppStartupOptions) {
   } = options;
 
   onMount(() => {
-    const t0 = performance.now();
-    console.log(`[rune] onMount: ${Math.round(t0)}ms`);
-
     // Show window immediately — don't wait for I/O
     (async () => {
       try {
@@ -49,9 +46,6 @@ export function useAppStartup(options: AppStartupOptions) {
         getCurrentWebviewWindow()
           .show()
           .catch(() => {});
-        console.log(
-          `[rune] window.show(): ${Math.round(performance.now() - t0)}ms`,
-        );
       } catch (e) {}
     })();
 
@@ -64,7 +58,6 @@ export function useAppStartup(options: AppStartupOptions) {
         const ctx: { workspace: string | null; file_to_open: string | null } = await invoke("get_window_context");
         
         if (ctx.workspace) {
-          console.log(`[rune] Initializing with CLI workspace: ${ctx.workspace}`);
           await fs.openFolderByPath(ctx.workspace);
           
           if (ctx.file_to_open) {
@@ -80,7 +73,6 @@ export function useAppStartup(options: AppStartupOptions) {
         console.error("Failed to load window context", e);
         await fs.init();
       }
-      console.log(`[rune] fs init done: ${Math.round(performance.now() - t0)}ms`);
     })();
 
     // Load settings and init plugins in background — don't block
@@ -100,9 +92,6 @@ export function useAppStartup(options: AppStartupOptions) {
 
     // Batch-load all settings in a single IPC call
     loadAllSettings(fs.rootPath()).then(() => {
-      console.log(
-        `[rune] loadAllSettings done: ${Math.round(performance.now() - t0)}ms`,
-      );
       // Apply persisted zoom after settings are loaded from disk
       const savedZoom = globalSettings.defaultZoom;
       if (savedZoom && savedZoom !== 1) {
@@ -129,7 +118,6 @@ export function useAppStartup(options: AppStartupOptions) {
 
         await getCurrentWebviewWindow().listen<string>("open-path", async (event) => {
           let path = event.payload;
-          console.log(`[rune] open-path received: ${path}`);
           if (!path) return;
 
           // Strip any remaining file:// prefix (safety net)
@@ -150,16 +138,11 @@ export function useAppStartup(options: AppStartupOptions) {
           try {
             const info = await stat(path);
             if (info.isDirectory) {
-              console.log(`[rune] open-path: opening folder ${path}`);
               await fs.openFolderByPath(path);
             } else {
               const sep = path.includes("\\") ? "\\" : "/";
               const lastSep = path.lastIndexOf(sep);
               const name = path.substring(lastSep + 1);
-
-              console.log(
-                `[rune] open-path: file ${path}`,
-              );
 
               await handleFileClick({ path, name });
             }
