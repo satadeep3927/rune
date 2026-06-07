@@ -504,8 +504,14 @@ fn get_unique_dest(dest_dir: &str, src_path: &Path) -> PathBuf {
 
 #[tauri::command]
 async fn batch_copy_files(paths: Vec<String>, dest_dir: String) -> Result<(), String> {
+    let dest_canon = std::fs::canonicalize(Path::new(&dest_dir)).unwrap_or_else(|_| PathBuf::from(&dest_dir));
     for src in paths {
         let src_path = Path::new(&src);
+        if let Ok(src_canon) = std::fs::canonicalize(&src_path) {
+            if dest_canon.starts_with(&src_canon) {
+                return Err("Cannot copy a folder into itself or its subdirectories.".to_string());
+            }
+        }
         let dest_path = get_unique_dest(&dest_dir, &src_path);
         if src_path.is_dir() {
             copy_recursively(&src_path, &dest_path).map_err(|e| e.to_string())?;
@@ -518,8 +524,14 @@ async fn batch_copy_files(paths: Vec<String>, dest_dir: String) -> Result<(), St
 
 #[tauri::command]
 async fn batch_move_files(paths: Vec<String>, dest_dir: String) -> Result<(), String> {
+    let dest_canon = std::fs::canonicalize(Path::new(&dest_dir)).unwrap_or_else(|_| PathBuf::from(&dest_dir));
     for src in paths {
         let src_path = Path::new(&src);
+        if let Ok(src_canon) = std::fs::canonicalize(&src_path) {
+            if dest_canon.starts_with(&src_canon) {
+                return Err("Cannot move a folder into itself or its subdirectories.".to_string());
+            }
+        }
         let dest_path = get_unique_dest(&dest_dir, &src_path);
         std::fs::rename(&src_path, &dest_path).map_err(|e| e.to_string())?;
     }
