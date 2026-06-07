@@ -54,3 +54,42 @@ export interface MenuDefinition {
   label: string;
   items: MenuItem[];
 }
+
+export interface SearchResult {
+  filePath: string;
+  fileName: string;
+  line: number;
+  col: number;
+  text: string;
+  matchStart: number;
+  matchEnd: number;
+}
+
+export interface QuickPickItem {
+  id: string;
+  label: string;
+  detail?: string;
+}
+
+export interface CommandItem {
+  id: string;
+  label: string;
+  shortcut?: string;
+  action: () => void;
+  category?: string;
+}
+
+export interface WorkspaceSymbol {
+  name: string;
+  kind: string;
+  line: number;
+  path: string;
+}
+
+export type PaletteMode =
+  | "command"
+  | "file"
+  | "workspace-symbol"
+  | "document-symbol";
+
+export type MdMode = "edit" | "preview" | "split";

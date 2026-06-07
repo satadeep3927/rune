@@ -1,6 +1,6 @@
 import { readTextFile, writeTextFile } from "@tauri-apps/plugin-fs";
 import { invoke } from "@tauri-apps/api/core";
-import { tabStore } from "../stores/tabs";
+import { tabStore } from "@/stores/tabs";
 import { pluginRegistry } from "./registry";
 import type { RunePlugin, RuneAPI, ExecResult } from "./types";
 
@@ -51,8 +51,7 @@ export function createRuneAPI(
         if (normalized.endsWith(".rune/settings.json")) {
           const root = options?.getRootPath?.();
           if (root) {
-            const { loadWorkspaceSettings } =
-              await import("../stores/settings");
+            const { loadWorkspaceSettings } = await import("@/stores/settings");
             await loadWorkspaceSettings(root);
           }
         }

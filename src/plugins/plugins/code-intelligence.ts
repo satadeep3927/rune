@@ -1,4 +1,4 @@
-import type { RunePlugin, RuneAPI } from "../types";
+import type { RunePlugin, RuneAPI } from "@/plugins/types";
 
 export interface Symbol {
   name: string;

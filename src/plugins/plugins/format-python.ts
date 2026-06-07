@@ -1,4 +1,4 @@
-import type { RunePlugin, RuneAPI, ContextInfo } from "../types";
+import type { RunePlugin, RuneAPI, ContextInfo } from "@/plugins/types";
 
 async function formatFile(api: RuneAPI, filePath: string) {
   try {
@@ -29,7 +29,7 @@ async function formatWorkspace(api: RuneAPI) {
       return;
     }
     // Refresh all open Python tabs
-    const tabs = (await import("../../stores/tabs")).tabStore.tabs();
+    const tabs = (await import("@/stores/tabs")).tabStore.tabs();
     for (const tab of tabs) {
       if (tab.filePath.endsWith(".py")) {
         await api.editor.refresh(tab.filePath);

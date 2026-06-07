@@ -1,5 +1,5 @@
 import { createSignal } from "solid-js";
-import type { Tab, FileType, PaneSide } from "../types";
+import type { Tab, FileType, PaneSide } from "@/types";
 
 let nextTabId = 1;
 let untitledCount = 0;
@@ -231,69 +231,120 @@ function updateTabAfterSave(tabId: string, filePath: string, fileName: string) {
   );
 }
 
-function reorderTabs(sourceTabId: string, targetTabId: string) {
-  if (sourceTabId === targetTabId) return;
+function reorderTabs(
+  sourceTabId: string,
+  targetTabId: string,
+): { paneCleared?: PaneSide } {
+  if (sourceTabId === targetTabId) return {};
+
+  let newTabs: Tab[] = [];
+  let targetPane: PaneSide = "left";
+  let sourcePane: PaneSide = "left";
+  let changed = false;
+
   setTabs((prev) => {
     const sourceIndex = prev.findIndex((t) => t.id === sourceTabId);
     const targetIndex = prev.findIndex((t) => t.id === targetTabId);
-    if (sourceIndex === -1 || targetIndex === -1) return prev;
+    if (sourceIndex === -1 || targetIndex === -1) {
+      newTabs = prev;
+      return prev;
+    }
 
     const sourceTab = prev[sourceIndex];
     const targetTab = prev[targetIndex];
-    
-    const newTabs = [...prev];
-    newTabs.splice(sourceIndex, 1);
-    
-    const updatedSource = { ...sourceTab, pane: targetTab.pane };
+    sourcePane = sourceTab.pane;
+    targetPane = targetTab.pane;
+
+    const tempTabs = [...prev];
+    tempTabs.splice(sourceIndex, 1);
+
+    const updatedSource = { ...sourceTab, pane: targetPane };
     const insertIndex = sourceIndex < targetIndex ? targetIndex : targetIndex;
-    
-    newTabs.splice(insertIndex, 0, updatedSource);
+
+    tempTabs.splice(insertIndex, 0, updatedSource);
+    newTabs = tempTabs;
+    changed = true;
     return newTabs;
   });
 
-  const tab = tabs().find((t) => t.id === sourceTabId);
-  if (tab) {
-    if (tab.pane === "left") {
-      setActiveTabId(tab.id);
-      setFocusedPane("left");
-      if (rightActiveTabId() === tab.id) {
-        const rTabs = tabs().filter((t) => t.pane === "right");
-        setRightActiveTabId(rTabs[rTabs.length - 1]?.id ?? null);
-      }
-    } else {
-      setRightActiveTabId(tab.id);
-      setFocusedPane("right");
-      if (activeTabId() === tab.id) {
-        const lTabs = tabs().filter((t) => t.pane === "left");
-        setActiveTabId(lTabs[lTabs.length - 1]?.id ?? null);
-      }
+  if (!changed || newTabs.length === 0) return {};
+
+  if (targetPane === "left") {
+    setActiveTabId(sourceTabId);
+    setFocusedPane("left");
+    if (rightActiveTabId() === sourceTabId) {
+      const rTabs = newTabs.filter((t) => t.pane === "right");
+      setRightActiveTabId(rTabs[rTabs.length - 1]?.id ?? null);
+    }
+  } else {
+    setRightActiveTabId(sourceTabId);
+    setFocusedPane("right");
+    if (activeTabId() === sourceTabId) {
+      const lTabs = newTabs.filter((t) => t.pane === "left");
+      setActiveTabId(lTabs[lTabs.length - 1]?.id ?? null);
     }
   }
+
+  let paneCleared: PaneSide | undefined;
+  if (
+    sourcePane !== targetPane &&
+    newTabs.filter((t) => t.pane === sourcePane).length === 0
+  ) {
+    paneCleared = sourcePane;
+  }
+
+  return { paneCleared };
 }
 
-function moveTabToPane(tabId: string, targetPane: PaneSide) {
-  const tabToMove = tabs().find((t) => t.id === tabId);
-  if (!tabToMove || tabToMove.pane === targetPane) return;
+function moveTabToPane(
+  tabId: string,
+  targetPane: PaneSide,
+): { paneCleared?: PaneSide } {
+  let newTabs: Tab[] = [];
+  let sourcePane: PaneSide = "left";
+  let changed = false;
 
-  setTabs((prev) =>
-    prev.map((t) => (t.id === tabId ? { ...t, pane: targetPane } : t)),
-  );
+  setTabs((prev) => {
+    const tabToMove = prev.find((t) => t.id === tabId);
+    if (!tabToMove || tabToMove.pane === targetPane) {
+      newTabs = prev;
+      return prev;
+    }
+    sourcePane = tabToMove.pane;
+    newTabs = prev.map((t) =>
+      t.id === tabId ? { ...t, pane: targetPane } : t,
+    );
+    changed = true;
+    return newTabs;
+  });
+
+  if (!changed) return {};
 
   if (targetPane === "left") {
     setActiveTabId(tabId);
     setFocusedPane("left");
     if (rightActiveTabId() === tabId) {
-      const rightTabs = tabs().filter((t) => t.pane === "right");
+      const rightTabs = newTabs.filter((t) => t.pane === "right");
       setRightActiveTabId(rightTabs[rightTabs.length - 1]?.id ?? null);
     }
   } else {
     setRightActiveTabId(tabId);
     setFocusedPane("right");
     if (activeTabId() === tabId) {
-      const leftTabs = tabs().filter((t) => t.pane === "left");
+      const leftTabs = newTabs.filter((t) => t.pane === "left");
       setActiveTabId(leftTabs[leftTabs.length - 1]?.id ?? null);
     }
   }
+
+  let paneCleared: PaneSide | undefined;
+  if (
+    sourcePane !== targetPane &&
+    newTabs.filter((t) => t.pane === sourcePane).length === 0
+  ) {
+    paneCleared = sourcePane;
+  }
+
+  return { paneCleared };
 }
 
 function closeOtherTabs(keepTabId: string) {

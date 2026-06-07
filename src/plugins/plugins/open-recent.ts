@@ -1,4 +1,4 @@
-import type { RunePlugin } from "../types";
+import type { RunePlugin } from "@/plugins/types";
 
 const RECENT_KEY = "rune:recent-folders";
 const MAX_RECENT = 10;

@@ -12,5 +12,27 @@ export function useWindowControls() {
     });
   });
 
-  return { isMaximized };
+  async function handleMinimize() {
+    await appWindow.minimize();
+  }
+
+  async function handleMaximize() {
+    const maximized = await appWindow.isMaximized();
+    if (maximized) {
+      await appWindow.unmaximize();
+    } else {
+      await appWindow.maximize();
+    }
+  }
+
+  async function handleClose() {
+    await appWindow.close();
+  }
+
+  return {
+    isMaximized,
+    handleMinimize,
+    handleMaximize,
+    handleClose,
+  };
 }

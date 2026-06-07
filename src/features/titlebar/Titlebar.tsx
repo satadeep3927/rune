@@ -1,8 +1,8 @@
 import { Show, For } from "solid-js";
 import { WindowControls } from "./WindowControls";
 import { MenuBar } from "./MenuBar";
-import type { MenuDefinition } from "../../types";
-import { pluginRegistry } from "../../plugins/registry";
+import type { MenuDefinition } from "@/types";
+import { pluginRegistry } from "@/plugins/registry";
 import { IndexerProgress } from "./IndexerProgress";
 
 interface TitlebarProps {

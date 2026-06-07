@@ -9,7 +9,7 @@ import type {
   TitlebarItemRegistration,
   ExplorerToolbarItemRegistration,
 } from "./types";
-import type { ThemeColors } from "../types";
+import type { ThemeColors } from "@/types";
 
 class PluginRegistry {
   private contextMenuProviders: ContextMenuRegistration[] = [];

@@ -1,11 +1,11 @@
 import { createContext, useContext, createEffect, type JSX } from "solid-js";
-import type { ThemeColors, ThemeMode } from "../../types";
+import type { ThemeColors, ThemeMode } from "@/types";
 import { themes, getThemeColors } from "./themes";
 import {
   globalSettings,
   setGlobalSettings,
   saveGlobalSettings,
-} from "../../stores/settings";
+} from "@/stores/settings";
 
 interface ThemeContextValue {
   theme: () => ThemeColors;

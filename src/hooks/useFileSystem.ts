@@ -8,11 +8,13 @@ import {
   remove,
   rename,
   watch,
+  copyFile,
 } from "@tauri-apps/plugin-fs";
 import { open } from "@tauri-apps/plugin-dialog";
 import { basename } from "@tauri-apps/api/path";
-import { workspaceSettings, globalSettings } from "../stores/settings";
-import type { FileEntry, FileType } from "../types";
+import { invoke } from "@tauri-apps/api/core";
+import { workspaceSettings, globalSettings } from "@/stores/settings";
+import type { FileEntry, FileType } from "@/types";
 
 function joinPath(...parts: string[]): string {
   const sep = parts[0]?.includes("\\") ? "\\" : "/";
@@ -115,51 +117,7 @@ function fileExtensionToLanguage(ext: string): string {
   return map[ext] ?? "text";
 }
 
-function sortEntries(entries: FileEntry[]): FileEntry[] {
-  return entries.sort((a, b) => {
-    if (a.isDirectory && !b.isDirectory) return -1;
-    if (!a.isDirectory && b.isDirectory) return 1;
-    return a.name.localeCompare(b.name);
-  });
-}
-
-function shouldSkip(name: string, relPath: string): boolean {
-  const normRelPath = relPath.replace(/\\/g, "/");
-  return workspaceSettings.excludeItems.some((item) => {
-    const cleanItem = item
-      .trim()
-      .replace(/[/\\]+$/, "")
-      .replace(/^[/\\]+/, "");
-    if (!cleanItem) return false;
-
-    const normCleanItem = cleanItem.replace(/\\/g, "/");
-
-    if (name === normCleanItem || normRelPath === normCleanItem) {
-      return true;
-    }
-
-    if (normRelPath.startsWith(normCleanItem + "/")) {
-      return true;
-    }
-
-    if (normCleanItem.includes("*")) {
-      const regexStr =
-        "^" +
-        normCleanItem
-          .replace(/[.+^${}()|[\]\\]/g, "\\$&")
-          .replace(/\*/g, ".*") +
-        "$";
-      try {
-        const regex = new RegExp(regexStr, "i");
-        if (regex.test(name) || regex.test(normRelPath)) {
-          return true;
-        }
-      } catch {}
-    }
-
-    return false;
-  });
-}
+// sorting and filtering handled by Rust
 
 const STORAGE_KEY = "rune-last-folder";
 
@@ -209,41 +167,18 @@ export function useFileSystem() {
   }
 
   async function readDirectory(dirPath: string): Promise<FileEntry[]> {
-    const entries = await readDir(dirPath);
-    const sep = dirPath.includes("\\") ? "\\" : "/";
-    const dirPrefix = dirPath.endsWith(sep) ? dirPath : dirPath + sep;
-    const root = rootPath();
-
-    const fileEntries: FileEntry[] = [];
-    for (const entry of entries) {
-      if (!entry.name) continue;
-      const entryPath = dirPrefix + entry.name;
-
-      let relPath = entry.name;
-      if (root) {
-        const normalizedRoot = root.replace(/\\/g, "/").replace(/\/+$/, "");
-        const normalizedEntry = entryPath.replace(/\\/g, "/");
-        if (normalizedEntry.startsWith(normalizedRoot)) {
-          relPath = normalizedEntry
-            .substring(normalizedRoot.length)
-            .replace(/^\/+/, "");
-        }
-      }
-
-      if (shouldSkip(entry.name, relPath)) {
-        continue;
-      }
-
-      fileEntries.push({
-        name: entry.name,
-        path: entryPath,
-        isDirectory: entry.isDirectory,
-        isExpanded: false,
-        children: entry.isDirectory ? [] : undefined,
+    const excludes = workspaceSettings.excludeItems || [];
+    const root = rootPath() || dirPath;
+    try {
+      return await invoke<FileEntry[]>("read_filtered_dir", {
+        dirPath,
+        rootPath: root,
+        excludes,
       });
+    } catch (e) {
+      console.error("Rust read_filtered_dir error:", e);
+      return [];
     }
-
-    return sortEntries(fileEntries);
   }
 
   async function openFolder() {
@@ -257,7 +192,7 @@ export function useFileSystem() {
       if (selected && typeof selected === "string") {
         setRootPath(selected);
         localStorage.setItem(STORAGE_KEY, selected);
-        
+
         try {
           const { invoke } = await import("@tauri-apps/api/core");
           await invoke("register_window_workspace", { workspace: selected });
@@ -370,7 +305,11 @@ export function useFileSystem() {
     }
 
     const content = await readTextFile(filePath);
-    return { content: content, language: fileExtensionToLanguage(ext), fileType };
+    return {
+      content: content,
+      language: fileExtensionToLanguage(ext),
+      fileType,
+    };
   }
 
   async function writeFileContent(
@@ -389,7 +328,7 @@ export function useFileSystem() {
         const entries = await readDirectory(saved);
         setTree(entries);
         startWatching(saved);
-        
+
         try {
           const { invoke } = await import("@tauri-apps/api/core");
           await invoke("register_window_workspace", { workspace: saved });
@@ -426,35 +365,30 @@ export function useFileSystem() {
     if (!root) return;
     setLoading(true);
     try {
-      const entries = await readDirectory(root);
-      const expandedPaths = collectExpandedPaths(tree());
+      const expandedPaths = Array.from(collectExpandedPaths(tree()));
+      const excludes = workspaceSettings.excludeItems || [];
 
-      async function applyExpanded(entries: FileEntry[]): Promise<FileEntry[]> {
-        const result: FileEntry[] = [];
-        for (const e of entries) {
-          if (e.isDirectory && expandedPaths.has(e.path)) {
-            startWatching(e.path);
-            const children = await readDirectory(e.path);
-            result.push({
-              ...e,
-              isExpanded: true,
-              children: await applyExpanded(children),
-            });
-          } else {
-            result.push(e);
-          }
-        }
-        return sortEntries(result);
+      const newTree = await invoke<FileEntry[]>("get_expanded_tree", {
+        dirPath: root,
+        root,
+        expandedPaths,
+        excludes,
+      });
+
+      setTree(newTree);
+
+      for (const e of expandedPaths) {
+        startWatching(e);
       }
 
-      setTree(await applyExpanded(entries));
-      // Prune watchers for directories that might have been deleted externally
-      const currentExpanded = collectExpandedPaths(tree());
+      const currentExpanded = collectExpandedPaths(newTree);
       for (const watchedPath of activeWatchers.keys()) {
         if (watchedPath !== root && !currentExpanded.has(watchedPath)) {
           stopWatching(watchedPath);
         }
       }
+    } catch (err) {
+      console.error("refreshPreservingExpanded error:", err);
     } finally {
       setLoading(false);
     }
@@ -542,7 +476,7 @@ export function useFileSystem() {
     try {
       setRootPath(folderPath);
       localStorage.setItem(STORAGE_KEY, folderPath);
-      
+
       try {
         const { invoke } = await import("@tauri-apps/api/core");
         await invoke("register_window_workspace", { workspace: folderPath });
@@ -580,6 +514,7 @@ export function useFileSystem() {
     collapseAll,
     renameEntry,
     deleteFile,
+    copyFile,
     init,
   };
 }

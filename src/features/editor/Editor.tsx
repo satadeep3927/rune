@@ -1,11 +1,13 @@
-import { Show, createSignal } from "solid-js";
+import { Show } from "solid-js";
 import { CodeMirrorView } from "./CodeMirrorView";
 import { ImageViewer } from "./ImageViewer";
 import { PdfViewer } from "./PdfViewer";
 import { MarkdownPreview } from "./MarkdownPreview";
-import { SettingsView } from "../../components/SettingsView";
-import { WelcomeScreen } from "../welcome/WelcomeScreen";
-import type { FileType } from "../../types";
+import { SettingsView } from "@/components/SettingsView";
+import { WelcomeScreen } from "@/features/welcome/WelcomeScreen";
+import { useEditor } from "@/hooks/useEditor";
+import { cn } from "@/utils/cn";
+import type { FileType, MdMode } from "@/types";
 
 interface EditorProps {
   content: string;
@@ -23,39 +25,21 @@ interface EditorProps {
   onSearchWorkspace?: () => void;
 }
 
-type MdMode = "edit" | "preview" | "split";
-
 export function Editor(props: EditorProps) {
-  const [mdMode, setMdMode] = createSignal<MdMode>("edit");
-  const [editorScroller, setEditorScroller] = createSignal<HTMLElement | null>(
-    null,
-  );
+  const { mdMode, setMdMode, editorScroller, setEditorScroller } = useEditor();
 
   return (
     <div class="flex-1 h-full overflow-hidden flex flex-col">
       <Show when={props.hasOpenFile && props.fileType === "markdown"}>
-        <div
-          class="flex items-center gap-1 px-2 h-[28px] shrink-0"
-          style={{
-            "border-bottom": "1px solid var(--color-border)",
-            background: "var(--color-bg-secondary)",
-          }}
-        >
+        <div class="flex items-center gap-1 px-2 h-[28px] shrink-0 border-b border-[var(--color-border)] bg-[var(--color-bg-secondary)]">
           {(["edit", "preview", "split"] as MdMode[]).map((mode) => (
             <button
-              class="px-2 py-0.5 text-[11px] uppercase tracking-wide transition-colors"
-              style={{
-                color:
-                  mdMode() === mode
-                    ? "var(--color-accent)"
-                    : "var(--color-fg-muted)",
-                background:
-                  mdMode() === mode
-                    ? "var(--color-bg-tertiary)"
-                    : "transparent",
-                border: "none",
-                cursor: "pointer",
-              }}
+              class={cn(
+                "px-2 py-0.5 text-[11px] uppercase tracking-wide transition-colors border-none cursor-pointer",
+                mdMode() === mode
+                  ? "text-[var(--color-accent)] bg-[var(--color-bg-tertiary)]"
+                  : "text-[var(--color-fg-muted)] bg-transparent",
+              )}
               onClick={() => setMdMode(mode)}
             >
               {mode}
@@ -107,13 +91,11 @@ export function Editor(props: EditorProps) {
           <div class="flex h-full">
             <Show when={mdMode() === "edit" || mdMode() === "split"}>
               <div
-                class={mdMode() === "split" ? "w-1/2" : "w-full"}
-                style={{
-                  "border-right":
-                    mdMode() === "split"
-                      ? "1px solid var(--color-border)"
-                      : "none",
-                }}
+                class={cn(
+                  mdMode() === "split"
+                    ? "w-1/2 border-r border-[var(--color-border)]"
+                    : "w-full",
+                )}
               >
                 <CodeMirrorView
                   tabId={props.tabId}

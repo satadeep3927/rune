@@ -1,11 +1,11 @@
 import { createEffect } from "solid-js";
 import { invoke } from "@tauri-apps/api/core";
-import { tabStore } from "../stores/tabs";
+import { tabStore } from "@/stores/tabs";
 import {
   settingsStore,
   workspaceSettings,
   loadWorkspaceSettings,
-} from "../stores/settings";
+} from "@/stores/settings";
 
 interface WorkspaceSyncOptions {
   fs: any;
@@ -22,7 +22,7 @@ export function useWorkspaceSync(options: WorkspaceSyncOptions) {
     tabStore.tabs();
     tabStore.getActiveTab();
     tabStore.getRightActiveTab();
-    
+
     if (fs.rootPath() && workspaceReady) {
       tabStore.saveTabsToStorage(fs.rootPath());
     }

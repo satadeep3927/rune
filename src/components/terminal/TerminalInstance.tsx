@@ -1,11 +1,5 @@
-import { onMount, onCleanup, createEffect } from "solid-js";
-import { invoke } from "@tauri-apps/api/core";
-import { Terminal } from "xterm";
-import { FitAddon } from "xterm-addon-fit";
-import { listen } from "@tauri-apps/api/event";
-import { globalSettings } from "../../stores/settings";
-import { throttle } from "../../utils/throttle";
 import "xterm/css/xterm.css";
+import { useTerminalInstance } from "@/hooks/useTerminalInstance";
 
 interface TerminalInstanceProps {
   id: string;
@@ -15,224 +9,18 @@ interface TerminalInstanceProps {
 }
 
 export function TerminalInstance(props: TerminalInstanceProps) {
-  let terminalRef!: HTMLDivElement;
-  let term: Terminal | undefined;
-  let fitAddon: FitAddon | undefined;
-  let unlistenOutput: (() => void) | undefined;
-  let unlistenExit: (() => void) | undefined;
-  let resizeObserver: ResizeObserver | undefined;
-
-  const throttledFit = throttle(() => {
-    if (props.isActive && fitAddon) {
-      try {
-        fitAddon.fit();
-      } catch (e) {
-        // Ignore fit issues during layout updates
-      }
-    }
-  }, 100);
-
-  async function initTerminal() {
-    term = new Terminal({
-      cursorBlink: true,
-      fontSize: globalSettings.terminalFontSize,
-      fontFamily:
-        "'FiraCode Nerd Font', 'Fira Code', 'JetBrains Mono', monospace",
-      theme: getTerminalTheme(),
-      scrollback: 10000,
-      convertEol: true,
-      allowProposedApi: true,
-      // Disable scroll on output so user can scroll up freely
-      smoothScrollDuration: 0,
-    });
-
-    term.attachCustomKeyEventHandler((arg) => {
-      const isModifier = arg.ctrlKey || arg.metaKey;
-      if (isModifier && arg.code === "KeyC" && arg.type === "keydown") {
-        const selection = term!.getSelection();
-        if (selection) {
-          navigator.clipboard.writeText(selection);
-          return false;
-        }
-      }
-      return true;
-    });
-
-    fitAddon = new FitAddon();
-    term.loadAddon(fitAddon);
-    term.open(terminalRef);
-
-    try {
-      fitAddon.fit();
-    } catch (e) {
-      console.warn("Could not fit terminal on open:", e);
-    }
-
-    term.onResize(({ cols, rows }) => {
-      invoke("resize_terminal", { termId: props.id, cols, rows }).catch(
-        () => {},
-      );
-    });
-
-    term.onData((data) => {
-      invoke("send_terminal_input", { termId: props.id, input: data }).catch(
-        (err) => {
-          term?.write(`\r\nError writing to terminal: ${err}\r\n`);
-        },
-      );
-    });
-
-    unlistenOutput = await listen<{ id: string; data: string }>(
-      "terminal-output",
-      (event) => {
-        if (event.payload.id === props.id) {
-          term?.write(event.payload.data);
-        }
-      },
-    );
-
-    unlistenExit = await listen<string>("terminal-exit", (event) => {
-      if (event.payload === props.id) {
-        props.onExit(props.id);
-      }
-    });
-
-    const cwd = props.rootPath;
-    invoke("start_terminal", {
-      termId: props.id,
-      cwd,
-      cols: term.cols,
-      rows: term.rows,
-    }).catch((err) => {
-      term?.write(`\r\nFailed to start terminal process: ${err}\r\n`);
-    });
-  }
-
-  function handleRunScriptEvent(e: Event) {
-    if (!props.isActive) return;
-    const runCommand = (e as CustomEvent).detail;
-    invoke("send_terminal_input", { termId: props.id, input: "\x03" });
-    setTimeout(() => {
-      invoke("send_terminal_input", {
-        termId: props.id,
-        input: runCommand + "\r\n",
-      });
-    }, 300);
-  }
-
-  function handleContextMenu(e: MouseEvent) {
-    e.preventDefault();
-    if (!term) return;
-    const selection = term.getSelection();
-    if (selection) {
-      navigator.clipboard.writeText(selection).then(() => {
-        term?.clearSelection();
-      });
-    } else {
-      navigator.clipboard.readText().then((text) => {
-        if (text) {
-          invoke("send_terminal_input", {
-            termId: props.id,
-            input: text,
-          }).catch(console.error);
-        }
-      });
-    }
-  }
-
-  onMount(() => {
-    initTerminal();
-    window.addEventListener("resize", handleResize);
-    window.addEventListener("rune-run-script", handleRunScriptEvent);
-    terminalRef?.addEventListener("contextmenu", handleContextMenu);
-
-    // Watch for direct container resizes (e.g., from user dragging the splitter)
-    resizeObserver = new ResizeObserver(() => {
-      throttledFit();
-    });
-    if (terminalRef) {
-      resizeObserver.observe(terminalRef);
-    }
-  });
-
-  onCleanup(() => {
-    window.removeEventListener("resize", handleResize);
-    window.removeEventListener("rune-run-script", handleRunScriptEvent);
-    terminalRef?.removeEventListener("contextmenu", handleContextMenu);
-    resizeObserver?.disconnect();
-    unlistenOutput?.();
-    unlistenExit?.();
-    term?.dispose();
-  });
-
-  createEffect(() => {
-    if (props.isActive) {
-      // Use requestAnimationFrame to ensure layout is complete before fitting.
-      // A double-raf ensures xterm canvas resizes correctly after show.
-      requestAnimationFrame(() => requestAnimationFrame(() => fitAddon?.fit()));
-    }
-  });
-
-  createEffect(() => {
-    // Access globalSettings.theme to establish a reactive dependency
-    globalSettings.theme;
-    if (term) {
-      term.options.fontSize = globalSettings.terminalFontSize;
-      term.options.theme = getTerminalTheme();
-      setTimeout(() => fitAddon?.fit(), 10);
-    }
-  });
-
-  // Watch for workspace changes and cd into new workspace
-  createEffect((prevPath?: string | null) => {
-    const currentPath = props.rootPath;
-    if (currentPath && prevPath && currentPath !== prevPath) {
-      invoke("send_terminal_input", {
-        termId: props.id,
-        // Sending cd with quotes handles spaces in paths for both Windows/Linux
-        input: `cd "${currentPath}"\r\n`,
-      }).catch(console.warn);
-    }
-    return currentPath;
-  }, props.rootPath);
-
-  function getTerminalTheme() {
-    const root = document.documentElement;
-    const style = getComputedStyle(root);
-    return {
-      background: style.getPropertyValue("--color-bg").trim() || "#0B0F00",
-      foreground: style.getPropertyValue("--color-fg").trim() || "#d4d4d4",
-      cursor: style.getPropertyValue("--color-accent").trim() || "#CDFF07",
-      cursorAccent: "#000000",
-      selectionBackground: "rgba(128, 128, 128, 0.4)",
-      black: "#1e1e1e",
-      red: "#f44747",
-      green: "#6A9955",
-      yellow: "#d7ba7d",
-      blue: "#569cd6",
-      magenta: "#c586c0",
-      cyan: "#4ec9b0",
-      white: "#d4d4d4",
-      brightBlack: "#666666",
-      brightRed: "#f44747",
-      brightGreen: "#6A9955",
-      brightYellow: "#d7ba7d",
-      brightBlue: "#569cd6",
-      brightMagenta: "#c586c0",
-      brightCyan: "#4ec9b0",
-      brightWhite: "#ffffff",
-    };
-  }
-
-  function handleResize() {
-    throttledFit();
-  }
+  const { setTerminalRef, focus } = useTerminalInstance(
+    props.id,
+    props.rootPath,
+    () => props.isActive,
+    props.onExit,
+  );
 
   return (
     <div
-      ref={terminalRef}
+      ref={setTerminalRef}
       class="absolute inset-0"
-      onClick={() => term?.focus()}
+      onClick={focus}
       style={{
         // No padding — xterm manages its own internal spacing.
         // Padding breaks the canvas/cell alignment causing garbled text.

@@ -1,8 +1,8 @@
-import { tabStore } from "../stores/tabs";
-import { pluginRegistry } from "../plugins";
-import type { FileEntry, PaneSide } from "../types";
-import type { ContextMenuItem } from "../components/ContextMenu";
-import type { EditingMode } from "../features/file-tree/FileTreeNode";
+import { tabStore } from "@/stores/tabs";
+import { pluginRegistry } from "@/plugins";
+import type { FileEntry, PaneSide } from "@/types";
+import type { ContextMenuItem } from "@/components/ContextMenu";
+import type { EditingMode } from "@/features/file-tree/FileTreeNode";
 
 interface ExplorerActionsOptions {
   fs: any;
@@ -13,6 +13,12 @@ interface ExplorerActionsOptions {
   ) => void;
   showContextMenu: (x: number, y: number, items: ContextMenuItem[]) => void;
   confirmDelete: (name: string, onConfirm: () => void) => void;
+  fileClipboard?: {
+    handleCopy: (paths: string[]) => void;
+    handleCut: (paths: string[]) => void;
+    handlePaste: (destinationFolder: string) => void;
+    internalPaths: () => string[];
+  };
 }
 
 export function useExplorerActions(options: ExplorerActionsOptions) {
@@ -23,6 +29,7 @@ export function useExplorerActions(options: ExplorerActionsOptions) {
     setEditingItem,
     showContextMenu,
     confirmDelete,
+    fileClipboard,
   } = options;
 
   async function deleteSelectedPaths(skipConfirm = false) {
@@ -128,6 +135,19 @@ export function useExplorerActions(options: ExplorerActionsOptions) {
         },
         { separator: true, label: "" },
         {
+          label: "Cut",
+          action: () => fileClipboard?.handleCut(Array.from(selectedPaths())),
+        },
+        {
+          label: "Copy",
+          action: () => fileClipboard?.handleCopy(Array.from(selectedPaths())),
+        },
+        {
+          label: "Paste",
+          action: () => fileClipboard?.handlePaste(entry.path),
+        },
+        { separator: true, label: "" },
+        {
           label: "Copy Path",
           action: () => navigator.clipboard.writeText(entry.path),
         },
@@ -153,6 +173,15 @@ export function useExplorerActions(options: ExplorerActionsOptions) {
     } else {
       items.push(
         { label: "Open", action: () => handleFileClick(entry) },
+        { separator: true, label: "" },
+        {
+          label: "Cut",
+          action: () => fileClipboard?.handleCut(Array.from(selectedPaths())),
+        },
+        {
+          label: "Copy",
+          action: () => fileClipboard?.handleCopy(Array.from(selectedPaths())),
+        },
         { separator: true, label: "" },
         {
           label: "Copy Path",

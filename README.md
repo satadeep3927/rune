@@ -22,15 +22,16 @@ Rune is designed to be extensible from the ground up. Almost every feature you i
 
 ### ✨ Exact Features
 
-- **Unified Command Palette (\`Ctrl+Shift+P\`):** A VS Code-style fuzzy finder that handles commands (\`>\`), workspace symbol search (\`#\`), file outline (\`@\`), and fast file switching—all unified into a single gorgeous dialog.
+- **Unified Command Palette (`Ctrl+Shift+P`):** A VS Code-style fuzzy finder that handles commands (`>`), workspace symbol search (`#`), file outline (`@`), and fast file switching—all unified into a single gorgeous dialog. Backed by a custom, blazing-fast native Rust fuzzy matching engine.
 - **Intelligent Code Navigation:** Instant "Go to Definition" and intelligent symbol extraction powered by a custom Rust workspace indexer.
+- **Native File Explorer:** Effortlessly handles massive mono-repos and deep `node_modules` folders instantly by leveraging native Rust file tree traversal and regex exclusion.
 - **Multi-pane Editing:** Split your workspace vertically or horizontally. Drag and drop tabs effortlessly between panes.
 - **Advanced CodeMirror 6 Engine:** Full syntax highlighting, error diagnostics, bracket matching, autocomplete, and seamless smooth scrolling.
 - **Integrated Terminal:** A fast, resizable terminal built right into the bottom panel. Run your builds, tests, and scripts without ever leaving Rune.
-- **Instant Workspace Search (\`Ctrl+Shift+F\`):** Deep text search across your entire codebase, returning results in milliseconds.
+- **Instant Workspace Search (`Ctrl+Shift+F`):** Deep text search across your entire codebase, returning results in milliseconds.
 - **Responsive Keyboard Control:** Every action is keyboard accessible, with custom combo mapping and collision prevention.
 - **Rich Media Viewing:** Built-in support for viewing images and PDFs directly within editor tabs.
-- **Markdown Split Preview:** Live preview markdown files side-by-side with your code.
+- **Asynchronous Markdown Preview:** Live preview markdown files side-by-side with your code, instantly rendered in the background natively by Rust (`pulldown-cmark`).
 
 ### The Stack
 

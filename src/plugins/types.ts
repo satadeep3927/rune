@@ -1,4 +1,4 @@
-import type { FileEntry, MenuItem, ThemeColors } from "../types";
+import type { FileEntry, MenuItem, ThemeColors } from "@/types";
 
 // ── Plugin Manifest ──
 

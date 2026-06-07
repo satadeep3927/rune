@@ -1,27 +1,10 @@
-import { createSignal, onMount, createEffect, Show } from "solid-js";
-import {
-  loadWorkspaceSettings,
-  workspaceRootPath,
-} from "../stores/settings";
+import { Show } from "solid-js";
 import { GlobalSettingsForm } from "./settings/GlobalSettingsForm";
 import { WorkspaceSettingsForm } from "./settings/WorkspaceSettingsForm";
+import { useSettingsView } from "@/hooks/useSettingsView";
 
 export function SettingsView() {
-  const [activeTab, setActiveTab] = createSignal<"global" | "workspace">(
-    "global",
-  );
-
-  onMount(() => {
-    if (workspaceRootPath) {
-      loadWorkspaceSettings(workspaceRootPath);
-    }
-  });
-
-  createEffect(() => {
-    if (activeTab() === "workspace" && workspaceRootPath) {
-      loadWorkspaceSettings(workspaceRootPath);
-    }
-  });
+  const { activeTab, setActiveTab } = useSettingsView();
 
   return (
     <div

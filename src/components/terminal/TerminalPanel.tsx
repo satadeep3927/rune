@@ -1,47 +1,24 @@
-import { createSignal, createUniqueId, For, Show, onMount } from "solid-js";
-import { invoke } from "@tauri-apps/api/core";
+import { For, Show } from "solid-js";
 import { X, Plus, Terminal as TerminalIcon } from "lucide-solid";
 import { TerminalInstance } from "./TerminalInstance";
+import { useTerminalPanel } from "@/hooks/useTerminalPanel";
 
 interface TerminalPanelProps {
   onClose: () => void;
   rootPath: string | null;
 }
 
-interface TermTab {
-  id: string;
-  name: string;
-}
-
 export function TerminalPanel(props: TerminalPanelProps) {
-  const [tabs, setTabs] = createSignal<TermTab[]>([]);
-  const [activeTabId, setActiveTabId] = createSignal<string | null>(null);
-  const [editingTabId, setEditingTabId] = createSignal<string | null>(null);
-
-  function handleAddTab() {
-    const id = createUniqueId();
-    const name = "Terminal";
-    setTabs((prev) => [...prev, { id, name }]);
-    setActiveTabId(id);
-  }
-
-  function handleCloseTab(id: string, e?: Event) {
-    e?.stopPropagation();
-    setTabs((prev) => prev.filter((t) => t.id !== id));
-    if (activeTabId() === id) {
-      const remaining = tabs();
-      if (remaining.length > 0) {
-        setActiveTabId(remaining[remaining.length - 1].id);
-      } else {
-        props.onClose();
-      }
-    }
-    invoke("kill_terminal", { termId: id }).catch(() => {});
-  }
-
-  onMount(() => {
-    handleAddTab();
-  });
+  const {
+    tabs,
+    activeTabId,
+    setActiveTabId,
+    editingTabId,
+    setEditingTabId,
+    handleAddTab,
+    handleCloseTab,
+    handleRenameTab,
+  } = useTerminalPanel(props.onClose);
 
   return (
     <div class="flex flex-col h-full shrink-0 overflow-hidden">
@@ -82,29 +59,10 @@ export function TerminalPanel(props: TerminalPanelProps) {
                   class="bg-transparent border-none outline-none text-[11px] w-20"
                   style={{ color: "var(--color-fg)" }}
                   autofocus
-                  onBlur={(e) => {
-                    setTabs((prev) =>
-                      prev.map((t) =>
-                        t.id === tab.id
-                          ? { ...t, name: e.currentTarget.value || "Terminal" }
-                          : t,
-                      ),
-                    );
-                    setEditingTabId(null);
-                  }}
+                  onBlur={(e) => handleRenameTab(tab.id, e.currentTarget.value)}
                   onKeyDown={(e) => {
                     if (e.key === "Enter") {
-                      setTabs((prev) =>
-                        prev.map((t) =>
-                          t.id === tab.id
-                            ? {
-                                ...t,
-                                name: e.currentTarget.value || "Terminal",
-                              }
-                            : t,
-                        ),
-                      );
-                      setEditingTabId(null);
+                      handleRenameTab(tab.id, e.currentTarget.value);
                     }
                   }}
                   onClick={(e) => e.stopPropagation()}

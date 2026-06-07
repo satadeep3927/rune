@@ -1,7 +1,7 @@
-import { tabStore } from "../stores/tabs";
-import { settingsStore } from "../stores/settings";
-import type { PaneSide } from "../types";
-import type { ContextMenuItem } from "../components/ContextMenu";
+import { tabStore } from "@/stores/tabs";
+import { settingsStore } from "@/stores/settings";
+import type { PaneSide } from "@/types";
+import type { ContextMenuItem } from "@/components/ContextMenu";
 
 interface TabContextMenuOptions {
   showContextMenu: (x: number, y: number, items: ContextMenuItem[]) => void;
@@ -39,8 +39,9 @@ export function useTabContextMenu(options: TabContextMenuOptions) {
       items.push({
         label: "Move to Left Pane",
         action: () => {
-          tabStore.moveTabToPane(tabId, "left");
-          if (!tabStore.rightTabs().length) settingsStore.setSplitActive(false);
+          const result = tabStore.moveTabToPane(tabId, "left");
+          if (result.paneCleared === "right")
+            settingsStore.setSplitActive(false);
         },
       });
     } else if (pane === "left" && settingsStore.splitActive()) {

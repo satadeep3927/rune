@@ -1,7 +1,9 @@
-import { TabBar, Editor } from "../features/editor";
-import { tabStore } from "../stores/tabs";
-import { settingsStore } from "../stores/settings";
-import type { PaneSide } from "../types";
+import { TabBar, Editor } from "@/features/editor";
+import { tabStore } from "@/stores/tabs";
+import { useEditorPane } from "@/hooks/useEditorPane";
+import type { PaneSide } from "@/types";
+import { XIcon } from "@/components/ui/icons/XIcon";
+import { Show } from "solid-js";
 
 interface EditorPaneProps {
   pane: PaneSide;
@@ -11,45 +13,18 @@ interface EditorPaneProps {
   setPalettePrefix: (p: string) => void;
   setShowCommandPalette: (s: boolean) => void;
   setShowWorkspaceSearch: (s: boolean) => void;
+  onCloseSplit?: () => void;
 }
 
 export function EditorPane(props: EditorPaneProps) {
-  const currentTabs = () =>
-    props.pane === "left" ? tabStore.leftTabs() : tabStore.rightTabs();
-
-  const activeTabId = () =>
-    props.pane === "left" ? tabStore.activeTabId() : tabStore.rightActiveTabId();
-
-  const activeTab = () =>
-    props.pane === "left"
-      ? tabStore.getActiveTab()
-      : tabStore.getRightActiveTab();
-
-  const widthStyle = () => {
-    if (props.pane === "left") {
-      return settingsStore.splitActive()
-        ? `${settingsStore.splitWidth()}%`
-        : "100%";
-    }
-    return `${100 - settingsStore.splitWidth()}%`;
-  };
-
-  const handleTabClick = (id: string) => {
-    tabStore.setActiveTabForPane(id, props.pane);
-  };
-
-  const handleTabClose = (id: string) => {
-    const result = tabStore.closeTab(id);
-    if (props.pane === "left") {
-      if (result.paneCleared === "left" && !tabStore.rightTabs().length) {
-        settingsStore.setSplitActive(false);
-      }
-    } else {
-      if (result.paneCleared === "right") {
-        settingsStore.setSplitActive(false);
-      }
-    }
-  };
+  const {
+    currentTabs,
+    activeTabId,
+    activeTab,
+    widthStyle,
+    handleTabClick,
+    handleTabClose,
+  } = useEditorPane(props.pane);
 
   return (
     <div
@@ -63,6 +38,19 @@ export function EditorPane(props: EditorPaneProps) {
         onTabClick={handleTabClick}
         onTabClose={handleTabClose}
         onTabContextMenu={(id, e) => props.onTabContextMenu(id, props.pane, e)}
+        trailing={
+          <Show when={props.onCloseSplit}>
+            <div class="flex items-center h-full pr-2">
+              <button
+                class="flex items-center justify-center p-0.5 rounded hover:bg-black/5 dark:hover:bg-white/5 text-[var(--color-fg-muted)] hover:text-red-400 transition-colors cursor-pointer"
+                onClick={props.onCloseSplit}
+                title="Close split"
+              >
+                <XIcon class="w-2.5 h-2.5" stroke-width="1.2" />
+              </button>
+            </div>
+          </Show>
+        }
       />
       <Editor
         content={activeTab()?.content ?? ""}

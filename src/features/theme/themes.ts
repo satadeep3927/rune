@@ -1,4 +1,4 @@
-import type { ThemeColors } from "../../types";
+import type { ThemeColors } from "@/types";
 
 export const obsidianLime: ThemeColors = {
   bg: "#0B0F00",
@@ -179,7 +179,7 @@ export const themes: Record<string, ThemeColors> = {
   cyberpunk: cyberpunk,
 };
 
-import { pluginRegistry } from "../../plugins/registry";
+import { pluginRegistry } from "@/plugins/registry";
 
 export function getThemeColors(name: string): ThemeColors | undefined {
   if (themes[name]) return themes[name];

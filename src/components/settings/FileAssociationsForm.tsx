@@ -1,41 +1,21 @@
-import { createSignal, For } from "solid-js";
-import {
-  globalSettings,
-  setGlobalSettings,
-  saveGlobalSettings,
-} from "../../stores/settings";
+import { For } from "solid-js";
 import { CustomSelect } from "./CustomSelect";
+import { Input } from "@/components/ui/Input";
+import {
+  useFileAssociations,
+  type FileAssociationType,
+} from "@/hooks/useFileAssociations";
 
 export function FileAssociationsForm() {
-  const [newExt, setNewExt] = createSignal("");
-  const [newType, setNewType] = createSignal<
-    "text" | "image" | "pdf" | "markdown"
-  >("text");
-
-  const associations = () => globalSettings.fileAssociations || {};
-  const entries = () => Object.entries(associations());
-
-  const handleAdd = () => {
-    let ext = newExt().trim().toLowerCase();
-    if (!ext) return;
-    if (ext.startsWith(".")) ext = ext.slice(1);
-
-    setGlobalSettings("fileAssociations", (prev) => ({
-      ...(prev || {}),
-      [ext]: newType(),
-    }));
-    saveGlobalSettings();
-    setNewExt("");
-  };
-
-  const handleRemove = (ext: string) => {
-    setGlobalSettings("fileAssociations", (prev) => {
-      const next = { ...prev } as Record<string, any>;
-      delete next[ext];
-      return next;
-    });
-    saveGlobalSettings();
-  };
+  const {
+    newExt,
+    setNewExt,
+    newType,
+    setNewType,
+    entries,
+    handleAdd,
+    handleRemove,
+  } = useFileAssociations();
 
   const typeOptions = [
     { label: "Text Editor", value: "text" },
@@ -51,23 +31,18 @@ export function FileAssociationsForm() {
       </p>
 
       <div class="flex items-center gap-2">
-        <input
+        <Input
           type="text"
           placeholder="Extension (e.g. log)"
           value={newExt()}
           onInput={(e) => setNewExt(e.currentTarget.value)}
           onKeyDown={(e) => e.key === "Enter" && handleAdd()}
-          class="w-48 px-3 py-1.5 rounded-md border text-sm"
-          style={{
-            background: "var(--color-bg-secondary)",
-            color: "var(--color-fg)",
-            "border-color": "var(--color-border)",
-          }}
+          class="w-48"
         />
         <CustomSelect
           value={newType()}
           options={typeOptions}
-          onChange={(v) => setNewType(v as any)}
+          onChange={(v) => setNewType(v as FileAssociationType)}
           width="160px"
         />
         <button

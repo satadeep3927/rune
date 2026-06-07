@@ -1,6 +1,7 @@
-import { Show, For, createSignal, onMount } from "solid-js";
-import type { FileEntry } from "../../types";
+import { Show, For, onMount } from "solid-js";
+import type { FileEntry } from "@/types";
 import { FileIcon } from "./FileIcon";
+import { useFileTreeNode } from "@/hooks/useFileTreeNode";
 
 export type EditingMode = "new-file" | "new-folder" | "rename";
 
@@ -28,6 +29,13 @@ interface FileTreeNodeProps {
     originalName?: string,
   ) => void;
   onCancelEdit?: () => void;
+  fileClipboard?: {
+    handleCopy: (paths: string[]) => void;
+    handleCut: (paths: string[]) => void;
+    handlePaste: (destinationFolder: string) => void;
+    internalPaths: () => string[];
+    action: () => "copy" | "cut";
+  };
 }
 
 function IndentGuides(props: { levels: number }) {
@@ -109,36 +117,14 @@ export function InlineInput(props: {
 }
 
 export function FileTreeNode(props: FileTreeNodeProps) {
-  const [isHovered, setIsHovered] = createSignal(false);
-
-  function handleClick(e: MouseEvent) {
-    if (e.ctrlKey || e.metaKey) {
-      // Toggle this entry in multi-selection
-      const current = props.selectedPaths ?? new Set<string>();
-      const next = new Set(current);
-      if (next.has(props.entry.path)) {
-        next.delete(props.entry.path);
-      } else {
-        next.add(props.entry.path);
-      }
-      props.onSelectPaths?.(next);
-    } else {
-      // Single select
-      props.onSelectPaths?.(new Set([props.entry.path]));
-      if (props.entry.isDirectory) {
-        props.onToggleDir(props.entry.path);
-      } else {
-        props.onFileClick(props.entry);
-      }
-    }
-  }
-
-  const isSelected = () => props.selectedPaths?.has(props.entry.path) ?? false;
-  const isActive = () => props.activeFilePath === props.entry.path;
-
-  const isRenaming = () =>
-    props.editingItem?.mode === "rename" &&
-    props.editingItem?.parentPath === props.entry.path;
+  const {
+    isHovered,
+    setIsHovered,
+    handleClick,
+    isSelected,
+    isActive,
+    isRenaming,
+  } = useFileTreeNode(props);
 
   return (
     <div>
@@ -177,6 +163,11 @@ export function FileTreeNode(props: FileTreeNodeProps) {
                 ? "var(--color-fg)"
                 : "inherit",
             "font-weight": isSelected() ? "600" : "normal",
+            opacity:
+              props.fileClipboard?.action() === "cut" &&
+              props.fileClipboard.internalPaths().includes(props.entry.path)
+                ? 0.5
+                : 1,
           }}
           onClick={handleClick}
           onContextMenu={(e) => {
@@ -241,6 +232,7 @@ export function FileTreeNode(props: FileTreeNodeProps) {
                 editingItem={props.editingItem}
                 onSubmitEdit={props.onSubmitEdit}
                 onCancelEdit={props.onCancelEdit}
+                fileClipboard={props.fileClipboard}
               />
             )}
           </For>

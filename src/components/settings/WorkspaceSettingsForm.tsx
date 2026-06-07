@@ -1,60 +1,21 @@
-import { createSignal, For } from "solid-js";
-import {
-  workspaceSettings,
-  setWorkspaceSettings,
-  saveWorkspaceSettings,
-} from "../../stores/settings";
+import { For } from "solid-js";
 import { SettingRow } from "./SettingRow";
+import { Input } from "@/components/ui/Input";
+import { useWorkspaceSettings } from "@/hooks/useWorkspaceSettings";
 
 export function WorkspaceSettingsForm() {
-  const [newExt, setNewExt] = createSignal("");
-  const [newCmd, setNewCmd] = createSignal("");
-
-  const handleExcludeItems = (e: Event) => {
-    const val = (e.target as HTMLInputElement).value;
-    const items = val
-      .split(",")
-      .map((s) => s.trim())
-      .filter(Boolean);
-    setWorkspaceSettings("excludeItems", items);
-    saveWorkspaceSettings();
-  };
-
-  const handleRunCommand = (e: Event) => {
-    setWorkspaceSettings(
-      "runCommand",
-      (e.currentTarget as HTMLInputElement).value,
-    );
-    saveWorkspaceSettings();
-  };
-
-  const updateRunMapVal = (ext: string, cmd: string) => {
-    setWorkspaceSettings("runMap", (prev) => ({ ...prev, [ext]: cmd }));
-    saveWorkspaceSettings();
-  };
-
-  const removeRunMapVal = (ext: string) => {
-    setWorkspaceSettings("runMap", (prev) => {
-      const copy = { ...prev };
-      delete copy[ext];
-      return copy;
-    });
-    saveWorkspaceSettings();
-  };
-
-  const addRunMapVal = () => {
-    const ext = newExt().trim();
-    const cmd = newCmd().trim();
-    if (!ext || !cmd) return;
-    const formattedExt = ext.startsWith(".") ? ext : `.${ext}`;
-    setWorkspaceSettings("runMap", (prev) => ({
-      ...prev,
-      [formattedExt]: cmd,
-    }));
-    saveWorkspaceSettings();
-    setNewExt("");
-    setNewCmd("");
-  };
+  const {
+    workspaceSettings,
+    newExt,
+    setNewExt,
+    newCmd,
+    setNewCmd,
+    handleExcludeItems,
+    handleRunCommand,
+    updateRunMapVal,
+    removeRunMapVal,
+    addRunMapVal,
+  } = useWorkspaceSettings();
 
   return (
     <div class="flex flex-col pb-12">
@@ -67,17 +28,11 @@ export function WorkspaceSettingsForm() {
           label="Exclude Items"
           description="Comma-separated list of files and folders to hide from the file tree."
         >
-          <input
+          <Input
             type="text"
             value={workspaceSettings.excludeItems.join(", ")}
             onChange={handleExcludeItems}
             placeholder=".git, node_modules"
-            class="w-full px-3 py-1.5 rounded-md outline-none border text-sm"
-            style={{
-              background: "var(--color-bg-secondary)",
-              color: "var(--color-fg)",
-              "border-color": "var(--color-border)",
-            }}
           />
         </SettingRow>
       </section>
@@ -91,17 +46,12 @@ export function WorkspaceSettingsForm() {
           label="Run Command"
           description="The command executed when clicking the Play button."
         >
-          <input
+          <Input
             type="text"
             value={workspaceSettings.runCommand}
             onChange={handleRunCommand}
             placeholder="npm run dev"
-            class="w-full px-3 py-1.5 rounded-md outline-none border font-mono text-sm"
-            style={{
-              background: "var(--color-bg-secondary)",
-              color: "var(--color-fg)",
-              "border-color": "var(--color-border)",
-            }}
+            class="font-mono"
           />
         </SettingRow>
       </section>
@@ -121,20 +71,15 @@ export function WorkspaceSettingsForm() {
             {([ext, cmd]) => (
               <div class="grid grid-cols-12 gap-2 items-center text-sm py-1">
                 <div class="col-span-3 font-mono">{ext}</div>
-                <input
+                <Input
                   type="text"
                   value={cmd}
                   onChange={(e) => updateRunMapVal(ext, e.currentTarget.value)}
-                  class="col-span-8 px-2 py-1 rounded border text-xs font-mono"
-                  style={{
-                    background: "var(--color-bg)",
-                    color: "var(--color-fg)",
-                    "border-color": "var(--color-border)",
-                  }}
+                  class="col-span-8 font-mono text-xs"
                 />
                 <button
                   onClick={() => removeRunMapVal(ext)}
-                  class="col-span-1 text-xs text-red-500 hover:text-red-700 cursor-pointer text-center bg-transparent border-0 font-semibold"
+                  class="col-span-1 text-xs text-[var(--color-error)] hover:opacity-80 cursor-pointer text-center bg-transparent border-0 font-semibold"
                 >
                   Remove
                 </button>
@@ -144,29 +89,19 @@ export function WorkspaceSettingsForm() {
 
           {/* Add Row */}
           <div class="grid grid-cols-12 gap-2 items-center pt-3 border-t border-[var(--color-border)]">
-            <input
+            <Input
               type="text"
               placeholder=".py"
               value={newExt()}
               onInput={(e) => setNewExt(e.currentTarget.value)}
-              class="col-span-3 px-2 py-1 rounded border text-xs font-mono"
-              style={{
-                background: "var(--color-bg)",
-                color: "var(--color-fg)",
-                "border-color": "var(--color-border)",
-              }}
+              class="col-span-3 font-mono text-xs"
             />
-            <input
+            <Input
               type="text"
               placeholder='python "{file}"'
               value={newCmd()}
               onInput={(e) => setNewCmd(e.currentTarget.value)}
-              class="col-span-7 px-2 py-1 rounded border text-xs font-mono"
-              style={{
-                background: "var(--color-bg)",
-                color: "var(--color-fg)",
-                "border-color": "var(--color-border)",
-              }}
+              class="col-span-7 font-mono text-xs"
             />
             <button
               onClick={addRunMapVal}

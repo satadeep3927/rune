@@ -264,7 +264,8 @@ body {
 }
 
 /* Reset line-height for xterm to fix selection highlight grid */
-.xterm, .xterm * {
+.xterm,
+.xterm * {
   line-height: normal !important;
 }
 
@@ -285,3 +286,17 @@ body {
 }
 
 .svg-icon-wrapper svg { width: 100%; height: 100%; }
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+  transform-origin: center;
+}

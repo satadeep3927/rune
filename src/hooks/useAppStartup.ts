@@ -1,6 +1,10 @@
 import { onMount } from "solid-js";
-import { loadAllSettings, globalSettings, settingsStore } from "../stores/settings";
-import { initPlugins } from "../plugins";
+import {
+  loadAllSettings,
+  globalSettings,
+  settingsStore,
+} from "@/stores/settings";
+import { initPlugins } from "@/plugins";
 
 interface AppStartupOptions {
   fs: any; // Using any for now to avoid circular dependency loops with useFileSystem return type, we can type it later
@@ -50,16 +54,16 @@ export function useAppStartup(options: AppStartupOptions) {
     })();
 
     // Init filesystem — this is the hot path for workspace restore
-    console.time("[rune] fs.init");
-    
+
     (async () => {
       try {
         const { invoke } = await import("@tauri-apps/api/core");
-        const ctx: { workspace: string | null; file_to_open: string | null } = await invoke("get_window_context");
-        
+        const ctx: { workspace: string | null; file_to_open: string | null } =
+          await invoke("get_window_context");
+
         if (ctx.workspace) {
           await fs.openFolderByPath(ctx.workspace);
-          
+
           if (ctx.file_to_open) {
             const name = ctx.file_to_open.split(/[\\/]/).pop() ?? "";
             setTimeout(() => {
@@ -116,40 +120,43 @@ export function useAppStartup(options: AppStartupOptions) {
         const { getCurrentWebviewWindow } =
           await import("@tauri-apps/api/webviewWindow");
 
-        await getCurrentWebviewWindow().listen<string>("open-path", async (event) => {
-          let path = event.payload;
-          if (!path) return;
+        await getCurrentWebviewWindow().listen<string>(
+          "open-path",
+          async (event) => {
+            let path = event.payload;
+            if (!path) return;
 
-          // Strip any remaining file:// prefix (safety net)
-          if (path.startsWith("file:///")) {
-            path = decodeURIComponent(path.slice(8)).replace(/\//g, "\\");
-          } else if (path.startsWith("file://")) {
-            path = decodeURIComponent(path.slice(7)).replace(/\//g, "\\");
-          }
-
-          // Show and focus window
-          getCurrentWebviewWindow()
-            .show()
-            .catch(() => {});
-          getCurrentWebviewWindow()
-            .setFocus()
-            .catch(() => {});
-
-          try {
-            const info = await stat(path);
-            if (info.isDirectory) {
-              await fs.openFolderByPath(path);
-            } else {
-              const sep = path.includes("\\") ? "\\" : "/";
-              const lastSep = path.lastIndexOf(sep);
-              const name = path.substring(lastSep + 1);
-
-              await handleFileClick({ path, name });
+            // Strip any remaining file:// prefix (safety net)
+            if (path.startsWith("file:///")) {
+              path = decodeURIComponent(path.slice(8)).replace(/\//g, "\\");
+            } else if (path.startsWith("file://")) {
+              path = decodeURIComponent(path.slice(7)).replace(/\//g, "\\");
             }
-          } catch (err) {
-            console.error("open-path: failed to open", path, err);
-          }
-        });
+
+            // Show and focus window
+            getCurrentWebviewWindow()
+              .show()
+              .catch(() => {});
+            getCurrentWebviewWindow()
+              .setFocus()
+              .catch(() => {});
+
+            try {
+              const info = await stat(path);
+              if (info.isDirectory) {
+                await fs.openFolderByPath(path);
+              } else {
+                const sep = path.includes("\\") ? "\\" : "/";
+                const lastSep = path.lastIndexOf(sep);
+                const name = path.substring(lastSep + 1);
+
+                await handleFileClick({ path, name });
+              }
+            } catch (err) {
+              console.error("open-path: failed to open", path, err);
+            }
+          },
+        );
       } catch (e) {
         console.error("open-path: listener setup failed", e);
       }

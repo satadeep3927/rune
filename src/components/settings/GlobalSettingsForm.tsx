@@ -1,43 +1,26 @@
 import { Show } from "solid-js";
-import {
-  globalSettings,
-  setGlobalSettings,
-  saveGlobalSettings,
-  settingsStore,
-} from "../../stores/settings";
-import { getAllThemeNames } from "../../features/theme/themes";
+import { getAllThemeNames } from "@/features/theme/themes";
 import { SettingRow } from "./SettingRow";
 import { CustomSelect } from "./CustomSelect";
 import { ColorPicker } from "./ColorPicker";
 import { FileAssociationsForm } from "./FileAssociationsForm";
+import { Input } from "@/components/ui/Input";
+import { useGlobalSettings } from "@/hooks/useGlobalSettings";
 
 export function GlobalSettingsForm() {
+  const {
+    globalSettings,
+    settingsStore,
+    updateCustomColor,
+    handleToggle,
+    handleNumber,
+    handleText,
+    handleZoom,
+  } = useGlobalSettings();
+
   const themeOptions = getAllThemeNames()
     .concat(["custom"])
     .map((t) => ({ label: t, value: t }));
-
-  const updateCustomColor = (key: string, val: string) => {
-    setGlobalSettings("customTheme", (prev) => ({ ...prev, [key]: val }));
-    saveGlobalSettings();
-  };
-
-  const handleToggle = (key: "wordWrap", checked: boolean) => {
-    setGlobalSettings(key, checked);
-    saveGlobalSettings();
-  };
-
-  const handleNumber = (
-    key: "editorFontSize" | "terminalFontSize",
-    val: number,
-  ) => {
-    setGlobalSettings(key, val);
-    saveGlobalSettings();
-  };
-
-  const handleText = (key: "editorFontFamily", val: string) => {
-    setGlobalSettings(key, val);
-    saveGlobalSettings();
-  };
 
   return (
     <div class="flex flex-col pb-12">
@@ -52,10 +35,7 @@ export function GlobalSettingsForm() {
         >
           <CustomSelect
             value={globalSettings.theme}
-            onChange={(v) => {
-              setGlobalSettings("theme", v);
-              saveGlobalSettings();
-            }}
+            onChange={(v) => handleText("theme", v)}
             options={themeOptions}
           />
         </SettingRow>
@@ -105,9 +85,7 @@ export function GlobalSettingsForm() {
               globalSettings.defaultZoom ??
               1
             ).toString()}
-            onChange={(v) => {
-              settingsStore.setZoomTo(parseFloat(v));
-            }}
+            onChange={handleZoom}
             options={[
               { label: "50%", value: "0.5" },
               { label: "60%", value: "0.6" },
@@ -149,18 +127,13 @@ export function GlobalSettingsForm() {
           label="Font Size"
           description="Controls the font size in pixels."
         >
-          <input
+          <Input
             type="number"
             value={globalSettings.editorFontSize}
             onChange={(e) =>
               handleNumber("editorFontSize", Number(e.currentTarget.value))
             }
-            class="w-full max-w-[120px] px-3 py-1.5 rounded-md outline-none border text-sm"
-            style={{
-              background: "var(--color-bg-secondary)",
-              color: "var(--color-fg)",
-              "border-color": "var(--color-border)",
-            }}
+            class="max-w-[120px]"
           />
         </SettingRow>
 
@@ -188,7 +161,7 @@ export function GlobalSettingsForm() {
           label="Terminal Font Size"
           description="Controls the font size in the integrated terminal."
         >
-          <input
+          <Input
             type="number"
             value={globalSettings.terminalFontSize}
             onInput={(e) =>
@@ -197,12 +170,7 @@ export function GlobalSettingsForm() {
                 parseInt(e.currentTarget.value) || 12,
               )
             }
-            class="w-24 px-3 py-1.5 rounded-md border text-sm transition-colors"
-            style={{
-              background: "var(--color-bg-secondary)",
-              color: "var(--color-fg)",
-              "border-color": "var(--color-border)",
-            }}
+            class="w-24"
           />
         </SettingRow>
       </section>

@@ -1,5 +1,5 @@
 import { createSignal, createEffect } from "solid-js";
-import { pluginRegistry } from "../../plugins/registry";
+import { pluginRegistry } from "@/plugins/registry";
 
 interface FileIconProps {
   name: string;

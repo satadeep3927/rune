@@ -1,6 +1,6 @@
 [package]
 name = "rune-editor"
-version = "1.1.0"
+version = "1.2.0"
 description = "A lightweight, beautiful editor"
 authors = ["you"]
 edition = "2021"
@@ -28,4 +28,12 @@ portable-pty = "0.8"
 dirs = "6"
 regex = "1.12.3"
 tauri-plugin-single-instance = "2.0.0-rc.0"
+clipboard-rs = "0.3.4"
+ignore = "0.4.26"
+pulldown-cmark = "0.11"
 
+[profile.release]
+lto = true
+opt-level = "z"
+strip = true
+codegen-units = 1

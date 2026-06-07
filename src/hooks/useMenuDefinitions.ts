@@ -1,6 +1,6 @@
 import { createMemo } from "solid-js";
-import type { MenuDefinition } from "../types";
-import { pluginRegistry } from "../plugins/registry";
+import type { MenuDefinition } from "@/types";
+import { pluginRegistry } from "@/plugins/registry";
 
 interface MenuActions {
   openFolder: () => void;

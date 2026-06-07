@@ -1,10 +1,8 @@
-import { createSignal, For, Show, onCleanup, onMount } from "solid-js";
-
-export interface QuickPickItem {
-  id: string;
-  label: string;
-  detail?: string;
-}
+import { For, Show, onMount } from "solid-js";
+import { useQuickPick } from "@/hooks/useQuickPick";
+import { Input } from "@/components/ui/Input";
+import { cn } from "@/utils/cn";
+import type { QuickPickItem } from "@/types";
 
 interface QuickPickProps {
   items: QuickPickItem[];
@@ -13,52 +11,30 @@ interface QuickPickProps {
 }
 
 export function QuickPick(props: QuickPickProps) {
-  const [query, setQuery] = createSignal("");
-  const [selectedIndex, setSelectedIndex] = createSignal(0);
+  const {
+    filter,
+    setFilter,
+    selectedIndex,
+    setSelectedIndex,
+    filteredItems,
+    handleKeydown,
+    selectItem,
+  } = useQuickPick(
+    props.items,
+    (id) => props.onSelect(id),
+    () => props.onSelect(undefined),
+  );
+
   let inputRef!: HTMLInputElement;
   let listRef!: HTMLDivElement;
-
-  const filtered = () => {
-    const q = query().toLowerCase().trim();
-    if (!q) return props.items;
-    return props.items.filter(
-      (c) =>
-        c.label.toLowerCase().includes(q) ||
-        (c.detail ?? "").toLowerCase().includes(q),
-    );
-  };
+  let dialogRef!: HTMLDivElement;
 
   onMount(() => {
     inputRef?.focus();
   });
 
-  function executeSelected() {
-    const items = filtered();
-    const idx = selectedIndex();
-    if (items[idx]) {
-      props.onSelect(items[idx].id);
-    } else {
-      props.onSelect(undefined);
-    }
-  }
-
-  function handleKeydown(e: KeyboardEvent) {
-    const items = filtered();
-    if (e.key === "ArrowDown") {
-      e.preventDefault();
-      setSelectedIndex((prev) =>
-        Math.min(prev + 1, Math.max(0, items.length - 1)),
-      );
-      scrollToSelected();
-    } else if (e.key === "ArrowUp") {
-      e.preventDefault();
-      setSelectedIndex((prev) => Math.max(prev - 1, 0));
-      scrollToSelected();
-    } else if (e.key === "Enter") {
-      e.preventDefault();
-      executeSelected();
-    } else if (e.key === "Escape") {
-      e.preventDefault();
+  function handleBackdropMouseDown(e: MouseEvent) {
+    if (dialogRef && !dialogRef.contains(e.target as Node)) {
       props.onSelect(undefined);
     }
   }
@@ -70,81 +46,50 @@ export function QuickPick(props: QuickPickProps) {
     });
   }
 
-  function handleClickOutside(e: MouseEvent) {
-    const target = e.target as HTMLElement;
-    if (!target.closest("[data-quickpick]")) {
-      props.onSelect(undefined);
-    }
-  }
-
-  document.addEventListener("click", handleClickOutside);
-  onCleanup(() => document.removeEventListener("click", handleClickOutside));
-
   return (
     <div
       data-quickpick
-      class="fixed inset-0 flex justify-center pt-[15%] backdrop-blur-[3px]"
-      style={{ "z-index": 200, background: "rgba(0,0,0,0.5)" }}
+      class="fixed inset-0 flex justify-center pt-[15%] backdrop-blur-[3px] bg-black/50 z-[200]"
+      onMouseDown={handleBackdropMouseDown}
     >
       <div
-        class="w-[520px] max-h-[400px] flex flex-col shrink-0 overflow-hidden"
-        style={{
-          background: "var(--color-bg-secondary)",
-          border: "1px solid var(--color-border)",
-          "border-radius": "8px",
-          "box-shadow": "0 10px 30px rgba(0,0,0,0.5)",
-        }}
+        ref={dialogRef}
+        class="w-[520px] max-h-[400px] flex flex-col shrink-0 overflow-hidden bg-[var(--color-bg-secondary)] border border-[var(--color-border)] rounded-lg shadow-[0_10px_30px_rgba(0,0,0,0.5)]"
       >
-        <div
-          class="flex items-center px-3 h-[36px] shrink-0"
-          style={{ "border-bottom": "1px solid var(--color-border)" }}
-        >
-          <input
+        <div class="flex items-center px-3 h-[36px] shrink-0 border-b border-[var(--color-border)]">
+          <Input
             ref={inputRef}
             type="text"
             placeholder={props.placeholder ?? "Search..."}
-            value={query()}
+            value={filter()}
             onInput={(e) => {
-              setQuery(e.currentTarget.value);
+              setFilter(e.currentTarget.value);
               setSelectedIndex(0);
             }}
-            onkeydown={handleKeydown}
-            class="w-full bg-transparent outline-none text-[13px]"
-            style={{
-              color: "var(--color-fg)",
-              "font-family": "'Inter', 'Segoe UI', system-ui, sans-serif",
+            onKeyDown={(e) => {
+              handleKeydown(e);
+              scrollToSelected();
             }}
+            class="w-full bg-transparent border-none outline-none text-[13px] text-[var(--color-fg)] font-sans"
           />
         </div>
         <div ref={listRef} class="flex-1 overflow-y-auto py-1">
-          <For each={filtered()}>
+          <For each={filteredItems()}>
             {(item, i) => (
               <button
-                class="w-full flex items-center justify-between px-3 py-[6px] text-[12px] text-left transition-colors"
-                style={{
-                  color:
-                    selectedIndex() === i()
-                      ? "var(--color-fg)"
-                      : "var(--color-fg)",
-                  background:
-                    selectedIndex() === i()
-                      ? "var(--color-bg-tertiary)"
-                      : "transparent",
-                  cursor: "pointer",
-                  border: "none",
-                }}
+                class={cn(
+                  "w-full flex items-center justify-between px-3 py-[6px] text-[12px] text-left transition-colors border-none cursor-pointer",
+                  selectedIndex() === i()
+                    ? "bg-[var(--color-bg-tertiary)] text-[var(--color-fg)]"
+                    : "bg-transparent text-[var(--color-fg)]",
+                )}
                 onMouseEnter={() => setSelectedIndex(i())}
-                onClick={() => {
-                  props.onSelect(item.id);
-                }}
+                onClick={() => selectItem(i())}
               >
                 <div class="flex flex-col">
                   <span>{item.label}</span>
                   <Show when={item.detail}>
-                    <span
-                      class="text-[10px] mt-0.5"
-                      style={{ color: "var(--color-fg-muted)" }}
-                    >
+                    <span class="text-[10px] mt-0.5 text-[var(--color-fg-muted)]">
                       {item.detail}
                     </span>
                   </Show>
@@ -152,11 +97,8 @@ export function QuickPick(props: QuickPickProps) {
               </button>
             )}
           </For>
-          <Show when={filtered().length === 0}>
-            <div
-              class="px-3 py-4 text-center text-xs"
-              style={{ color: "var(--color-fg-muted)" }}
-            >
+          <Show when={filteredItems().length === 0}>
+            <div class="px-3 py-4 text-center text-xs text-[var(--color-fg-muted)]">
               No matching items
             </div>
           </Show>

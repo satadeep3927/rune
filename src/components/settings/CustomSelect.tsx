@@ -1,4 +1,7 @@
-import { createSignal, onCleanup, For, Show } from "solid-js";
+import { createSignal, For, Show } from "solid-js";
+import { ChevronDownIcon } from "@/components/ui/icons/ChevronDownIcon";
+import { useClickOutside } from "@/hooks/useClickOutside";
+import { cn } from "@/utils/cn";
 
 interface CustomSelectProps {
   value: string;
@@ -11,14 +14,10 @@ export function CustomSelect(props: CustomSelectProps) {
   const [isOpen, setIsOpen] = createSignal(false);
   let containerRef!: HTMLDivElement;
 
-  const handleClickOutside = (e: MouseEvent) => {
-    if (isOpen() && containerRef && !containerRef.contains(e.target as Node)) {
-      setIsOpen(false);
-    }
-  };
-
-  window.addEventListener("click", handleClickOutside);
-  onCleanup(() => window.removeEventListener("click", handleClickOutside));
+  useClickOutside(
+    () => containerRef,
+    () => setIsOpen(false),
+  );
 
   const selectedLabel = () =>
     props.options.find((o) => o.value === props.value)?.label || props.value;
@@ -30,28 +29,25 @@ export function CustomSelect(props: CustomSelectProps) {
       style={{ width: props.width || "200px" }}
     >
       <div
-        class="flex items-center justify-between px-3 py-1.5 rounded-md border cursor-pointer select-none text-sm transition-colors"
+        class={cn(
+          "flex items-center justify-between px-3 py-1.5 rounded-md border cursor-pointer select-none text-sm transition-colors",
+          isOpen()
+            ? "border-[var(--color-accent)]"
+            : "border-[var(--color-border)]",
+        )}
         style={{
           background: "var(--color-bg-secondary)",
           color: "var(--color-fg)",
-          "border-color": isOpen()
-            ? "var(--color-accent)"
-            : "var(--color-border)",
         }}
         onClick={() => setIsOpen(!isOpen())}
       >
         <span class="truncate">{selectedLabel()}</span>
-        <svg
-          width="14"
-          height="14"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          class={`transition-transform ${isOpen() ? "rotate-180" : ""}`}
-        >
-          <polyline points="6 9 12 15 18 9"></polyline>
-        </svg>
+        <ChevronDownIcon
+          class={cn(
+            "w-3.5 h-3.5 transition-transform",
+            isOpen() ? "rotate-180" : "",
+          )}
+        />
       </div>
       <Show when={isOpen()}>
         <div
@@ -64,32 +60,12 @@ export function CustomSelect(props: CustomSelectProps) {
           <For each={props.options}>
             {(opt) => (
               <div
-                class="px-3 py-1.5 text-sm cursor-pointer select-none"
-                style={{
-                  color:
-                    props.value === opt.value
-                      ? "var(--color-accent)"
-                      : "var(--color-fg)",
-                  "background-color":
-                    props.value === opt.value
-                      ? "var(--color-bg-tertiary)"
-                      : "transparent",
-                }}
-                onMouseEnter={(e) => {
-                  if (props.value !== opt.value) {
-                    (e.currentTarget as HTMLElement).style.backgroundColor =
-                      "var(--color-accent)";
-                    (e.currentTarget as HTMLElement).style.color = "#ffffff";
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  if (props.value !== opt.value) {
-                    (e.currentTarget as HTMLElement).style.backgroundColor =
-                      "transparent";
-                    (e.currentTarget as HTMLElement).style.color =
-                      "var(--color-fg)";
-                  }
-                }}
+                class={cn(
+                  "px-3 py-1.5 text-sm cursor-pointer select-none transition-colors",
+                  props.value === opt.value
+                    ? "text-[var(--color-accent)] bg-[var(--color-bg-tertiary)]"
+                    : "text-[var(--color-fg)] bg-transparent hover:bg-[var(--color-accent)] hover:text-white",
+                )}
                 onClick={() => {
                   props.onChange(opt.value);
                   setIsOpen(false);

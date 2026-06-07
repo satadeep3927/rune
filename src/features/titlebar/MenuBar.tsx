@@ -1,5 +1,5 @@
 import { createSignal, For, Show, onCleanup } from "solid-js";
-import type { MenuDefinition, MenuItem } from "../../types";
+import type { MenuDefinition, MenuItem } from "@/types";
 
 interface MenuBarProps {
   menus: MenuDefinition[];

@@ -1,13 +1,13 @@
-import { tabStore } from "../stores/tabs";
-import { settingsStore } from "../stores/settings";
-import { pluginRegistry } from "../plugins";
+import { tabStore } from "@/stores/tabs";
+import { settingsStore } from "@/stores/settings";
+import { pluginRegistry } from "@/plugins";
 import { useMenuDefinitions } from "./useMenuDefinitions";
 import {
   useKeyboardShortcuts,
   normalizeShortcut,
 } from "./useKeyboardShortcuts";
-import { ABOUT_RUNE_MARKDOWN } from "../constants/about";
-import type { CommandItem } from "../components/CommandPalette";
+import { ABOUT_RUNE_MARKDOWN } from "@/constants/about";
+import type { CommandItem } from "@/components/CommandPalette";
 
 interface AppCommandsOptions {
   fs: any;

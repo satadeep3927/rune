@@ -1,5 +1,5 @@
-import { tabStore } from "../stores/tabs";
-import { settingsStore, loadWorkspaceSettings } from "../stores/settings";
+import { tabStore } from "@/stores/tabs";
+import { settingsStore, loadWorkspaceSettings } from "@/stores/settings";
 
 interface EditorActionsOptions {
   fs: any;

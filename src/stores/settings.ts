@@ -2,7 +2,7 @@ import { createSignal } from "solid-js";
 import { createStore } from "solid-js/store";
 import { invoke } from "@tauri-apps/api/core";
 import { readTextFile, writeTextFile, mkdir } from "@tauri-apps/plugin-fs";
-import type { ThemeColors } from "../types";
+import type { ThemeColors } from "@/types";
 
 function joinPath(...parts: string[]): string {
   const sep = parts[0]?.includes("\\") ? "\\" : "/";
@@ -141,7 +141,9 @@ export async function loadAllSettings(
 export async function saveGlobalSettings() {
   try {
     if (!cachedHomeDir) cachedHomeDir = await getHomeDir();
-    const configPath = joinPath(cachedHomeDir, ".rune", "settings.json");
+    const configDir = joinPath(cachedHomeDir, ".rune");
+    const configPath = joinPath(configDir, "settings.json");
+    await mkdir(configDir, { recursive: true }).catch(() => {});
     const data = JSON.parse(JSON.stringify(globalSettings));
     await writeTextFile(configPath, JSON.stringify(data, null, 2));
     localStorage.setItem("rune_theme", globalSettings.theme);
@@ -200,12 +202,12 @@ function createSettingsStore() {
   }
 
   function zoomIn() {
-    setZoomLevel((z) => Math.round((Math.min(z + 0.1, 2)) * 10) / 10);
+    setZoomLevel((z) => Math.round(Math.min(z + 0.1, 2) * 10) / 10);
     applyZoom(zoomLevel());
   }
 
   function zoomOut() {
-    setZoomLevel((z) => Math.round((Math.max(z - 0.1, 0.5)) * 10) / 10);
+    setZoomLevel((z) => Math.round(Math.max(z - 0.1, 0.5) * 10) / 10);
     applyZoom(zoomLevel());
   }
 
