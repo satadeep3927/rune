@@ -2,10 +2,9 @@ import { splitProps, JSX } from "solid-js";
 import { cva, type VariantProps } from "cva";
 import { cn } from "@/utils/cn";
 
-const buttonVariants = cva(
-  "inline-flex items-center justify-center rounded-sm text-xs font-medium transition-colors focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 cursor-pointer select-none",
-  {
-    variants: {
+const buttonVariants = cva({
+  base: "inline-flex items-center justify-center rounded-sm text-xs font-medium transition-colors focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 cursor-pointer select-none",
+  variants: {
       variant: {
         default:
           "bg-[var(--color-bg-secondary)] hover:bg-[var(--color-bg-tertiary)] border border-[var(--color-border)] text-[var(--color-fg)]",

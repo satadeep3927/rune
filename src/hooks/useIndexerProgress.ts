@@ -5,19 +5,19 @@ export function useIndexerProgress() {
   const [progress, setProgress] = createSignal("");
   const [isIndexing, setIsIndexing] = createSignal(false);
 
-  onMount(async () => {
+  onMount(() => {
     let unlistenProgress: UnlistenFn;
     let unlistenDone: UnlistenFn;
 
-    unlistenProgress = await listen<string>("indexing-progress", (e) => {
+    listen<string>("indexing-progress", (e) => {
       setIsIndexing(true);
       setProgress(e.payload);
-    });
+    }).then(un => unlistenProgress = un);
 
-    unlistenDone = await listen<string>("indexing-done", (e) => {
+    listen<string>("indexing-done", (e) => {
       setProgress(e.payload);
       setTimeout(() => setIsIndexing(false), 2000);
-    });
+    }).then(un => unlistenDone = un);
 
     onCleanup(() => {
       if (unlistenProgress) unlistenProgress();

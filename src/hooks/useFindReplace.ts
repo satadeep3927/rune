@@ -1,0 +1,115 @@
+import { createSignal, onMount, onCleanup, createEffect } from "solid-js";
+import { SearchQuery } from "@codemirror/search";
+
+export function useFindReplace() {
+  const [isVisible, setIsVisible] = createSignal(false);
+  const [isReplaceVisible, setIsReplaceVisible] = createSignal(false);
+  const [searchQuery, setSearchQuery] = createSignal("");
+  const [replaceQuery, setReplaceQuery] = createSignal("");
+  const [caseSensitive, setCaseSensitive] = createSignal(false);
+  const [useRegex, setUseRegex] = createSignal(false);
+  const [wholeWord, setWholeWord] = createSignal(false);
+  const [matchCount, setMatchCount] = createSignal<number | string>(0);
+  const [currentMatch, setCurrentMatch] = createSignal(0);
+
+  // Dispatch events to active CodeMirror view
+  function executeSearch(action: "findNext" | "findPrev" | "replace" | "replaceAll") {
+    if (!searchQuery()) return;
+    
+    window.dispatchEvent(
+      new CustomEvent("rune-search-execute", {
+        detail: {
+          action,
+          query: searchQuery(),
+          replaceWith: replaceQuery(),
+          caseSensitive: caseSensitive(),
+          regexp: useRegex(),
+          wholeWord: wholeWord(),
+        },
+      })
+    );
+  }
+
+  function handleFind(e: Event) {
+    setIsVisible(true);
+    setIsReplaceVisible(false);
+  }
+
+  function handleReplace(e: Event) {
+    setIsVisible(true);
+    setIsReplaceVisible(true);
+  }
+
+  function handleClose() {
+    setIsVisible(false);
+    setMatchCount(0);
+    setCurrentMatch(0);
+    // Clear search highlights by dispatching empty query
+    window.dispatchEvent(
+      new CustomEvent("rune-search-execute", {
+        detail: { action: "clear" },
+      })
+    );
+  }
+
+  function handleResults(e: Event) {
+    const detail = (e as CustomEvent).detail;
+    if (detail) {
+      setMatchCount(detail.count);
+      setCurrentMatch(detail.currentIndex);
+    }
+  }
+
+  function handleSetQuery(e: Event) {
+    const detail = (e as CustomEvent).detail;
+    if (detail && detail.query) {
+      setSearchQuery(detail.query);
+    }
+  }
+
+  onMount(() => {
+    window.addEventListener("rune-editor-find", handleFind);
+    window.addEventListener("rune-editor-replace", handleReplace);
+    window.addEventListener("rune-search-results", handleResults);
+    window.addEventListener("rune-search-set-query", handleSetQuery);
+    window.addEventListener("keydown", (e: KeyboardEvent) => {
+      if (e.key === "Escape" && isVisible()) {
+        handleClose();
+      }
+    });
+  });
+
+  onCleanup(() => {
+    window.removeEventListener("rune-editor-find", handleFind);
+    window.removeEventListener("rune-editor-replace", handleReplace);
+    window.removeEventListener("rune-search-results", handleResults);
+    window.removeEventListener("rune-search-set-query", handleSetQuery);
+  });
+
+  // Re-run search whenever options change
+  createEffect(() => {
+    if (isVisible() && searchQuery()) {
+      executeSearch("findNext");
+    }
+  });
+
+  return {
+    isVisible,
+    isReplaceVisible,
+    setIsReplaceVisible,
+    searchQuery,
+    setSearchQuery,
+    replaceQuery,
+    setReplaceQuery,
+    caseSensitive,
+    setCaseSensitive,
+    useRegex,
+    setUseRegex,
+    wholeWord,
+    setWholeWord,
+    matchCount,
+    currentMatch,
+    executeSearch,
+    handleClose,
+  };
+}
