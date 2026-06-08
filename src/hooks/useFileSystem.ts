@@ -421,7 +421,7 @@ export function useFileSystem() {
   }
 
   async function deleteFile(filePath: string) {
-    await remove(filePath, { recursive: true });
+    await invoke("delete_path_async", { path: filePath });
     function removeFromTree(entries: FileEntry[]): FileEntry[] {
       return entries
         .filter((e) => e.path !== filePath)

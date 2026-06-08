@@ -18,7 +18,7 @@ export function TerminalPanel(props: TerminalPanelProps) {
     handleAddTab,
     handleCloseTab,
     handleRenameTab,
-  } = useTerminalPanel(props.onClose);
+  } = useTerminalPanel(props.onClose, () => props.rootPath);
 
   return (
     <div class="flex flex-col h-full shrink-0 overflow-hidden">

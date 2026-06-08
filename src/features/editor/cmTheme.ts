@@ -166,6 +166,9 @@ export function createRuneTheme(): Extension {
         color: "var(--color-fg)",
       },
     },
+    ".cm-search": {
+      display: "none !important",
+    },
     ".cm-scroller": {
       overflow: "auto",
       scrollbarWidth: "thin",

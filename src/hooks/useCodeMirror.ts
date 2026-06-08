@@ -35,9 +35,15 @@ import {
 } from "@codemirror/autocomplete";
 import { invoke } from "@tauri-apps/api/core";
 import {
-  searchKeymap,
   highlightSelectionMatches,
-  openSearchPanel,
+  setSearchQuery,
+  SearchQuery,
+  findNext,
+  findPrevious,
+  replaceNext,
+  replaceAll,
+  getSearchQuery,
+  selectMatches,
 } from "@codemirror/search";
 import {
   foldGutter,
@@ -142,6 +148,7 @@ async function globalWordCompletion(
 }
 
 const editorStateCache = new Map<string, EditorState>();
+const scrollStateCache = new Map<string, { top: number; left: number }>();
 
 interface UseCodeMirrorOptions {
   containerRef: () => HTMLDivElement | undefined;
@@ -167,7 +174,8 @@ export function useCodeMirror(options: UseCodeMirrorOptions) {
 
   let updateIndexTimeout: number | undefined;
   let gotoLineHandler: ((e: Event) => void) | undefined;
-  let findHandler: ((e: Event) => void) | undefined;
+  let searchExecuteHandler: ((e: Event) => void) | undefined;
+  let findReplaceShortcutHandler: ((e: Event) => void) | undefined;
 
   function scheduleIndexUpdate(content: string) {
     const tId = options.tabId();
@@ -199,6 +207,37 @@ export function useCodeMirror(options: UseCodeMirrorOptions) {
           scheduleIndexUpdate(currentContent);
         }
       }
+
+      if (update.docChanged || update.selectionSet) {
+        const query = getSearchQuery(update.state);
+        if (query && query.valid && query.search) {
+          let count = 0;
+          let currentIndex = 0;
+          const currentPos = update.state.selection.main.from;
+          const cursor = query.getCursor(update.state);
+          let m = cursor.next();
+          while (!m.done && count < 999) {
+            count++;
+            if (m.value.to <= currentPos || (m.value.from <= currentPos && m.value.to >= currentPos)) {
+              currentIndex = count;
+            }
+            m = cursor.next();
+          }
+          const finalCount = m.done ? count : "999+";
+          
+          if (tId && (tabStore.activeTabId() === tId || tabStore.rightActiveTabId() === tId)) {
+            window.dispatchEvent(new CustomEvent("rune-search-results", {
+              detail: { count: finalCount, currentIndex: currentIndex || (count > 0 ? 1 : 0) }
+            }));
+          }
+        } else {
+          if (tId && (tabStore.activeTabId() === tId || tabStore.rightActiveTabId() === tId)) {
+            window.dispatchEvent(new CustomEvent("rune-search-results", {
+              detail: { count: 0, currentIndex: 0 }
+            }));
+          }
+        }
+      }
     });
   }
 
@@ -227,6 +266,7 @@ export function useCodeMirror(options: UseCodeMirrorOptions) {
       highlightSelectionMatches({ minSelectionLength: 1 }),
       syntaxHighlighting(defaultHighlightStyle, { fallback: true }),
       keymap.of([
+        { key: "Mod-Shift-l", run: selectMatches, preventDefault: true },
         { key: "Mod-Shift-z", run: redo, preventDefault: true },
         {
           key: "F12",
@@ -260,7 +300,6 @@ export function useCodeMirror(options: UseCodeMirrorOptions) {
         },
         ...closeBracketsKeymap,
         ...defaultKeymap,
-        ...searchKeymap,
         ...historyKeymap,
         ...foldKeymap,
         ...completionKeymap,
@@ -324,32 +363,81 @@ export function useCodeMirror(options: UseCodeMirrorOptions) {
     };
     window.addEventListener("rune-goto-line-path", gotoLineHandler);
 
-    findHandler = () => {
+    searchExecuteHandler = (e: Event) => {
       const tId = options.tabId();
       if (
         tabStore.activeTabId() === tId ||
         tabStore.rightActiveTabId() === tId
       ) {
-        if (view) {
-          openSearchPanel(view);
+        if (!view) return;
+        const { action, query, replaceWith, caseSensitive, regexp, wholeWord } = (e as CustomEvent).detail;
+        
+        if (action === "clear") {
+          view.dispatch({ effects: setSearchQuery.of(new SearchQuery({ search: "" })) });
           view.focus();
+          return;
+        }
+
+        // Always update query before executing
+        view.dispatch({ 
+          effects: setSearchQuery.of(new SearchQuery({ 
+            search: query || "", 
+            replace: replaceWith || "",
+            caseSensitive: !!caseSensitive, 
+            regexp: !!regexp, 
+            wholeWord: !!wholeWord 
+          })) 
+        });
+
+        if (action === "findNext") {
+           findNext(view);
+        } else if (action === "findPrev") {
+           findPrevious(view);
+        } else if (action === "replace") {
+           replaceNext(view);
+        } else if (action === "replaceAll") {
+           replaceAll(view);
+        }
+        // Do not call view.focus() here, otherwise the search input loses focus on every keystroke
+      }
+    };
+    window.addEventListener("rune-search-execute", searchExecuteHandler);
+
+    findReplaceShortcutHandler = () => {
+      const tId = options.tabId();
+      if (tId && (tabStore.activeTabId() === tId || tabStore.rightActiveTabId() === tId)) {
+        if (view) {
+          const state = view.state;
+          const sel = state.sliceDoc(state.selection.main.from, state.selection.main.to);
+          if (sel && !sel.includes("\n")) {
+            window.dispatchEvent(new CustomEvent("rune-search-set-query", { detail: { query: sel }}));
+          }
         }
       }
     };
-    window.addEventListener("rune-editor-find", findHandler);
+    window.addEventListener("rune-editor-find", findReplaceShortcutHandler);
+    window.addEventListener("rune-editor-replace", findReplaceShortcutHandler);
   });
 
   onCleanup(() => {
-    if (updateIndexTimeout) clearTimeout(updateIndexTimeout);
-    if (gotoLineHandler) {
-      window.removeEventListener("rune-goto-line-path", gotoLineHandler);
-    }
-    if (findHandler) {
-      window.removeEventListener("rune-editor-find", findHandler);
-    }
-    const tId = options.tabId();
-    if (view && tId) {
-      editorStateCache.set(tId, view.state);
+      if (updateIndexTimeout) clearTimeout(updateIndexTimeout);
+      if (gotoLineHandler) {
+        window.removeEventListener("rune-goto-line-path", gotoLineHandler);
+      }
+      if (searchExecuteHandler) {
+        window.removeEventListener("rune-search-execute", searchExecuteHandler);
+      }
+      if (findReplaceShortcutHandler) {
+        window.removeEventListener("rune-editor-find", findReplaceShortcutHandler);
+        window.removeEventListener("rune-editor-replace", findReplaceShortcutHandler);
+      }
+      const tId = options.tabId();
+      if (view && tId) {
+        editorStateCache.set(tId, view.state);
+      scrollStateCache.set(tId, {
+        top: view.scrollDOM.scrollTop,
+        left: view.scrollDOM.scrollLeft,
+      });
     }
     view?.destroy();
     view = undefined;
@@ -383,6 +471,10 @@ export function useCodeMirror(options: UseCodeMirrorOptions) {
     if (tId !== lastTabId) {
       if (lastTabId && view) {
         editorStateCache.set(lastTabId, view.state);
+        scrollStateCache.set(lastTabId, {
+          top: view.scrollDOM.scrollTop,
+          left: view.scrollDOM.scrollLeft,
+        });
       }
 
       lastTabId = tId;
@@ -410,6 +502,23 @@ export function useCodeMirror(options: UseCodeMirrorOptions) {
       if (cached) {
         view.dispatch({
           effects: updateListenerCompartment.reconfigure(getUpdateListener()),
+        });
+      }
+      
+      const scrollPos = tId ? scrollStateCache.get(tId) : undefined;
+      if (scrollPos) {
+        requestAnimationFrame(() => {
+          if (view) {
+            view.scrollDOM.scrollTop = scrollPos.top;
+            view.scrollDOM.scrollLeft = scrollPos.left;
+          }
+        });
+      } else {
+        requestAnimationFrame(() => {
+          if (view) {
+            view.scrollDOM.scrollTop = 0;
+            view.scrollDOM.scrollLeft = 0;
+          }
         });
       }
       return;

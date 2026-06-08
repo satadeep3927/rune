@@ -4,6 +4,7 @@ import { useEditorPane } from "@/hooks/useEditorPane";
 import type { PaneSide } from "@/types";
 import { XIcon } from "@/components/ui/icons/XIcon";
 import { Show } from "solid-js";
+import { FindReplace } from "@/components/editor/FindReplace";
 
 interface EditorPaneProps {
   pane: PaneSide;
@@ -32,6 +33,7 @@ export function EditorPane(props: EditorPaneProps) {
       style={{ width: widthStyle() }}
       onMouseDown={() => tabStore.setFocusedPane(props.pane)}
     >
+      <FindReplace />
       <TabBar
         tabs={currentTabs()}
         activeTabId={activeTabId()}
