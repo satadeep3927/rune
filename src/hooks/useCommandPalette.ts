@@ -7,6 +7,7 @@ export function useCommandPalette(
   commands: CommandItem[],
   initialPrefix: string | undefined,
   onClose: () => void,
+  rootPath: string | null,
 ) {
   const [rawQuery, setRawQuery] = createSignal(initialPrefix ?? "");
   const [selectedIndex, setSelectedIndex] = createSignal(0);
@@ -51,11 +52,11 @@ export function useCommandPalette(
   function fetchFiles() {
     const q = searchText();
     if (!q) {
-      invoke<string[]>("get_indexed_files")
+      invoke<string[]>("get_indexed_files", { workspacePath: rootPath })
         .then((files) => setFileList(files.slice(0, 60)))
         .catch(() => setFileList([]));
     } else {
-      invoke<string[]>("fuzzy_search_files", { query: q })
+      invoke<string[]>("fuzzy_search_files", { query: q, workspacePath: rootPath })
         .then((files) => setFileList(files))
         .catch(() => setFileList([]));
     }
@@ -71,6 +72,7 @@ export function useCommandPalette(
       setLoadingSymbols(true);
       invoke<WorkspaceSymbol[]>("get_workspace_symbols", {
         query: searchText(),
+        workspacePath: rootPath,
       })
         .then((s) => {
           setSymbols(s);
