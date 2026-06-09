@@ -177,6 +177,7 @@ export function MainLayout() {
           commands={commands()}
           onClose={() => setShowCommandPalette(false)}
           initialPrefix={palettePrefix()}
+          rootPath={fs.rootPath()}
         />
       </Show>
       <Show when={showWorkspaceSearch()}>

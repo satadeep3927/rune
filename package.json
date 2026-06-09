@@ -1,6 +1,6 @@
 {
-  "name": "rune",
-  "version": "1.3.0",
+  "name": "rune-editor",
+  "version": "1.4.0",
   "description": "",
   "type": "module",
   "scripts": {
