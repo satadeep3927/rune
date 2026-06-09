@@ -14,6 +14,7 @@ interface CommandPaletteProps {
   commands: CommandItem[];
   onClose: () => void;
   initialPrefix?: string;
+  rootPath: string | null;
 }
 
 // ── Shortcut badge renderer ──
@@ -56,7 +57,7 @@ export function CommandPalette(props: CommandPaletteProps) {
     handleKeydown,
     executeSelected,
     fetchFiles,
-  } = useCommandPalette(props.commands, props.initialPrefix, props.onClose);
+  } = useCommandPalette(props.commands, props.initialPrefix, props.onClose, props.rootPath);
 
   let inputRef!: HTMLInputElement;
   let listRef!: HTMLDivElement;

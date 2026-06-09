@@ -117,10 +117,14 @@ impl IndexerState {
         results
     }
 
-    pub fn get_workspace_symbols(&self, query: &str) -> Vec<Symbol> {
+    pub fn get_workspace_symbols(&self, query: &str, workspace_path: Option<&str>) -> Vec<Symbol> {
         let mut results = Vec::new();
         let q = query.to_lowercase();
-        for symbols in self.file_symbols.values() {
+        let ws = workspace_path.unwrap_or("");
+        for (path, symbols) in &self.file_symbols {
+            if !ws.is_empty() && !path.starts_with(ws) {
+                continue;
+            }
             for sym in symbols {
                 if q.is_empty() || sym.name.to_lowercase().contains(&q) {
                     results.push(sym.clone());

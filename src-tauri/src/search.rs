@@ -26,9 +26,9 @@ pub fn get_completions(query: String, state: State<'_, WorkspaceIndexer>) -> Res
 }
 
 #[tauri::command]
-pub fn get_workspace_symbols(query: String, state: State<'_, WorkspaceIndexer>) -> Result<Vec<Symbol>, String> {
+pub fn get_workspace_symbols(query: String, workspace_path: Option<String>, state: State<'_, WorkspaceIndexer>) -> Result<Vec<Symbol>, String> {
     if let Ok(indexer) = state.state.lock() {
-        Ok(indexer.get_workspace_symbols(&query))
+        Ok(indexer.get_workspace_symbols(&query, workspace_path.as_deref()))
     } else {
         Ok(vec![])
     }
@@ -53,9 +53,15 @@ pub fn get_definition(symbol: String, state: State<'_, WorkspaceIndexer>) -> Res
 }
 
 #[tauri::command]
-pub fn get_indexed_files(state: State<'_, WorkspaceIndexer>) -> Result<Vec<String>, String> {
+pub fn get_indexed_files(workspace_path: Option<String>, state: State<'_, WorkspaceIndexer>) -> Result<Vec<String>, String> {
     if let Ok(indexer) = state.state.lock() {
-        Ok(indexer.file_words.keys().cloned().collect())
+        let ws = workspace_path.unwrap_or_default();
+        let mut files: Vec<String> = indexer.file_words.keys()
+            .filter(|p| ws.is_empty() || p.starts_with(&ws))
+            .cloned()
+            .collect();
+        files.sort();
+        Ok(files)
     } else {
         Ok(vec![])
     }
@@ -161,12 +167,16 @@ pub async fn workspace_search(root_path: String, query: String) -> Result<Vec<Se
 }
 
 #[tauri::command]
-pub fn fuzzy_search_files(query: String, state: State<'_, WorkspaceIndexer>) -> Result<Vec<String>, String> {
+pub fn fuzzy_search_files(query: String, workspace_path: Option<String>, state: State<'_, WorkspaceIndexer>) -> Result<Vec<String>, String> {
     if let Ok(indexer) = state.state.lock() {
         let mut results = Vec::new();
         let q = query.to_lowercase();
+        let ws = workspace_path.unwrap_or_default();
         
         for file in indexer.file_words.keys() {
+            if !ws.is_empty() && !file.starts_with(&ws) {
+                continue;
+            }
             let filename = Path::new(file).file_name().and_then(|n| n.to_str()).unwrap_or("").to_lowercase();
             let mut q_chars = q.chars().peekable();
             for c in filename.chars() {
