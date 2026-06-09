@@ -22,6 +22,9 @@ export interface Tab {
   dataUrl?: string;
   cursorPosition?: { line: number; col: number };
   pane: PaneSide;
+  diskHash?: number;
+  hasConflict?: boolean;
+  externalContent?: string;
 }
 
 export type ThemeMode = "dark" | "light";

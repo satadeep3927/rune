@@ -5,6 +5,8 @@ import type { PaneSide } from "@/types";
 import { XIcon } from "@/components/ui/icons/XIcon";
 import { Show } from "solid-js";
 import { FindReplace } from "@/components/editor/FindReplace";
+import { Alert } from "@/components/ui/Alert";
+import { Button } from "@/components/ui/Button";
 
 interface EditorPaneProps {
   pane: PaneSide;
@@ -54,6 +56,37 @@ export function EditorPane(props: EditorPaneProps) {
           </Show>
         }
       />
+      <Show when={activeTab()?.hasConflict}>
+        <Alert 
+          variant="warning"
+          actions={
+            <>
+              <Button 
+                variant="secondary" 
+                size="sm"
+                onClick={() => {
+                  const tabId = activeTab()?.id;
+                  if (tabId) tabStore.resolveTabConflict(tabId, "overwrite");
+                }}
+              >
+                Overwrite Disk
+              </Button>
+              <Button 
+                variant="secondary" 
+                size="sm"
+                onClick={() => {
+                  const tabId = activeTab()?.id;
+                  if (tabId) tabStore.resolveTabConflict(tabId, "discard");
+                }}
+              >
+                Discard Editor
+              </Button>
+            </>
+          }
+        >
+          This file has been modified on disk by another program.
+        </Alert>
+      </Show>
       <Editor
         content={activeTab()?.content ?? ""}
         language={activeTab()?.language ?? "text"}

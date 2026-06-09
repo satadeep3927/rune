@@ -1,8 +1,8 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
   "productName": "Rune",
-  "version": "1.3.0",
-  "identifier": "com.runeeditor.app",
+  "version": "1.5.0",
+  "identifier": "com.rune.dev",
   "build": {
     "beforeDevCommand": "pnpm dev",
     "devUrl": "http://localhost:1420",

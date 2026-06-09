@@ -1,15 +1,15 @@
 {
-  "version": "v1.3.0",
+  "version": "v1.5.0",
   "notes": "A new version of Rune is available.",
-  "pub_date": "2026-06-08T14:29:24.726Z",
+  "pub_date": "2026-06-09T10:03:13.796Z",
   "platforms": {
     "windows-x86_64": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVTOVg0U004K24wZWpsOVVWN0VSazV3UnZIaE9NclFpdzdlS2VRNzBxTEdrbzRya21IcEU0Sk9keDdnbzAxRFZ3c29jcWJwVkE2QmsxYlRyQklmU3pFNVNVd082a29oZncwPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzgwOTI3MTY0CWZpbGU6UnVuZV8xLjMuMF94NjQtc2V0dXAuZXhlCmtkbUtVMTNtV2RnZlBMc3EwN2dER3FMeHVseUlxNU1hTTVjaTZPRkQvMVlDYkhJdUVuZS93UFk4bDJKY0NHd1pETk1RTlJaZEQ3UDBqbDhDZDVEUERBPT0K",
-      "url": "https://github.com/satadeep3927/rune/releases/latest/download/Rune_1.3.0_x64-setup.exe"
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVTOVg0U004K24wZW9aYUJPc3RBR2QraXU5NE82bi8vQXFPVGlJM2tCNEVCazJWQm4vMkk1R0lWSWV4cU1DQ3Jod3doM3YxVlBLU052VTBBZy8xaFVoUTVCRVhtOWtwTndVPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzgwOTk4OTk5CWZpbGU6UnVuZV8xLjUuMF94NjQtc2V0dXAuZXhlClUrQ3pqUUUrOHJscWE3UWpMOGVndnVEbXA2ZE0vMGVsdzRUbDVQWFFHTStNdHZiZytKSTdtV2h5MGJvZWhOMXdIMkRyUDFlUUJPN1FjOU5uWXdqNkRBPT0K",
+      "url": "https://github.com/satadeep3927/rune/releases/latest/download/Rune_1.5.0_x64-setup.exe"
     },
     "linux-x86_64": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVTOVg0U004K24wZXQ2UWw3S0N2ZFB0TUdIMDFjYmR1bExoQm1zNjFYeHBaWWduK0pjMlV6cWhLTnhHZkdqTUxRTXh5dEt1TGswMXNyak1GVG05d0c1U0NaK2oxZmRHYlFVPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzgwOTI4ODc4CWZpbGU6UnVuZV8xLjMuMF9hbWQ2NC5BcHBJbWFnZQp6bGJBaXFjYnJpdEFqUHV6RFAwSzVOblJNTVd2SE5kbWxJZU14Wk1wNjBSL3NzeER3cjI1VVRsYjNCVjNoK2c1YUpDZG9LVjJNeUZxUFlZV0ttdmJBUT09Cg==",
-      "url": "https://github.com/satadeep3927/rune/releases/latest/download/Rune_1.3.0_amd64.AppImage"
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVTOVg0U004K24wZWx4eXlROWtWcFlZc2k0cTkreHUrNEc5R0V0MG8vZHhEQ3F4NSt1MkF1RjdzMjJreW8rdG5GRkQwaGcwQktxTm8yemNjd0ZGbjNPankyZWZTOGtCWVEwPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzgwOTk5MjE0CWZpbGU6UnVuZV8xLjUuMF9hbWQ2NC5BcHBJbWFnZQp3aGM4bFZ5czBrQUs1Z0hQM0w1L0VhZ3kyMEhQcEE0eHNsbEZiVnlaOXNOTlNvS2NTZytIV0JybzJoV1JWcVdnYzBHb2h1dVVuQ3pJYnVQVWZCMFlEUT09Cg==",
+      "url": "https://github.com/satadeep3927/rune/releases/latest/download/Rune_1.5.0_amd64.AppImage"
     }
   }
 }

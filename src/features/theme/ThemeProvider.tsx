@@ -6,6 +6,7 @@ import {
   setGlobalSettings,
   saveGlobalSettings,
 } from "@/stores/settings";
+import { getLuminance } from "@/utils/color";
 
 interface ThemeContextValue {
   theme: () => ThemeColors;
@@ -37,6 +38,10 @@ function applyThemeToDOM(t: ThemeColors, isLight: boolean) {
   root.style.setProperty("--color-error", t.error);
   root.style.setProperty("--color-warning", t.warning);
   root.style.setProperty("--color-success", t.success);
+
+  // Automatically compute ideal foreground text color for the accent background
+  const accentLuma = getLuminance(t.accent);
+  root.style.setProperty("--color-accent-fg", accentLuma > 150 ? "#0F1318" : "#FFFFFF");
 
   // Derived properties
   root.style.setProperty("--color-sidebar-bg", t.bgSecondary);
@@ -79,17 +84,7 @@ export function ThemeProvider(props: ThemeProviderProps) {
     if (globalSettings.theme === "custom") {
       const t = theme();
       const bg = t.bg || "#0B0F00";
-      try {
-        const c = bg.startsWith("#") ? bg.substring(1) : bg;
-        const rgb = parseInt(c, 16);
-        const r = (rgb >> 16) & 0xff;
-        const g = (rgb >> 8) & 0xff;
-        const b = (rgb >> 0) & 0xff;
-        const luma = 0.2126 * r + 0.7152 * g + 0.0722 * b;
-        return luma > 128;
-      } catch (e) {
-        return false;
-      }
+      return getLuminance(bg) > 128;
     }
     return false;
   };

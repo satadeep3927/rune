@@ -6,9 +6,9 @@ pub mod search;
 pub mod system;
 
 use std::collections::HashMap;
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 use std::sync::Mutex;
-use tauri::{Manager, Emitter};
+use tauri::Manager;
 
 use indexer::WorkspaceIndexer;
 use window::{WindowContext, WindowManager, resolve_workspace};
@@ -30,74 +30,7 @@ pub fn run() {
             counter: Mutex::new(0),
         })
         .plugin(tauri_plugin_single_instance::init(|app, argv, cwd| {
-            // This runs in the primary instance when a second instance is launched
-            let target_path = argv.iter().skip(1).find(|a| !a.starts_with("--"));
-            if let Some(path_str) = target_path {
-                let absolute_path = Path::new(&cwd).join(path_str);
-                let path_str_abs = absolute_path.to_string_lossy().to_string();
-                let (workspace, file) = resolve_workspace(&path_str_abs);
-                
-                let mgr = app.state::<WindowManager>();
-                let mut windows = mgr.windows.lock().unwrap();
-                
-                let mut found_label = None;
-                for (label, ctx) in windows.iter() {
-                    if let Some(ws) = &ctx.workspace {
-                        // Crucial: check if window actually still exists!
-                        if app.get_webview_window(label).is_some() {
-                            let target = Path::new(&path_str_abs);
-                            let ws_path = Path::new(ws);
-                            
-                            // Because resolve_workspace canonicalizes, ws is canonicalized.
-                            // We should also canonicalize the target for a fair comparison.
-                            let target_canon = std::fs::canonicalize(target).unwrap_or_else(|_| target.to_path_buf());
-                            let target_s = target_canon.to_string_lossy().to_string();
-                            let target_clean = if target_s.starts_with(r"\\?\") { &target_s[4..] } else { &target_s };
-                            
-                            if Path::new(target_clean).starts_with(ws_path) {
-                                found_label = Some(label.clone());
-                                break;
-                            }
-                        }
-                    }
-                }
-                
-                if let Some(label) = found_label {
-                    // Window exists
-                    if let Some(win) = app.get_webview_window(&label) {
-                        let _ = win.unminimize();
-                        let _ = win.show();
-                        let _ = win.set_focus();
-                        if let Some(f) = file {
-                            let _ = win.emit("open-path", f);
-                        }
-                    }
-                } else {
-                    // Create new window
-                    let mut counter = mgr.counter.lock().unwrap();
-                    *counter += 1;
-                    let label = format!("rune-window-{}", counter);
-                    
-                    windows.insert(label.clone(), WindowContext {
-                        workspace: Some(workspace),
-                        file_to_open: file,
-                    });
-                    
-                    let _ = tauri::WebviewWindowBuilder::new(app, &label, tauri::WebviewUrl::App("index.html".into()))
-                        .title("Rune")
-                        .inner_size(1280.0, 800.0)
-                        .min_inner_size(800.0, 500.0)
-                        .decorations(false)
-                        .build();
-                }
-            } else {
-                // Just focus the main window if they launched without args
-                if let Some(win) = app.get_webview_window("main") {
-                    let _ = win.unminimize();
-                    let _ = win.show();
-                    let _ = win.set_focus();
-                }
-            }
+            window::handle_single_instance(app, argv, cwd);
         }))
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_fs::init())
@@ -113,7 +46,8 @@ pub fn run() {
             window::get_window_context, window::register_window_workspace,
             fs_utils::read_clipboard_files, fs_utils::write_clipboard_files, search::workspace_search,
             fs_utils::parse_markdown, fs_utils::batch_copy_files, fs_utils::batch_move_files, search::fuzzy_search_files,
-            fs_utils::get_expanded_tree, fs_utils::read_filtered_dir, fs_utils::delete_path_async
+            fs_utils::get_expanded_tree, fs_utils::read_filtered_dir, fs_utils::delete_path_async,
+            fs_utils::get_file_hash, fs_utils::check_file_update
         ])
           .setup(move |app| {
               let mut ctx = WindowContext::default();
