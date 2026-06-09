@@ -64,7 +64,7 @@ export function CustomSelect(props: CustomSelectProps) {
                   "px-3 py-1.5 text-sm cursor-pointer select-none transition-colors",
                   props.value === opt.value
                     ? "text-[var(--color-accent)] bg-[var(--color-bg-tertiary)]"
-                    : "text-[var(--color-fg)] bg-transparent hover:bg-[var(--color-accent)] hover:text-white",
+                    : "text-[var(--color-fg)] bg-transparent hover:bg-[var(--color-accent)] hover:text-[var(--color-accent-fg,white)]",
                 )}
                 onClick={() => {
                   props.onChange(opt.value);

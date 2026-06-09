@@ -15,8 +15,11 @@ import { settingsStore } from "@/stores/settings";
 import { tabStore } from "@/stores/tabs";
 import { Button } from "@/components/ui/Button";
 import { XIcon } from "@/components/ui/icons/XIcon";
+import { useActiveFileWatcher } from "@/hooks/useActiveFileWatcher";
 
 export function MainLayout() {
+  useActiveFileWatcher();
+
   const {
     fs,
     ctxMenu,

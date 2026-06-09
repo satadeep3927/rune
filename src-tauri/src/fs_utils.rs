@@ -228,3 +228,35 @@ pub async fn read_filtered_dir(
     let root = root_path.unwrap_or_else(|| dir_path.clone());
     get_expanded_tree(dir_path, root, vec![], excludes).await
 }
+
+use std::hash::{DefaultHasher, Hash, Hasher};
+
+#[tauri::command]
+pub async fn get_file_hash(path: String) -> Result<u64, String> {
+    tauri::async_runtime::spawn_blocking(move || {
+        let content = std::fs::read_to_string(&path).map_err(|e| e.to_string())?;
+        let mut hasher = DefaultHasher::new();
+        content.hash(&mut hasher);
+        Ok(hasher.finish())
+    })
+    .await
+    .map_err(|e| format!("Task join failed: {}", e))?
+}
+
+#[tauri::command]
+pub async fn check_file_update(path: String, known_hash: u64) -> Result<Option<(u64, String)>, String> {
+    tauri::async_runtime::spawn_blocking(move || {
+        let content = std::fs::read_to_string(&path).map_err(|e| e.to_string())?;
+        let mut hasher = DefaultHasher::new();
+        content.hash(&mut hasher);
+        let current_hash = hasher.finish();
+
+        if current_hash != known_hash {
+            Ok(Some((current_hash, content)))
+        } else {
+            Ok(None)
+        }
+    })
+    .await
+    .map_err(|e| format!("Task join failed: {}", e))?
+}

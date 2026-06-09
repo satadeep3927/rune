@@ -412,6 +412,45 @@ function rightTabs(): Tab[] {
   return tabs().filter((t) => t.pane === "right");
 }
 
+function setTabDiskHash(tabId: string, hash: number) {
+  setTabs((prev) =>
+    prev.map((t) => (t.id === tabId ? { ...t, diskHash: hash } : t)),
+  );
+}
+
+function setTabConflict(tabId: string, externalContent: string) {
+  setTabs((prev) =>
+    prev.map((t) =>
+      t.id === tabId ? { ...t, hasConflict: true, externalContent } : t,
+    ),
+  );
+}
+
+function resolveTabConflict(tabId: string, action: "overwrite" | "discard") {
+  setTabs((prev) =>
+    prev.map((t) => {
+      if (t.id !== tabId) return t;
+      if (action === "discard") {
+        const newContent = t.externalContent ?? t.savedContent;
+        return {
+          ...t,
+          hasConflict: false,
+          externalContent: undefined,
+          content: newContent,
+          savedContent: newContent,
+          isDirty: false,
+        };
+      } else {
+        return {
+          ...t,
+          hasConflict: false,
+          externalContent: undefined,
+        };
+      }
+    }),
+  );
+}
+
 export const tabStore = {
   tabs,
   activeTabId,
@@ -442,4 +481,7 @@ export const tabStore = {
   loadTabsFromStorage,
   getStoredActiveFilePath,
   getStoredRightActiveFilePath,
+  setTabDiskHash,
+  setTabConflict,
+  resolveTabConflict,
 };
