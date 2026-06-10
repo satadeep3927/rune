@@ -10,11 +10,12 @@ export function useGitView(fs: any) {
   const ui = useUI();
 
   const handleCommit = async () => {
-    if (!commitMessage().trim()) return;
+    if (!commitMessage().trim()) return false;
     setIsCommitting(true);
     try {
       await gitStore.commit(commitMessage());
       setCommitMessage("");
+      return true;
     } catch (e: any) {
       console.error("Commit failed:", e);
       ui.showConfirmDialog("Commit Failed", {
@@ -22,6 +23,7 @@ export function useGitView(fs: any) {
         okLabel: "Close",
         hideCancel: true,
       });
+      return false;
     } finally {
       setIsCommitting(false);
     }
@@ -36,12 +38,14 @@ export function useGitView(fs: any) {
     setIsPushing(true);
     try {
       await gitStore.push();
+      return true;
     } catch (e: any) {
       ui.showConfirmDialog("Push Failed", {
         detail: typeof e === "string" && e.trim() ? e : "An error occurred during push.",
         okLabel: "Close",
         hideCancel: true,
       });
+      return false;
     } finally {
       setIsPushing(false);
     }
@@ -51,12 +55,14 @@ export function useGitView(fs: any) {
     setIsPulling(true);
     try {
       await gitStore.pull();
+      return true;
     } catch (e: any) {
       ui.showConfirmDialog("Pull Failed", {
         detail: typeof e === "string" && e.trim() ? e : "An error occurred during pull.",
         okLabel: "Close",
         hideCancel: true,
       });
+      return false;
     } finally {
       setIsPulling(false);
     }
