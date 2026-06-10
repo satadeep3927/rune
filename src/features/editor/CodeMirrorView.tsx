@@ -1,6 +1,6 @@
 import { createSignal, Show } from "solid-js";
 import { useCodeMirror } from "@/hooks/useCodeMirror";
-import { ContextMenu, type ContextMenuItem } from "@/components/ContextMenu";
+import { ContextMenu, type ContextMenuItem } from "@/components/ui/ContextMenu";
 
 interface CodeMirrorViewProps {
   content: string;

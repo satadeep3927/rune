@@ -1,6 +1,8 @@
 import { Show, For, onCleanup } from "solid-js";
-import { Dynamic } from "solid-js/web";
+import { Dynamic, Portal } from "solid-js/web";
 import * as LucideIcons from "lucide-solid";
+import { useAdaptiveMenu } from "@/hooks/useAdaptiveMenu";
+import { useContextMenu } from "@/hooks/useContextMenu";
 
 export interface ContextMenuItem {
   label: string;
@@ -11,7 +13,7 @@ export interface ContextMenuItem {
   hint?: string;
 }
 
-interface ContextMenuProps {
+export interface ContextMenuProps {
   x: number;
   y: number;
   items: ContextMenuItem[];
@@ -19,34 +21,26 @@ interface ContextMenuProps {
 }
 
 export function ContextMenu(props: ContextMenuProps) {
-  function handleClickOutside(e: MouseEvent) {
-    const target = e.target as HTMLElement;
-    if (!target.closest("[data-context-menu]")) {
-      props.onClose();
-    }
-  }
+  let menuRef!: HTMLDivElement;
+  const position = useAdaptiveMenu(() => props.x, () => props.y, () => menuRef);
 
-  function handleKeydown(e: KeyboardEvent) {
-    if (e.key === "Escape") props.onClose();
-  }
-
-  document.addEventListener("click", handleClickOutside);
-  document.addEventListener("keydown", handleKeydown);
-  onCleanup(() => {
-    document.removeEventListener("click", handleClickOutside);
-    document.removeEventListener("keydown", handleKeydown);
-  });
+  useContextMenu({ onClose: props.onClose });
 
   const hasAnyIcon = () =>
     props.items.some((item) => !item.separator && item.icon);
 
   return (
+    <Portal mount={document.body}>
     <div
+      ref={menuRef}
       data-context-menu
-      class="fixed z-[100] py-1 min-w-[190px] overflow-hidden"
+      class="fixed z-[100] py-1 min-w-[190px] overflow-y-auto overflow-x-hidden"
       style={{
-        left: `${props.x}px`,
-        top: `${props.y}px`,
+        left: `${position().x}px`,
+        top: `${position().y}px`,
+        "max-height": `${position().maxHeight}px`,
+        opacity: position().ready ? 1 : 0,
+        "pointer-events": position().ready ? "auto" : "none",
         background: "var(--color-bg-secondary)",
         border: "1px solid var(--color-border)",
         "border-radius": "6px",
@@ -138,5 +132,6 @@ export function ContextMenu(props: ContextMenuProps) {
         )}
       </For>
     </div>
+    </Portal>
   );
 }
