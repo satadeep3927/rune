@@ -39,10 +39,10 @@ export function GitView(props: GitViewProps) {
             <button class="p-1 hover:text-[var(--color-accent)] transition-colors" onClick={git.refreshGit} title="Refresh">
               <RefreshCw size={14} />
             </button>
-            <button class="p-1 hover:text-[var(--color-accent)] transition-colors" onClick={git.pull} title="Pull">
+            <button class="p-1 hover:text-[var(--color-accent)] transition-colors" onClick={git.handlePull} title="Pull">
               <Download size={14} />
             </button>
-            <button class="p-1 hover:text-[var(--color-accent)] transition-colors" onClick={git.push} title="Push">
+            <button class="p-1 hover:text-[var(--color-accent)] transition-colors" onClick={git.handlePush} title="Push">
               <Upload size={14} />
             </button>
           </div>

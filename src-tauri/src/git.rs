@@ -130,7 +130,7 @@ pub fn git_reset(path: String, files: Vec<String>) -> Result<String, String> {
 #[tauri::command]
 pub fn git_push(path: String) -> Result<String, String> {
     let output = Command::new("git")
-        .args(["push"])
+        .args(["push", "-u", "origin", "HEAD"])
         .current_dir(&path)
         .output()
         .map_err(|e| e.to_string())?;
@@ -149,7 +149,7 @@ pub fn git_push(path: String) -> Result<String, String> {
 #[tauri::command]
 pub fn git_pull(path: String) -> Result<String, String> {
     let output = Command::new("git")
-        .args(["pull"])
+        .args(["pull", "origin", "HEAD"])
         .current_dir(&path)
         .output()
         .map_err(|e| e.to_string())?;
@@ -157,7 +157,11 @@ pub fn git_pull(path: String) -> Result<String, String> {
     if output.status.success() {
         Ok(String::from_utf8_lossy(&output.stdout).to_string())
     } else {
-        Err(String::from_utf8_lossy(&output.stderr).to_string())
+        let mut err_msg = String::from_utf8_lossy(&output.stderr).to_string();
+        if err_msg.is_empty() {
+            err_msg = String::from_utf8_lossy(&output.stdout).to_string();
+        }
+        Err(err_msg)
     }
 }
 
