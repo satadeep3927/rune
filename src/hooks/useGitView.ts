@@ -27,9 +27,13 @@ export function useGitView(fs: any) {
     }
   };
 
+  const [isPushing, setIsPushing] = createSignal(false);
+  const [isPulling, setIsPulling] = createSignal(false);
+
   const isRepo = () => gitStore.gitState() !== null;
 
   const handlePush = async () => {
+    setIsPushing(true);
     try {
       await gitStore.push();
     } catch (e: any) {
@@ -38,10 +42,13 @@ export function useGitView(fs: any) {
         okLabel: "Close",
         hideCancel: true,
       });
+    } finally {
+      setIsPushing(false);
     }
   };
 
   const handlePull = async () => {
+    setIsPulling(true);
     try {
       await gitStore.pull();
     } catch (e: any) {
@@ -50,6 +57,8 @@ export function useGitView(fs: any) {
         okLabel: "Close",
         hideCancel: true,
       });
+    } finally {
+      setIsPulling(false);
     }
   };
 
@@ -58,6 +67,8 @@ export function useGitView(fs: any) {
     commitMessage,
     setCommitMessage,
     isCommitting,
+    isPushing,
+    isPulling,
     handleCommit,
     handlePush,
     handlePull,

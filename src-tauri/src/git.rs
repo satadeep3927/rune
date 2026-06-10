@@ -60,7 +60,7 @@ pub fn get_git_state(path: String) -> Option<GitState> {
 }
 
 #[tauri::command]
-pub fn git_commit(path: String, message: String) -> Result<String, String> {
+pub async fn git_commit(path: String, message: String) -> Result<String, String> {
     let output = Command::new("git")
         .args(["commit", "-m", &message])
         .current_dir(&path)
@@ -128,7 +128,7 @@ pub fn git_reset(path: String, files: Vec<String>) -> Result<String, String> {
 }
 
 #[tauri::command]
-pub fn git_push(path: String) -> Result<String, String> {
+pub async fn git_push(path: String) -> Result<String, String> {
     let output = Command::new("git")
         .args(["push", "-u", "origin", "HEAD"])
         .current_dir(&path)
@@ -147,7 +147,7 @@ pub fn git_push(path: String) -> Result<String, String> {
 }
 
 #[tauri::command]
-pub fn git_pull(path: String) -> Result<String, String> {
+pub async fn git_pull(path: String) -> Result<String, String> {
     let output = Command::new("git")
         .args(["pull", "origin", "HEAD"])
         .current_dir(&path)

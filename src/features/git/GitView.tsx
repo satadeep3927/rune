@@ -1,6 +1,6 @@
 import { Show, For } from "solid-js";
 import { remove } from "@tauri-apps/plugin-fs";
-import { GitCommit, Plus, Minus, RefreshCw, Upload, Download, FolderGit2, Undo } from "lucide-solid";
+import { GitCommit, Plus, Minus, RefreshCw, Upload, Download, FolderGit2, Undo, Loader2 } from "lucide-solid";
 import { Button } from "@/components/ui/Button";
 import { useUI } from "@/contexts/UIContext";
 import { useGitView } from "@/hooks/useGitView";
@@ -39,11 +39,15 @@ export function GitView(props: GitViewProps) {
             <button class="p-1 hover:text-[var(--color-accent)] transition-colors" onClick={git.refreshGit} title="Refresh">
               <RefreshCw size={14} />
             </button>
-            <button class="p-1 hover:text-[var(--color-accent)] transition-colors" onClick={git.handlePull} title="Pull">
-              <Download size={14} />
+            <button class={`p-1 transition-colors ${git.isPulling() ? 'opacity-50 cursor-not-allowed' : 'hover:text-[var(--color-accent)]'}`} onClick={git.handlePull} title="Pull" disabled={git.isPulling()}>
+              <Show when={git.isPulling()} fallback={<Download size={14} />}>
+                <Loader2 size={14} class="animate-spin" />
+              </Show>
             </button>
-            <button class="p-1 hover:text-[var(--color-accent)] transition-colors" onClick={git.handlePush} title="Push">
-              <Upload size={14} />
+            <button class={`p-1 transition-colors ${git.isPushing() ? 'opacity-50 cursor-not-allowed' : 'hover:text-[var(--color-accent)]'}`} onClick={git.handlePush} title="Push" disabled={git.isPushing()}>
+              <Show when={git.isPushing()} fallback={<Upload size={14} />}>
+                <Loader2 size={14} class="animate-spin" />
+              </Show>
             </button>
           </div>
         </div>
