@@ -2,7 +2,7 @@ import { Show } from "solid-js";
 import { Titlebar } from "@/features/titlebar";
 import { FileTree } from "@/features/file-tree";
 import { EditorPane } from "./EditorPane";
-import { ContextMenu } from "@/components/ContextMenu";
+import { ContextMenu } from "@/components/ui/ContextMenu";
 import { CommandPalette } from "@/components/CommandPalette";
 import { WelcomeScreen } from "@/features/welcome/WelcomeScreen";
 import { QuickPick } from "@/components/QuickPick";

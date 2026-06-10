@@ -1,7 +1,7 @@
 import { tabStore } from "@/stores/tabs";
 import { settingsStore } from "@/stores/settings";
 import type { PaneSide } from "@/types";
-import type { ContextMenuItem } from "@/components/ContextMenu";
+import type { ContextMenuItem } from "@/components/ui/ContextMenu";
 
 interface TabContextMenuOptions {
   showContextMenu: (x: number, y: number, items: ContextMenuItem[]) => void;

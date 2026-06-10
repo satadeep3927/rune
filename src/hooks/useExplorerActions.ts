@@ -1,7 +1,7 @@
 import { tabStore } from "@/stores/tabs";
 import { pluginRegistry } from "@/plugins";
 import type { FileEntry, PaneSide } from "@/types";
-import type { ContextMenuItem } from "@/components/ContextMenu";
+import type { ContextMenuItem } from "@/components/ui/ContextMenu";
 import type { EditingMode } from "@/features/file-tree/FileTreeNode";
 
 interface ExplorerActionsOptions {

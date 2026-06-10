@@ -1,6 +1,6 @@
 [package]
 name = "rune-editor"
-version = "1.5.0"
+version = "1.6.0"
 description = "A high-performance modern text editor"
 authors = ["you"]
 edition = "2021"

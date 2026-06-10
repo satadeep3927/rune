@@ -11,7 +11,7 @@ import { useFileClipboard } from "@/hooks/useFileClipboard";
 import { globalSettings, settingsStore } from "@/stores/settings";
 import { tabStore } from "@/stores/tabs";
 import type { EditingMode } from "@/features/file-tree/FileTreeNode";
-import type { ContextMenuItem } from "@/components/ContextMenu";
+import type { ContextMenuItem } from "@/components/ui/ContextMenu";
 
 export function useMainLayout() {
   const fs = useFileSystem();

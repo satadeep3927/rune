@@ -75,7 +75,7 @@ import { createRuneTheme } from "@/features/editor/cmTheme";
 import { tabStore } from "@/stores/tabs";
 import { globalSettings } from "@/stores/settings";
 import { pluginRegistry } from "@/plugins";
-import type { ContextMenuItem } from "@/components/ContextMenu";
+import type { ContextMenuItem } from "@/components/ui/ContextMenu";
 
 function getLanguageExtension(lang: string): Extension {
   switch (lang) {
