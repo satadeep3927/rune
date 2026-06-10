@@ -45,7 +45,7 @@ export function useGit(fs: ReturnType<typeof useFileSystem>) {
     try {
       await invoke("git_commit", { path: root, message });
       refreshGit();
-    } catch (err) {
+    } catch (err: any) {
       console.error("Commit failed:", err);
       throw err;
     }

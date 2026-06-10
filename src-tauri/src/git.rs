@@ -70,7 +70,11 @@ pub fn git_commit(path: String, message: String) -> Result<String, String> {
     if output.status.success() {
         Ok(String::from_utf8_lossy(&output.stdout).to_string())
     } else {
-        Err(String::from_utf8_lossy(&output.stderr).to_string())
+        let mut err_msg = String::from_utf8_lossy(&output.stderr).to_string();
+        if err_msg.is_empty() {
+            err_msg = String::from_utf8_lossy(&output.stdout).to_string();
+        }
+        Err(err_msg)
     }
 }
 
@@ -90,7 +94,11 @@ pub fn git_add(path: String, files: Vec<String>) -> Result<String, String> {
     if output.status.success() {
         Ok(String::from_utf8_lossy(&output.stdout).to_string())
     } else {
-        Err(String::from_utf8_lossy(&output.stderr).to_string())
+        let mut err_msg = String::from_utf8_lossy(&output.stderr).to_string();
+        if err_msg.is_empty() {
+            err_msg = String::from_utf8_lossy(&output.stdout).to_string();
+        }
+        Err(err_msg)
     }
 }
 
@@ -111,7 +119,11 @@ pub fn git_reset(path: String, files: Vec<String>) -> Result<String, String> {
     if output.status.success() {
         Ok(String::from_utf8_lossy(&output.stdout).to_string())
     } else {
-        Err(String::from_utf8_lossy(&output.stderr).to_string())
+        let mut err_msg = String::from_utf8_lossy(&output.stderr).to_string();
+        if err_msg.is_empty() {
+            err_msg = String::from_utf8_lossy(&output.stdout).to_string();
+        }
+        Err(err_msg)
     }
 }
 
@@ -126,7 +138,11 @@ pub fn git_push(path: String) -> Result<String, String> {
     if output.status.success() {
         Ok(String::from_utf8_lossy(&output.stdout).to_string())
     } else {
-        Err(String::from_utf8_lossy(&output.stderr).to_string())
+        let mut err_msg = String::from_utf8_lossy(&output.stderr).to_string();
+        if err_msg.is_empty() {
+            err_msg = String::from_utf8_lossy(&output.stdout).to_string();
+        }
+        Err(err_msg)
     }
 }
 
