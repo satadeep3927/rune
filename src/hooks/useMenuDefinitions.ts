@@ -22,6 +22,7 @@ interface MenuActions {
   find: () => void;
   replace: () => void;
   about: () => void;
+  refresh: () => void;
 }
 
 export function useMenuDefinitions(actions: MenuActions) {
@@ -36,6 +37,10 @@ export function useMenuDefinitions(actions: MenuActions) {
             label: "Open Folder",
             accelerator: "Ctrl+K Ctrl+O",
             action: actions.openFolder,
+          },
+          {
+            label: "Refresh",
+            action: actions.refresh,
           },
           { separator: true, label: "" },
           { label: "Save", accelerator: "Ctrl+S", action: actions.save },

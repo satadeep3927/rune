@@ -71,13 +71,14 @@ import { toml } from "@codemirror/legacy-modes/mode/toml";
 import { yaml } from "@codemirror/legacy-modes/mode/yaml";
 import { shell } from "@codemirror/legacy-modes/mode/shell";
 import { go } from "@codemirror/legacy-modes/mode/go";
+import { gitConflictExtension } from "@/features/editor/gitConflictExtension";
 import { createRuneTheme } from "@/features/editor/cmTheme";
 import { tabStore } from "@/stores/tabs";
 import { globalSettings } from "@/stores/settings";
 import { pluginRegistry } from "@/plugins";
 import type { ContextMenuItem } from "@/components/ui/ContextMenu";
 
-function getLanguageExtension(lang: string): Extension {
+export function getLanguageExtension(lang: string): Extension {
   switch (lang) {
     case "javascript":
       return javascript({ jsx: true });
@@ -242,7 +243,6 @@ export function useCodeMirror(options: UseCodeMirrorOptions) {
   }
 
   function buildExtensions(
-    initialContent: string,
     language: string,
   ): Extension[] {
     return [
@@ -310,6 +310,7 @@ export function useCodeMirror(options: UseCodeMirrorOptions) {
         globalSettings.wordWrap ? EditorView.lineWrapping : [],
       ),
       updateListenerCompartment.of(getUpdateListener()),
+      gitConflictExtension(),
       createRuneTheme(),
     ];
   }
@@ -322,7 +323,7 @@ export function useCodeMirror(options: UseCodeMirrorOptions) {
     const tId = options.tabId();
     const cached = tId ? editorStateCache.get(tId) : undefined;
     const initialContent = options.content();
-    const exts = buildExtensions(initialContent, options.language());
+    const exts = buildExtensions(options.language());
 
     if (cached) {
       if (cached.doc.toString() === initialContent) {
@@ -488,13 +489,13 @@ export function useCodeMirror(options: UseCodeMirrorOptions) {
         } else {
           state = EditorState.create({
             doc: newContent,
-            extensions: buildExtensions(newContent, options.language()),
+            extensions: buildExtensions(options.language()),
           });
         }
       } else {
         state = EditorState.create({
           doc: newContent,
-          extensions: buildExtensions(newContent, options.language()),
+          extensions: buildExtensions(options.language()),
         });
       }
       view.setState(state);

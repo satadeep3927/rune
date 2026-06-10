@@ -1,4 +1,4 @@
-import { Show, For, onCleanup } from "solid-js";
+import { Show, For } from "solid-js";
 import { Dynamic, Portal } from "solid-js/web";
 import * as LucideIcons from "lucide-solid";
 import { useAdaptiveMenu } from "@/hooks/useAdaptiveMenu";

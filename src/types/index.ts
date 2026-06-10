@@ -6,7 +6,7 @@ export interface FileEntry {
   isExpanded?: boolean;
 }
 
-export type FileType = "text" | "image" | "pdf" | "markdown" | "settings";
+export type FileType = "text" | "image" | "pdf" | "markdown" | "settings" | "agent";
 
 export type PaneSide = "left" | "right";
 
@@ -25,6 +25,8 @@ export interface Tab {
   diskHash?: number;
   hasConflict?: boolean;
   externalContent?: string;
+  isDiff?: boolean;
+  diffOriginalContent?: string;
 }
 
 export type ThemeMode = "dark" | "light";

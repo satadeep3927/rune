@@ -1,18 +1,17 @@
 import { createSignal } from "solid-js";
 import {
-  readDir,
   readTextFile,
   writeTextFile,
   readFile,
   mkdir,
-  remove,
   rename,
-  watch,
   copyFile,
 } from "@tauri-apps/plugin-fs";
 import { open } from "@tauri-apps/plugin-dialog";
 import { basename } from "@tauri-apps/api/path";
 import { invoke } from "@tauri-apps/api/core";
+import { watch } from "@tauri-apps/plugin-fs";
+
 import { workspaceSettings, globalSettings } from "@/stores/settings";
 import type { FileEntry, FileType } from "@/types";
 
@@ -466,6 +465,7 @@ export function useFileSystem() {
     try {
       const entries = await readDirectory(root);
       setTree(entries);
+      window.dispatchEvent(new CustomEvent('fs-change'));
     } finally {
       setLoading(false);
     }

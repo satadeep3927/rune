@@ -1,5 +1,4 @@
 import { createSignal, onMount, onCleanup, createEffect } from "solid-js";
-import { SearchQuery } from "@codemirror/search";
 
 export function useFindReplace() {
   const [isVisible, setIsVisible] = createSignal(false);
@@ -30,12 +29,12 @@ export function useFindReplace() {
     );
   }
 
-  function handleFind(e: Event) {
+  function handleFind() {
     setIsVisible(true);
     setIsReplaceVisible(false);
   }
 
-  function handleReplace(e: Event) {
+  function handleReplace() {
     setIsVisible(true);
     setIsReplaceVisible(true);
   }

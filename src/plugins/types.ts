@@ -63,6 +63,7 @@ export interface ExplorerToolbarItemRegistration {
   id: string;
   icon: string; // SVG content or Lucide icon name or React/Solid node? We can use SVG content since Titlebar does the same. Wait, FileTree uses Lucide. I'll just use SVG string.
   title: string;
+  label?: string; // Text to show in the ActivityBar
   action: () => void;
   priority?: number;
 }

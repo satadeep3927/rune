@@ -1,5 +1,11 @@
 import { createSignal } from "solid-js";
-import type { AgentMessage } from "../plugins/types";
+export interface AgentMessage {
+  id: string;
+  sessionId: string;
+  role: "user" | "assistant" | "system";
+  content: string;
+  timestamp: number;
+}
 import { tabStore } from "./tabs";
 
 let nextSessionId = 1;

@@ -55,7 +55,6 @@ export function CommandPalette(props: CommandPaletteProps) {
     filteredFiles,
     totalItems,
     handleKeydown,
-    executeSelected,
     fetchFiles,
   } = useCommandPalette(props.commands, props.initialPrefix, props.onClose, props.rootPath);
 

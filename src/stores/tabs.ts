@@ -74,8 +74,11 @@ function openTab(
   fileType: FileType = "text",
   dataUrl?: string,
   pane: PaneSide = "left",
+  isDiff?: boolean,
+  diffOriginalContent?: string
 ): string {
-  const existing = tabs().find((t) => t.filePath === filePath);
+  // For diffs, we might want to allow opening a diff tab alongside a regular tab, but for now we'll just check by filePath
+  const existing = tabs().find((t) => t.filePath === filePath && t.isDiff === isDiff);
   if (existing) {
     if (existing.pane === "left") setActiveTabId(existing.id);
     else setRightActiveTabId(existing.id);
@@ -94,6 +97,8 @@ function openTab(
     fileType,
     dataUrl,
     pane,
+    isDiff,
+    diffOriginalContent,
   };
 
   setTabs((prev) => [...prev, tab]);

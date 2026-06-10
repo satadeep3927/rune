@@ -40,6 +40,7 @@ interface FileTreeProps {
     internalPaths: () => string[];
     action: () => "copy" | "cut";
   };
+  hideHeader?: boolean;
 }
 
 export function FileTree(props: FileTreeProps) {
@@ -54,6 +55,7 @@ export function FileTree(props: FileTreeProps) {
         "border-right": "1px solid var(--color-border)",
       }}
     >
+      <Show when={!props.hideHeader}>
       <div
         class="flex items-center justify-between px-3 h-[32px] shrink-0 select-none"
         style={{
@@ -114,6 +116,7 @@ export function FileTree(props: FileTreeProps) {
           </Show>
         </div>
       </div>
+      </Show>
 
       <div
         class="flex-1 overflow-y-auto py-1 outline-none focus:outline-none"

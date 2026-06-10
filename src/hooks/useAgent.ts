@@ -3,7 +3,6 @@ import { listen, UnlistenFn } from "@tauri-apps/api/event";
 import { invoke } from "@tauri-apps/api/core";
 import { agentStore } from "../stores/agent";
 import { pluginRegistry } from "../plugins/registry";
-import type { ProviderConfig, AgentContext } from "../plugins/types";
 
 export function useAgent(sessionId: string) {
   const [providerName, setProviderName] = createSignal("Agent");
@@ -78,11 +77,11 @@ export function useAgent(sessionId: string) {
 
     const allMessages = agentStore.getSessionMessages(sessionId);
     const chatMessages = allMessages.map((m) => ({
-      role: m.role === "tool-result" ? "system" : m.role,
+      role: m.role,
       content: m.content,
     }));
 
-    const context: AgentContext = {
+    const context: any = {
       activeFilePath: undefined,
       activeContent: undefined,
       selection: undefined,
@@ -92,7 +91,7 @@ export function useAgent(sessionId: string) {
 
     agentStore.startStreaming(sessionId);
 
-    const config: ProviderConfig = {
+    const config: any = {
       provider: session.providerId,
       api_key: undefined,
       base_url: undefined,

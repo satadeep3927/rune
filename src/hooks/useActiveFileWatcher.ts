@@ -47,11 +47,20 @@ export function useActiveFileWatcher() {
               if (update) {
                 const [newHash, newContent] = update;
                 tabStore.setTabDiskHash(tab.id, newHash);
+                window.dispatchEvent(new CustomEvent('fs-change'));
                 
                 if (!currentTab.isDirty) {
                   // Clean: silent auto reload
                   tabStore.updateTabContent(tab.id, newContent);
                   tabStore.markTabClean(tab.id);
+
+                  // If it's a diff tab and now matches the original content perfectly, auto-close it
+                  if (currentTab.isDiff && currentTab.diffOriginalContent !== undefined) {
+                    // Check if newContent perfectly matches diffOriginalContent (accounting for potential CRLF vs LF)
+                    if (newContent.replace(/\r\n/g, "\n") === currentTab.diffOriginalContent.replace(/\r\n/g, "\n")) {
+                      tabStore.closeTab(tab.id);
+                    }
+                  }
                 } else {
                   // Dirty: raise conflict
                   tabStore.setTabConflict(tab.id, newContent);

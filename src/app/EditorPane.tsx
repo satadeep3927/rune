@@ -100,6 +100,8 @@ export function EditorPane(props: EditorPaneProps) {
         fileType={activeTab()?.fileType ?? "text"}
         dataUrl={activeTab()?.dataUrl}
         fileName={activeTab()?.fileName}
+        isDiff={activeTab()?.isDiff}
+        diffOriginalContent={activeTab()?.diffOriginalContent}
         onCreateFile={() => tabStore.openUntitledTab()}
         onOpenFolder={() => props.fs.openFolder()}
         onOpenCommandPalette={() => {

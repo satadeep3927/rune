@@ -106,8 +106,10 @@ export function useCommandPalette(
   };
 
   const filteredSymbols = () => {
-    const q = searchText().toLowerCase();
     const s = symbols();
+    if (mode() === "workspace-symbol") return s;
+    
+    const q = searchText().toLowerCase();
     if (!q) return s;
     return s.filter((sym) => sym.name.toLowerCase().includes(q));
   };

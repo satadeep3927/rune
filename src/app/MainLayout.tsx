@@ -1,11 +1,12 @@
 import { Show } from "solid-js";
 import { Titlebar } from "@/features/titlebar";
-import { FileTree } from "@/features/file-tree";
+import { Sidebar } from "@/components/ui/Sidebar";
 import { EditorPane } from "./EditorPane";
 import { ContextMenu } from "@/components/ui/ContextMenu";
 import { CommandPalette } from "@/components/CommandPalette";
 import { WelcomeScreen } from "@/features/welcome/WelcomeScreen";
 import { QuickPick } from "@/components/QuickPick";
+import { PromptDialog } from "@/components/ui/PromptDialog";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { WorkspaceSearch } from "@/components/WorkspaceSearch";
 import { TerminalPanel } from "@/components/terminal/TerminalPanel";
@@ -13,9 +14,9 @@ import { TerminalPanel } from "@/components/terminal/TerminalPanel";
 import { useMainLayout } from "@/hooks/useMainLayout";
 import { settingsStore } from "@/stores/settings";
 import { tabStore } from "@/stores/tabs";
-import { Button } from "@/components/ui/Button";
-import { XIcon } from "@/components/ui/icons/XIcon";
 import { useActiveFileWatcher } from "@/hooks/useActiveFileWatcher";
+
+import { UIContext } from "@/contexts/UIContext";
 
 export function MainLayout() {
   useActiveFileWatcher();
@@ -36,6 +37,7 @@ export function MainLayout() {
     editingItem,
     confirmState,
     quickPickState,
+    promptState,
     selectedPaths,
     setSelectedPaths,
     handleEditorChange,
@@ -57,17 +59,21 @@ export function MainLayout() {
     handleTerminalResize,
     handleWorkspaceSearchSelect,
     fileClipboard,
+    showConfirmDialog,
+    showQuickPick,
+    showPromptDialog,
   } = useMainLayout();
 
   return (
-    <div
-      class="h-full w-full flex flex-col overflow-hidden"
-      style={{ background: "var(--color-bg)", color: "var(--color-fg)" }}
-      onContextMenu={(e) => {
-        e.preventDefault();
-      }}
-    >
-      <Titlebar menus={menus()} title={windowTitle()} />
+    <UIContext.Provider value={{ showConfirmDialog, showQuickPick, showPromptDialog }}>
+      <div
+        class="h-full w-full flex flex-col overflow-hidden"
+        style={{ background: "var(--color-bg)", color: "var(--color-fg)" }}
+        onContextMenu={(e) => {
+          e.preventDefault();
+        }}
+      >
+        <Titlebar menus={menus()} title={windowTitle()} fs={fs} />
       <Show
         when={
           fs.rootPath() ||
@@ -81,25 +87,22 @@ export function MainLayout() {
         <div class="flex flex-1 overflow-hidden">
           {settingsStore.sidebarVisible() && (
             <>
-              <FileTree
-                tree={fs.tree()}
-                rootPath={fs.rootPath()}
-                loading={fs.loading()}
+              <Sidebar
                 width={settingsStore.sidebarWidth()}
-                onFileClick={handleFileTreeSelect}
-                onToggleDir={fs.toggleDirectory}
-                onOpenFolder={fs.openFolder}
-                onRefresh={fs.refreshTree}
-                onContextMenu={handleFileTreeContextMenu}
-                onEmptyContextMenu={handleEmptyContextMenu}
-                activeFilePath={leftActiveTab()?.filePath}
+                fs={fs}
+                handleFileTreeSelect={handleFileTreeSelect}
+                handleFileTreeContextMenu={handleFileTreeContextMenu}
+                handleEmptyContextMenu={handleEmptyContextMenu}
+                leftActiveTab={leftActiveTab()}
                 selectedPaths={selectedPaths()}
-                onSelectPaths={setSelectedPaths}
+                setSelectedPaths={setSelectedPaths}
                 editingItem={editingItem()}
-                onStartEdit={handleStartEdit}
-                onSubmitEdit={handleSubmitEdit}
-                onCancelEdit={handleCancelEdit}
+                handleStartEdit={handleStartEdit}
+                handleSubmitEdit={handleSubmitEdit}
+                handleCancelEdit={handleCancelEdit}
                 fileClipboard={fileClipboard}
+                terminalHeight={terminalHeight()}
+                showConfirmDialog={showConfirmDialog}
               />
               <div
                 class="w-[3px] shrink-0 cursor-col-resize hover:bg-[var(--color-accent)] transition-colors"
@@ -213,6 +216,20 @@ export function MainLayout() {
           />
         )}
       </Show>
+      <Show when={promptState()}>
+        {(p) => (
+          <PromptDialog
+            title={p().title}
+            message={p().message}
+            fields={p().fields}
+            okLabel={p().okLabel}
+            cancelLabel={p().cancelLabel}
+            onConfirm={p().onConfirm}
+            onCancel={p().onCancel}
+          />
+        )}
+      </Show>
     </div>
+    </UIContext.Provider>
   );
 }

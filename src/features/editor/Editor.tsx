@@ -1,5 +1,6 @@
 import { Show } from "solid-js";
 import { CodeMirrorView } from "./CodeMirrorView";
+import { CodeMirrorMergeView } from "./CodeMirrorMergeView";
 import { ImageViewer } from "./ImageViewer";
 import { PdfViewer } from "./PdfViewer";
 import { MarkdownPreview } from "./MarkdownPreview";
@@ -19,6 +20,8 @@ interface EditorProps {
   fileType: FileType;
   dataUrl?: string;
   fileName?: string;
+  isDiff?: boolean;
+  diffOriginalContent?: string;
   onCreateFile?: () => void;
   onOpenFolder?: () => void;
   onOpenCommandPalette?: () => void;
@@ -75,12 +78,22 @@ export function Editor(props: EditorProps) {
         <Show
           when={props.hasOpenFile && props.fileType === "text" && props.tabId}
         >
-          <CodeMirrorView
-            tabId={props.tabId}
-            content={props.content}
-            language={props.language}
-            onChange={props.onChange}
-          />
+          <Show when={props.isDiff} fallback={
+            <CodeMirrorView
+              tabId={props.tabId}
+              content={props.content}
+              language={props.language}
+              onChange={props.onChange}
+            />
+          }>
+            <CodeMirrorMergeView
+              tabId={props.tabId}
+              originalContent={props.diffOriginalContent ?? ""}
+              currentContent={props.content}
+              language={props.language}
+              onChange={props.onChange}
+            />
+          </Show>
         </Show>
 
         <Show

@@ -16,7 +16,7 @@ const agentPanelPlugin: RunePlugin = {
       shortcut: "Ctrl+Shift+A",
       category: "Agent",
       action: () => {
-        const providers = pluginRegistry.getAgentProviders();
+        const providers = (pluginRegistry as any).getAgentProviders?.() || [];
         if (providers.length === 0) {
           api.ui.showMessage("No agent providers registered. Configure a provider in Settings.");
           return;
@@ -30,7 +30,7 @@ const agentPanelPlugin: RunePlugin = {
       label: "Agent: New Session with Provider",
       category: "Agent",
       action: async () => {
-        const providers = pluginRegistry.getAgentProviders();
+        const providers = (pluginRegistry as any).getAgentProviders?.() || [];
         if (providers.length === 0) {
           api.ui.showMessage("No agent providers registered. Configure a provider in Settings.");
           return;
@@ -40,7 +40,7 @@ const agentPanelPlugin: RunePlugin = {
           return;
         }
         const picked = await api.ui.showQuickPick(
-          providers.map((p) => ({
+          providers.map((p: any) => ({
             id: p.id,
             label: p.name,
             detail: p.description,
@@ -59,7 +59,7 @@ const agentPanelPlugin: RunePlugin = {
         label: "Agent: New Session",
         accelerator: "Ctrl+Shift+A",
         action: () => {
-          const providers = pluginRegistry.getAgentProviders();
+          const providers = (pluginRegistry as any).getAgentProviders?.() || [];
           if (providers.length > 0) {
             agentStore.openSession(providers[0]!.id);
           }

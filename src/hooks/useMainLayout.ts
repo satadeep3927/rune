@@ -46,6 +46,15 @@ export function useMainLayout() {
     placeholder?: string;
     onSelect: (id: string | undefined) => void;
   } | null>(null);
+  const [promptState, setPromptState] = createSignal<{
+    title: string;
+    message?: string;
+    fields: { id: string; label: string; type?: "text" | "password"; placeholder?: string; defaultValue?: string }[];
+    okLabel?: string;
+    cancelLabel?: string;
+    onConfirm: (values: Record<string, string>) => void;
+    onCancel: () => void;
+  } | null>(null);
   const [selectedPaths, setSelectedPaths] = createSignal<Set<string>>(
     new Set(),
   );
@@ -104,6 +113,30 @@ export function useMainLayout() {
     });
   }
 
+  function showPromptDialog(
+    title: string,
+    fields: { id: string; label: string; type?: "text" | "password"; placeholder?: string; defaultValue?: string }[],
+    options?: { message?: string; okLabel?: string; cancelLabel?: string }
+  ): Promise<Record<string, string> | null> {
+    return new Promise((resolve) => {
+      setPromptState({
+        title,
+        fields,
+        message: options?.message,
+        okLabel: options?.okLabel,
+        cancelLabel: options?.cancelLabel,
+        onConfirm: (values) => {
+          setPromptState(null);
+          resolve(values);
+        },
+        onCancel: () => {
+          setPromptState(null);
+          resolve(null);
+        },
+      });
+    });
+  }
+
   function confirmDelete(name: string, onConfirm: () => void) {
     showConfirmDialog(`Delete "${name}"?`, {
       detail: "This action cannot be undone.",
@@ -121,7 +154,7 @@ export function useMainLayout() {
     tabStore.updateTabContent(tabId, content);
   }
 
-  const fileClipboard = useFileClipboard(fs);
+  const fileClipboard = useFileClipboard();
 
   // Hooks Initialization
   const {
@@ -372,6 +405,7 @@ export function useMainLayout() {
     editingItem,
     confirmState,
     quickPickState,
+    promptState,
     selectedPaths,
     setSelectedPaths,
     handleEditorChange,
@@ -393,5 +427,8 @@ export function useMainLayout() {
     handleTerminalResize,
     handleWorkspaceSearchSelect,
     fileClipboard,
+    showConfirmDialog,
+    showQuickPick,
+    showPromptDialog,
   };
 }
