@@ -38,7 +38,7 @@ export function GitView(props: GitViewProps) {
       style={{ color: "var(--color-fg)" }}
     >
       <Show
-        when={!git.isLoading()}
+        when={!git.isInitialLoading()}
         fallback={
           <div class="flex flex-col items-center justify-center h-full gap-4 text-center">
             <Loader2
@@ -86,8 +86,9 @@ export function GitView(props: GitViewProps) {
               Source Control
             </span>
             <div class="flex items-center gap-1">
-              <button
-                class="p-1 hover:text-[var(--color-accent)] transition-colors"
+              <Button
+                variant="ghost"
+                size="icon"
                 onClick={() => {
                   tabStore.openTab(
                     "git://settings",
@@ -102,16 +103,19 @@ export function GitView(props: GitViewProps) {
                 title="Git Settings"
               >
                 <Settings size={14} />
-              </button>
-              <button
-                class="p-1 hover:text-[var(--color-accent)] transition-colors"
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
                 onClick={git.refreshGit}
                 title="Refresh"
+                disabled={git.isRefreshing()}
               >
-                <RefreshCw size={14} />
-              </button>
-              <button
-                class={`p-1 transition-colors ${git.isPulling() ? "opacity-50 cursor-not-allowed" : "hover:text-[var(--color-accent)]"}`}
+                <RefreshCw size={14} class={git.isRefreshing() ? "animate-spin" : ""} />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
                 onClick={async () => {
                   if (await git.handlePull())
                     ui.showToast(
@@ -126,9 +130,10 @@ export function GitView(props: GitViewProps) {
                 <Show when={git.isPulling()} fallback={<Download size={14} />}>
                   <Loader2 size={14} class="animate-spin" />
                 </Show>
-              </button>
-              <button
-                class={`p-1 transition-colors ${git.isPushing() ? "opacity-50 cursor-not-allowed" : "hover:text-[var(--color-accent)]"}`}
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
                 onClick={async () => {
                   if (await git.handlePush())
                     ui.showToast(
@@ -143,7 +148,7 @@ export function GitView(props: GitViewProps) {
                 <Show when={git.isPushing()} fallback={<Upload size={14} />}>
                   <Loader2 size={14} class="animate-spin" />
                 </Show>
-              </button>
+              </Button>
             </div>
           </div>
 
