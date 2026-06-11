@@ -2,7 +2,13 @@ export function getLuminance(hex: string) {
   try {
     const c = hex.startsWith("#") ? hex.substring(1) : hex;
     // For 3-digit hex like #FFF
-    const expanded = c.length === 3 ? c.split('').map(x => x + x).join('') : c;
+    const expanded =
+      c.length === 3
+        ? c
+            .split("")
+            .map((x) => x + x)
+            .join("")
+        : c;
     const rgb = parseInt(expanded, 16);
     const r = (rgb >> 16) & 0xff;
     const g = (rgb >> 8) & 0xff;

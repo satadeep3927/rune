@@ -1,8 +1,8 @@
 import { Show } from "solid-js";
-import type { AgentMessage as AgentMessageType } from "../../plugins/types";
+import type { AgentMessage } from "../../stores/agent";
 
 interface AgentMessageProps {
-  message: AgentMessageType;
+  message: AgentMessage;
   isStreaming?: boolean;
 }
 

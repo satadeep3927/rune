@@ -4,6 +4,7 @@ pub mod terminal;
 pub mod fs_utils;
 pub mod search;
 pub mod system;
+pub mod git;
 
 use std::collections::HashMap;
 use std::path::PathBuf;
@@ -47,7 +48,10 @@ pub fn run() {
             fs_utils::read_clipboard_files, fs_utils::write_clipboard_files, search::workspace_search,
             fs_utils::parse_markdown, fs_utils::batch_copy_files, fs_utils::batch_move_files, search::fuzzy_search_files,
             fs_utils::get_expanded_tree, fs_utils::read_filtered_dir, fs_utils::delete_path_async,
-            fs_utils::get_file_hash, fs_utils::check_file_update
+            fs_utils::get_file_hash, fs_utils::check_file_update,
+            git::get_git_state, git::git_commit, git::git_add, git::git_reset, git::git_push, git::git_pull, git::git_init, git::git_discard,
+            git::git_list_branches, git::git_checkout, git::git_create_branch, git::git_show_file,
+            git::git_set_remote, git::git_get_remote, git::git_get_remotes, git::git_remove_remote, git::git_get_config, git::git_set_config
         ])
           .setup(move |app| {
               let mut ctx = WindowContext::default();

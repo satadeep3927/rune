@@ -21,7 +21,7 @@ interface AdaptivePosition {
 export function useAdaptiveMenu(
   x: Accessor<number>,
   y: Accessor<number>,
-  menuRef: Accessor<HTMLElement | undefined>
+  menuRef: Accessor<HTMLElement | undefined>,
 ) {
   const [position, setPosition] = createSignal<AdaptivePosition>({
     x: -9999,

@@ -62,7 +62,12 @@ export function useExplorerActions(options: ExplorerActionsOptions) {
   }
 
   async function handleFileClick(
-    entry: { path: string; name: string },
+    entry: {
+      path: string;
+      name: string;
+      isDiff?: boolean;
+      diffOriginalContent?: string;
+    },
     pane: PaneSide = "left",
   ) {
     try {
@@ -81,6 +86,8 @@ export function useExplorerActions(options: ExplorerActionsOptions) {
         fileType,
         dataUrl,
         pane,
+        entry.isDiff,
+        entry.diffOriginalContent,
       );
     } catch (err) {
       console.error("Failed to open file:", err);

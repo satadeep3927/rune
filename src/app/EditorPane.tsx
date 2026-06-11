@@ -57,12 +57,12 @@ export function EditorPane(props: EditorPaneProps) {
         }
       />
       <Show when={activeTab()?.hasConflict}>
-        <Alert 
+        <Alert
           variant="warning"
           actions={
             <>
-              <Button 
-                variant="secondary" 
+              <Button
+                variant="secondary"
                 size="sm"
                 onClick={() => {
                   const tabId = activeTab()?.id;
@@ -71,8 +71,8 @@ export function EditorPane(props: EditorPaneProps) {
               >
                 Overwrite Disk
               </Button>
-              <Button 
-                variant="secondary" 
+              <Button
+                variant="secondary"
                 size="sm"
                 onClick={() => {
                   const tabId = activeTab()?.id;
@@ -100,6 +100,8 @@ export function EditorPane(props: EditorPaneProps) {
         fileType={activeTab()?.fileType ?? "text"}
         dataUrl={activeTab()?.dataUrl}
         fileName={activeTab()?.fileName}
+        isDiff={activeTab()?.isDiff}
+        diffOriginalContent={activeTab()?.diffOriginalContent}
         onCreateFile={() => tabStore.openUntitledTab()}
         onOpenFolder={() => props.fs.openFolder()}
         onOpenCommandPalette={() => {

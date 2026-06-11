@@ -7,7 +7,7 @@ import {
   normalizeShortcut,
 } from "./useKeyboardShortcuts";
 import { ABOUT_RUNE_MARKDOWN } from "@/constants/about";
-import type { CommandItem } from "@/components/CommandPalette";
+import type { CommandItem } from "@/types";
 
 interface AppCommandsOptions {
   fs: any;
@@ -39,6 +39,7 @@ export function useAppCommands(options: AppCommandsOptions) {
 
   const menuActions = {
     openFolder: () => fs.openFolder(),
+    refresh: () => fs.refreshTree(),
     save: handleSave,
     saveAll: handleSaveAll,
     saveAs: handleSaveAs,

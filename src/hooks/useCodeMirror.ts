@@ -71,13 +71,14 @@ import { toml } from "@codemirror/legacy-modes/mode/toml";
 import { yaml } from "@codemirror/legacy-modes/mode/yaml";
 import { shell } from "@codemirror/legacy-modes/mode/shell";
 import { go } from "@codemirror/legacy-modes/mode/go";
+import { gitConflictExtension } from "@/features/editor/gitConflictExtension";
 import { createRuneTheme } from "@/features/editor/cmTheme";
 import { tabStore } from "@/stores/tabs";
 import { globalSettings } from "@/stores/settings";
 import { pluginRegistry } from "@/plugins";
 import type { ContextMenuItem } from "@/components/ui/ContextMenu";
 
-function getLanguageExtension(lang: string): Extension {
+export function getLanguageExtension(lang: string): Extension {
   switch (lang) {
     case "javascript":
       return javascript({ jsx: true });
@@ -218,33 +219,48 @@ export function useCodeMirror(options: UseCodeMirrorOptions) {
           let m = cursor.next();
           while (!m.done && count < 999) {
             count++;
-            if (m.value.to <= currentPos || (m.value.from <= currentPos && m.value.to >= currentPos)) {
+            if (
+              m.value.to <= currentPos ||
+              (m.value.from <= currentPos && m.value.to >= currentPos)
+            ) {
               currentIndex = count;
             }
             m = cursor.next();
           }
           const finalCount = m.done ? count : "999+";
-          
-          if (tId && (tabStore.activeTabId() === tId || tabStore.rightActiveTabId() === tId)) {
-            window.dispatchEvent(new CustomEvent("rune-search-results", {
-              detail: { count: finalCount, currentIndex: currentIndex || (count > 0 ? 1 : 0) }
-            }));
+
+          if (
+            tId &&
+            (tabStore.activeTabId() === tId ||
+              tabStore.rightActiveTabId() === tId)
+          ) {
+            window.dispatchEvent(
+              new CustomEvent("rune-search-results", {
+                detail: {
+                  count: finalCount,
+                  currentIndex: currentIndex || (count > 0 ? 1 : 0),
+                },
+              }),
+            );
           }
         } else {
-          if (tId && (tabStore.activeTabId() === tId || tabStore.rightActiveTabId() === tId)) {
-            window.dispatchEvent(new CustomEvent("rune-search-results", {
-              detail: { count: 0, currentIndex: 0 }
-            }));
+          if (
+            tId &&
+            (tabStore.activeTabId() === tId ||
+              tabStore.rightActiveTabId() === tId)
+          ) {
+            window.dispatchEvent(
+              new CustomEvent("rune-search-results", {
+                detail: { count: 0, currentIndex: 0 },
+              }),
+            );
           }
         }
       }
     });
   }
 
-  function buildExtensions(
-    initialContent: string,
-    language: string,
-  ): Extension[] {
+  function buildExtensions(language: string): Extension[] {
     return [
       EditorState.allowMultipleSelections.of(true),
       lineNumbers(),
@@ -310,6 +326,7 @@ export function useCodeMirror(options: UseCodeMirrorOptions) {
         globalSettings.wordWrap ? EditorView.lineWrapping : [],
       ),
       updateListenerCompartment.of(getUpdateListener()),
+      gitConflictExtension(),
       createRuneTheme(),
     ];
   }
@@ -322,7 +339,7 @@ export function useCodeMirror(options: UseCodeMirrorOptions) {
     const tId = options.tabId();
     const cached = tId ? editorStateCache.get(tId) : undefined;
     const initialContent = options.content();
-    const exts = buildExtensions(initialContent, options.language());
+    const exts = buildExtensions(options.language());
 
     if (cached) {
       if (cached.doc.toString() === initialContent) {
@@ -370,33 +387,38 @@ export function useCodeMirror(options: UseCodeMirrorOptions) {
         tabStore.rightActiveTabId() === tId
       ) {
         if (!view) return;
-        const { action, query, replaceWith, caseSensitive, regexp, wholeWord } = (e as CustomEvent).detail;
-        
+        const { action, query, replaceWith, caseSensitive, regexp, wholeWord } =
+          (e as CustomEvent).detail;
+
         if (action === "clear") {
-          view.dispatch({ effects: setSearchQuery.of(new SearchQuery({ search: "" })) });
+          view.dispatch({
+            effects: setSearchQuery.of(new SearchQuery({ search: "" })),
+          });
           view.focus();
           return;
         }
 
         // Always update query before executing
-        view.dispatch({ 
-          effects: setSearchQuery.of(new SearchQuery({ 
-            search: query || "", 
-            replace: replaceWith || "",
-            caseSensitive: !!caseSensitive, 
-            regexp: !!regexp, 
-            wholeWord: !!wholeWord 
-          })) 
+        view.dispatch({
+          effects: setSearchQuery.of(
+            new SearchQuery({
+              search: query || "",
+              replace: replaceWith || "",
+              caseSensitive: !!caseSensitive,
+              regexp: !!regexp,
+              wholeWord: !!wholeWord,
+            }),
+          ),
         });
 
         if (action === "findNext") {
-           findNext(view);
+          findNext(view);
         } else if (action === "findPrev") {
-           findPrevious(view);
+          findPrevious(view);
         } else if (action === "replace") {
-           replaceNext(view);
+          replaceNext(view);
         } else if (action === "replaceAll") {
-           replaceAll(view);
+          replaceAll(view);
         }
         // Do not call view.focus() here, otherwise the search input loses focus on every keystroke
       }
@@ -405,12 +427,22 @@ export function useCodeMirror(options: UseCodeMirrorOptions) {
 
     findReplaceShortcutHandler = () => {
       const tId = options.tabId();
-      if (tId && (tabStore.activeTabId() === tId || tabStore.rightActiveTabId() === tId)) {
+      if (
+        tId &&
+        (tabStore.activeTabId() === tId || tabStore.rightActiveTabId() === tId)
+      ) {
         if (view) {
           const state = view.state;
-          const sel = state.sliceDoc(state.selection.main.from, state.selection.main.to);
+          const sel = state.sliceDoc(
+            state.selection.main.from,
+            state.selection.main.to,
+          );
           if (sel && !sel.includes("\n")) {
-            window.dispatchEvent(new CustomEvent("rune-search-set-query", { detail: { query: sel }}));
+            window.dispatchEvent(
+              new CustomEvent("rune-search-set-query", {
+                detail: { query: sel },
+              }),
+            );
           }
         }
       }
@@ -420,20 +452,26 @@ export function useCodeMirror(options: UseCodeMirrorOptions) {
   });
 
   onCleanup(() => {
-      if (updateIndexTimeout) clearTimeout(updateIndexTimeout);
-      if (gotoLineHandler) {
-        window.removeEventListener("rune-goto-line-path", gotoLineHandler);
-      }
-      if (searchExecuteHandler) {
-        window.removeEventListener("rune-search-execute", searchExecuteHandler);
-      }
-      if (findReplaceShortcutHandler) {
-        window.removeEventListener("rune-editor-find", findReplaceShortcutHandler);
-        window.removeEventListener("rune-editor-replace", findReplaceShortcutHandler);
-      }
-      const tId = options.tabId();
-      if (view && tId) {
-        editorStateCache.set(tId, view.state);
+    if (updateIndexTimeout) clearTimeout(updateIndexTimeout);
+    if (gotoLineHandler) {
+      window.removeEventListener("rune-goto-line-path", gotoLineHandler);
+    }
+    if (searchExecuteHandler) {
+      window.removeEventListener("rune-search-execute", searchExecuteHandler);
+    }
+    if (findReplaceShortcutHandler) {
+      window.removeEventListener(
+        "rune-editor-find",
+        findReplaceShortcutHandler,
+      );
+      window.removeEventListener(
+        "rune-editor-replace",
+        findReplaceShortcutHandler,
+      );
+    }
+    const tId = options.tabId();
+    if (view && tId) {
+      editorStateCache.set(tId, view.state);
       scrollStateCache.set(tId, {
         top: view.scrollDOM.scrollTop,
         left: view.scrollDOM.scrollLeft,
@@ -488,13 +526,13 @@ export function useCodeMirror(options: UseCodeMirrorOptions) {
         } else {
           state = EditorState.create({
             doc: newContent,
-            extensions: buildExtensions(newContent, options.language()),
+            extensions: buildExtensions(options.language()),
           });
         }
       } else {
         state = EditorState.create({
           doc: newContent,
-          extensions: buildExtensions(newContent, options.language()),
+          extensions: buildExtensions(options.language()),
         });
       }
       view.setState(state);
@@ -504,7 +542,7 @@ export function useCodeMirror(options: UseCodeMirrorOptions) {
           effects: updateListenerCompartment.reconfigure(getUpdateListener()),
         });
       }
-      
+
       const scrollPos = tId ? scrollStateCache.get(tId) : undefined;
       if (scrollPos) {
         requestAnimationFrame(() => {

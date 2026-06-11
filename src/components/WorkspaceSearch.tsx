@@ -76,7 +76,9 @@ export function WorkspaceSearch(props: WorkspaceSearchProps) {
               onMouseEnter={() => setSelectedIndex(i)}
             >
               <div class="text-[12px] text-[var(--color-fg)] flex items-center justify-between">
-                <span class="font-medium truncate text-[var(--color-fg)]">{res.fileName}</span>
+                <span class="font-medium truncate text-[var(--color-fg)]">
+                  {res.fileName}
+                </span>
                 <span class="text-[10px] text-[var(--color-fg-muted)] opacity-60 shrink-0">
                   {res.line}:{res.col}
                 </span>

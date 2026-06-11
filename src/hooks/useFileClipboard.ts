@@ -1,25 +1,9 @@
 import { createSignal } from "solid-js";
 import { invoke } from "@tauri-apps/api/core";
-import { exists, rename } from "@tauri-apps/plugin-fs";
 
 export type ClipboardAction = "copy" | "cut";
 
-async function getUniqueDest(destinationFolder: string, fileName: string) {
-  let dest = `${destinationFolder}/${fileName}`;
-  if (!(await exists(dest))) return dest;
-
-  const dotIdx = fileName.lastIndexOf(".");
-  const base = dotIdx > 0 ? fileName.substring(0, dotIdx) : fileName;
-  const ext = dotIdx > 0 ? fileName.substring(dotIdx) : "";
-
-  let i = 1;
-  while (await exists(`${destinationFolder}/${base} (${i})${ext}`)) {
-    i++;
-  }
-  return `${destinationFolder}/${base} (${i})${ext}`;
-}
-
-export function useFileClipboard(fs: any) {
+export function useFileClipboard() {
   const [internalPaths, setInternalPaths] = createSignal<string[]>([]);
   const [action, setAction] = createSignal<ClipboardAction>("copy");
 
@@ -39,9 +23,9 @@ export function useFileClipboard(fs: any) {
 
   async function handlePaste(destinationFolder: string) {
     try {
-      const sysFiles: string[] = await invoke("read_clipboard_files").catch(
-        () => [],
-      );
+      const sysFiles: string[] = await invoke<string[]>(
+        "read_clipboard_files",
+      ).catch(() => []);
 
       let pathsToPaste = sysFiles;
       let currentAction = "copy" as ClipboardAction;

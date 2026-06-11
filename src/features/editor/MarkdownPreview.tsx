@@ -1,5 +1,4 @@
 import { useMarkdownPreview } from "@/hooks/useMarkdownPreview";
-import { cn } from "@/utils/cn";
 
 interface MarkdownPreviewProps {
   content: string;

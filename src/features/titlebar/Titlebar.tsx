@@ -4,10 +4,12 @@ import { MenuBar } from "./MenuBar";
 import type { MenuDefinition } from "@/types";
 import { pluginRegistry } from "@/plugins/registry";
 import { IndexerProgress } from "./IndexerProgress";
+import { BranchPicker } from "@/features/git/BranchPicker";
 
 interface TitlebarProps {
   menus?: MenuDefinition[];
   title?: string;
+  fs?: any;
 }
 
 export function Titlebar(props: TitlebarProps) {
@@ -19,18 +21,28 @@ export function Titlebar(props: TitlebarProps) {
         "border-bottom": "1px solid var(--color-border)",
       }}
     >
-      <Show when={props.menus}>
-        <MenuBar menus={props.menus!} />
-      </Show>
+      <div class="flex items-center h-full gap-1">
+        <Show when={props.menus}>
+          <MenuBar menus={props.menus!} />
+        </Show>
+        <div
+          class="pointer-events-auto no-drag h-full"
+          style={{ "-webkit-app-region": "no-drag" }}
+        >
+          <Show when={props.fs}>
+            <BranchPicker fs={props.fs} />
+          </Show>
+        </div>
+      </div>
 
       <div data-tauri-drag-region class="flex-1 h-full" />
 
       <div
         data-tauri-drag-region
-        class="text-[11px] absolute left-1/2 -translate-x-1/2 pointer-events-none"
+        class="text-[11px] absolute left-1/2 -translate-x-1/2 pointer-events-none flex items-center"
         style={{ color: "var(--color-fg-muted)" }}
       >
-        {props.title ?? "Rune Editor"}
+        <span>{props.title ?? "Rune Editor"}</span>
       </div>
 
       <div

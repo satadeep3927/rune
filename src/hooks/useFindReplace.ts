@@ -1,5 +1,4 @@
 import { createSignal, onMount, onCleanup, createEffect } from "solid-js";
-import { SearchQuery } from "@codemirror/search";
 
 export function useFindReplace() {
   const [isVisible, setIsVisible] = createSignal(false);
@@ -13,9 +12,11 @@ export function useFindReplace() {
   const [currentMatch, setCurrentMatch] = createSignal(0);
 
   // Dispatch events to active CodeMirror view
-  function executeSearch(action: "findNext" | "findPrev" | "replace" | "replaceAll") {
+  function executeSearch(
+    action: "findNext" | "findPrev" | "replace" | "replaceAll",
+  ) {
     if (!searchQuery()) return;
-    
+
     window.dispatchEvent(
       new CustomEvent("rune-search-execute", {
         detail: {
@@ -26,16 +27,16 @@ export function useFindReplace() {
           regexp: useRegex(),
           wholeWord: wholeWord(),
         },
-      })
+      }),
     );
   }
 
-  function handleFind(e: Event) {
+  function handleFind() {
     setIsVisible(true);
     setIsReplaceVisible(false);
   }
 
-  function handleReplace(e: Event) {
+  function handleReplace() {
     setIsVisible(true);
     setIsReplaceVisible(true);
   }
@@ -48,7 +49,7 @@ export function useFindReplace() {
     window.dispatchEvent(
       new CustomEvent("rune-search-execute", {
         detail: { action: "clear" },
-      })
+      }),
     );
   }
 

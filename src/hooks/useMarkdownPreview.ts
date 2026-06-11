@@ -7,12 +7,14 @@ export function useMarkdownPreview(
   previewRef: () => HTMLDivElement | undefined,
 ) {
   const [html, setHtml] = createSignal("");
-  
+
   createEffect(() => {
     const text = content();
-    invoke<string>("parse_markdown", { text }).then(setHtml).catch(console.error);
+    invoke<string>("parse_markdown", { text })
+      .then(setHtml)
+      .catch(console.error);
   });
-  
+
   let syncing = false;
 
   function syncFromEditor() {
