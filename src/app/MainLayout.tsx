@@ -10,6 +10,9 @@ import { PromptDialog } from "@/components/ui/PromptDialog";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { WorkspaceSearch } from "@/components/WorkspaceSearch";
 import { TerminalPanel } from "@/components/terminal/TerminalPanel";
+import { Toast } from "@/components/ui/Toast";
+import { CheckCircle2, AlertCircle, Info } from "lucide-solid";
+import { Portal } from "solid-js/web";
 
 import { useMainLayout } from "@/hooks/useMainLayout";
 import { settingsStore } from "@/stores/settings";
@@ -59,13 +62,15 @@ export function MainLayout() {
     handleTerminalResize,
     handleWorkspaceSearchSelect,
     fileClipboard,
+    toastState,
     showConfirmDialog,
     showQuickPick,
     showPromptDialog,
+    showToast,
   } = useMainLayout();
 
   return (
-    <UIContext.Provider value={{ showConfirmDialog, showQuickPick, showPromptDialog }}>
+    <UIContext.Provider value={{ showConfirmDialog, showQuickPick, showPromptDialog, showToast }}>
       <div
         class="h-full w-full flex flex-col overflow-hidden"
         style={{ background: "var(--color-bg)", color: "var(--color-fg)" }}
@@ -229,6 +234,15 @@ export function MainLayout() {
           />
         )}
       </Show>
+      <Portal>
+        <Toast 
+          open={toastState() !== null} 
+          onOpenChange={(open) => { if (!open && toastState()) showToast(toastState()!.title, toastState()!.description, { duration: 0 }); }}
+          title={toastState()?.title}
+          description={toastState()?.description}
+          icon={toastState()?.variant === "error" ? <AlertCircle size={18} /> : toastState()?.variant === "info" ? <Info size={18} /> : <CheckCircle2 size={18} />}
+        />
+      </Portal>
     </div>
     </UIContext.Provider>
   );

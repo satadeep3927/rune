@@ -253,3 +253,121 @@ pub fn git_show_file(path: String, file: String, ref_name: String) -> Result<Str
         Err(String::from_utf8_lossy(&output.stderr).to_string())
     }
 }
+
+#[tauri::command]
+pub async fn git_set_remote(path: String, remote: String, url: String) -> Result<String, String> {
+    // try to set-url first, if fails (remote doesn't exist), try to add it
+    let mut output = Command::new("git")
+        .args(["remote", "set-url", &remote, &url])
+        .current_dir(&path)
+        .output()
+        .map_err(|e| e.to_string())?;
+
+    if !output.status.success() {
+        output = Command::new("git")
+            .args(["remote", "add", &remote, &url])
+            .current_dir(&path)
+            .output()
+            .map_err(|e| e.to_string())?;
+    }
+
+    if output.status.success() {
+        Ok(String::from_utf8_lossy(&output.stdout).to_string())
+    } else {
+        Err(String::from_utf8_lossy(&output.stderr).to_string())
+    }
+}
+
+#[tauri::command]
+pub async fn git_get_remote(path: String, remote: String) -> Result<String, String> {
+    let output = Command::new("git")
+        .args(["remote", "get-url", &remote])
+        .current_dir(&path)
+        .output()
+        .map_err(|e| e.to_string())?;
+
+    if output.status.success() {
+        Ok(String::from_utf8_lossy(&output.stdout).trim().to_string())
+    } else {
+        Err(String::from_utf8_lossy(&output.stderr).to_string())
+    }
+}
+
+#[tauri::command]
+pub async fn git_get_remotes(path: String) -> Result<Vec<serde_json::Value>, String> {
+    let output = Command::new("git")
+        .args(["remote", "-v"])
+        .current_dir(&path)
+        .output()
+        .map_err(|e| e.to_string())?;
+
+    if output.status.success() {
+        let stdout = String::from_utf8_lossy(&output.stdout);
+        let mut remotes_map = std::collections::HashMap::new();
+        
+        for line in stdout.lines() {
+            let parts: Vec<&str> = line.split_whitespace().collect();
+            if parts.len() >= 2 {
+                let name = parts[0];
+                let url = parts[1];
+                remotes_map.insert(name.to_string(), url.to_string());
+            }
+        }
+        
+        let mut result = Vec::new();
+        for (name, url) in remotes_map {
+            result.push(serde_json::json!({
+                "name": name,
+                "url": url
+            }));
+        }
+        Ok(result)
+    } else {
+        Err(String::from_utf8_lossy(&output.stderr).to_string())
+    }
+}
+
+#[tauri::command]
+pub async fn git_remove_remote(path: String, remote: String) -> Result<String, String> {
+    let output = Command::new("git")
+        .args(["remote", "remove", &remote])
+        .current_dir(&path)
+        .output()
+        .map_err(|e| e.to_string())?;
+
+    if output.status.success() {
+        Ok(String::from_utf8_lossy(&output.stdout).to_string())
+    } else {
+        Err(String::from_utf8_lossy(&output.stderr).to_string())
+    }
+}
+
+#[tauri::command]
+pub async fn git_get_config(path: String, key: String) -> Result<String, String> {
+    let output = Command::new("git")
+        .args(["config", "--local", &key])
+        .current_dir(&path)
+        .output()
+        .map_err(|e| e.to_string())?;
+
+    if output.status.success() {
+        Ok(String::from_utf8_lossy(&output.stdout).trim().to_string())
+    } else {
+        Ok(String::new()) // Return empty string if not found locally
+    }
+}
+
+#[tauri::command]
+pub async fn git_set_config(path: String, key: String, value: String) -> Result<String, String> {
+    let output = Command::new("git")
+        .args(["config", "--local", &key, &value])
+        .current_dir(&path)
+        .output()
+        .map_err(|e| e.to_string())?;
+
+    if output.status.success() {
+        Ok(String::from_utf8_lossy(&output.stdout).to_string())
+    } else {
+        Err(String::from_utf8_lossy(&output.stderr).to_string())
+    }
+}

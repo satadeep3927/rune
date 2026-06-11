@@ -1,12 +1,12 @@
-import { Show, For, createSignal } from "solid-js";
-import { Portal } from "solid-js/web";
+import { Show, For } from "solid-js";
+import { invoke } from "@tauri-apps/api/core";
 import { remove } from "@tauri-apps/plugin-fs";
-import { GitCommit, Plus, Minus, RefreshCw, Upload, Download, FolderGit2, Undo, Loader2, CheckCircle2 } from "lucide-solid";
+import { GitCommit, Plus, Minus, RefreshCw, Upload, Download, FolderGit2, Undo, Loader2, Settings } from "lucide-solid";
 import { Button } from "@/components/ui/Button";
 import { useUI } from "@/contexts/UIContext";
 import { useGitView } from "@/hooks/useGitView";
 import { GitFileItem } from "@/components/ui/GitFileItem";
-import { Toast } from "@/components/ui/Toast";
+import { tabStore } from "@/stores/tabs";
 
 interface GitViewProps {
   fs: any;
@@ -17,40 +17,63 @@ interface GitViewProps {
 export function GitView(props: GitViewProps) {
   const git = useGitView(props.fs);
   const ui = useUI();
-  
-  const [toastMessage, setToastMessage] = createSignal<{title: string, desc: string} | null>(null);
-
-  const showToast = (title: string, desc: string) => {
-    setToastMessage({ title, desc });
-    setTimeout(() => setToastMessage(null), 3000);
-  };
 
   return (
     <div class="h-full w-full flex flex-col p-3 overflow-y-auto" style={{ color: "var(--color-fg)" }}>
       <Show
-        when={git.isRepo()}
+        when={!git.isLoading()}
         fallback={
           <div class="flex flex-col items-center justify-center h-full gap-4 text-center">
-            <FolderGit2 size={48} style={{ color: "var(--color-fg-muted)" }} />
-            <p class="text-sm" style={{ color: "var(--color-fg-muted)" }}>
-              No Git repository found in the current folder.
-            </p>
-            <Button onClick={git.init} class="w-full">Initialize Repository</Button>
+            <Loader2 size={24} class="animate-spin" style={{ color: "var(--color-fg-muted)" }} />
           </div>
         }
       >
-        {/* Actions Header */}
-        <div class="flex items-center justify-between mb-4 gap-2">
-          <span class="text-xs font-semibold uppercase tracking-wider" style={{ color: "var(--color-fg-muted)" }}>
-            Source Control
-          </span>
+        <Show
+          when={git.isRepo()}
+          fallback={
+            <div class="flex flex-col gap-4">
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-xs font-semibold uppercase tracking-wider" style={{ color: "var(--color-fg-muted)" }}>
+                  Source Control
+                </span>
+              </div>
+              <div class="flex flex-col gap-2">
+                <p class="text-sm" style={{ color: "var(--color-fg-muted)" }}>
+                  No Git repository found in the current folder.
+                </p>
+                <Button onClick={git.init} variant="primary" class="w-full justify-center flex items-center gap-2">
+                  <FolderGit2 size={14} />
+                  Initialize Repository
+                </Button>
+              </div>
+            </div>
+          }
+        >
+          {/* Actions Header */}
+          <div class="flex items-center justify-between mb-4 gap-2">
+            <span class="text-xs font-semibold uppercase tracking-wider" style={{ color: "var(--color-fg-muted)" }}>
+              Source Control
+            </span>
           <div class="flex items-center gap-1">
+            <button class="p-1 hover:text-[var(--color-accent)] transition-colors" onClick={() => {
+              tabStore.openTab(
+                "git://settings",
+                "Git Settings",
+                "",
+                "plaintext",
+                "git-settings",
+                undefined,
+                "left"
+              );
+            }} title="Git Settings">
+              <Settings size={14} />
+            </button>
             <button class="p-1 hover:text-[var(--color-accent)] transition-colors" onClick={git.refreshGit} title="Refresh">
               <RefreshCw size={14} />
             </button>
             <button class={`p-1 transition-colors ${git.isPulling() ? 'opacity-50 cursor-not-allowed' : 'hover:text-[var(--color-accent)]'}`} 
               onClick={async () => {
-                if (await git.handlePull()) showToast("Pull Successful", "Successfully pulled latest changes from remote.");
+                if (await git.handlePull()) ui.showToast("Pull Successful", "Successfully pulled latest changes from remote.", { variant: "success" });
               }} 
               title="Pull" disabled={git.isPulling()}>
               <Show when={git.isPulling()} fallback={<Download size={14} />}>
@@ -59,7 +82,7 @@ export function GitView(props: GitViewProps) {
             </button>
             <button class={`p-1 transition-colors ${git.isPushing() ? 'opacity-50 cursor-not-allowed' : 'hover:text-[var(--color-accent)]'}`} 
               onClick={async () => {
-                if (await git.handlePush()) showToast("Push Successful", "Successfully pushed your commits to remote.");
+                if (await git.handlePush()) ui.showToast("Push Successful", "Successfully pushed your commits to remote.", { variant: "success" });
               }} 
               title="Push" disabled={git.isPushing()}>
               <Show when={git.isPushing()} fallback={<Upload size={14} />}>
@@ -85,13 +108,11 @@ export function GitView(props: GitViewProps) {
             onKeyDown={async (e) => {
               if (e.key === "Enter" && e.ctrlKey) {
                 e.preventDefault();
-                if (await git.handleCommit()) showToast("Commit Successful", "Your changes have been committed.");
+                await git.handleCommit();
               }
             }}
           />
-          <Button variant="primary" onClick={async () => {
-            if (await git.handleCommit()) showToast("Commit Successful", "Your changes have been committed.");
-          }} disabled={git.isCommitting() || !git.commitMessage().trim()} class="w-full justify-center flex items-center gap-2">
+          <Button variant="primary" onClick={git.handleCommit} disabled={git.isCommitting() || !git.commitMessage().trim()} class="w-full justify-center flex items-center gap-2">
             <GitCommit size={14} />
             Commit
           </Button>
@@ -205,16 +226,7 @@ export function GitView(props: GitViewProps) {
           </div>
         </div>
       </Show>
-
-      <Portal>
-        <Toast 
-          open={toastMessage() !== null} 
-          onOpenChange={(open) => !open && setToastMessage(null)}
-          title={toastMessage()?.title}
-          description={toastMessage()?.desc}
-          icon={<CheckCircle2 size={18} />}
-        />
-      </Portal>
+      </Show>
     </div>
   );
 }

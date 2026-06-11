@@ -32,7 +32,8 @@ export function useGitView(fs: any) {
   const [isPushing, setIsPushing] = createSignal(false);
   const [isPulling, setIsPulling] = createSignal(false);
 
-  const isRepo = () => gitStore.gitState() !== null;
+  const isRepo = () => gitStore.gitState() !== null && gitStore.gitState() !== undefined;
+  const isLoading = () => gitStore.gitState.loading;
 
   const handlePush = async () => {
     setIsPushing(true);
@@ -78,6 +79,7 @@ export function useGitView(fs: any) {
     handleCommit,
     handlePush,
     handlePull,
-    isRepo
+    isRepo,
+    isLoading
   };
 }

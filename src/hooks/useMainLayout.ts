@@ -55,6 +55,11 @@ export function useMainLayout() {
     onConfirm: (values: Record<string, string>) => void;
     onCancel: () => void;
   } | null>(null);
+  const [toastState, setToastState] = createSignal<{
+    title: string;
+    description?: string;
+    variant?: "success" | "error" | "info";
+  } | null>(null);
   const [selectedPaths, setSelectedPaths] = createSignal<Set<string>>(
     new Set(),
   );
@@ -116,13 +121,13 @@ export function useMainLayout() {
   function showPromptDialog(
     title: string,
     fields: { id: string; label: string; type?: "text" | "password"; placeholder?: string; defaultValue?: string }[],
-    options?: { message?: string; okLabel?: string; cancelLabel?: string }
+    options?: { message?: string; okLabel?: string; cancelLabel?: string },
   ): Promise<Record<string, string> | null> {
     return new Promise((resolve) => {
       setPromptState({
         title,
-        fields,
         message: options?.message,
+        fields,
         okLabel: options?.okLabel,
         cancelLabel: options?.cancelLabel,
         onConfirm: (values) => {
@@ -135,6 +140,21 @@ export function useMainLayout() {
         },
       });
     });
+  }
+
+  function showToast(
+    title: string,
+    description?: string,
+    options?: { variant?: "success" | "error" | "info"; duration?: number }
+  ) {
+    if (options?.duration === 0) {
+      setToastState(null);
+      return;
+    }
+    setToastState({ title, description, variant: options?.variant });
+    setTimeout(() => {
+      setToastState(null);
+    }, options?.duration !== undefined ? options.duration : 3000);
   }
 
   function confirmDelete(name: string, onConfirm: () => void) {
@@ -406,6 +426,7 @@ export function useMainLayout() {
     confirmState,
     quickPickState,
     promptState,
+    toastState,
     selectedPaths,
     setSelectedPaths,
     handleEditorChange,
@@ -430,5 +451,6 @@ export function useMainLayout() {
     showConfirmDialog,
     showQuickPick,
     showPromptDialog,
+    showToast,
   };
 }

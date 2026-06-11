@@ -6,6 +6,7 @@ import { PdfViewer } from "./PdfViewer";
 import { MarkdownPreview } from "./MarkdownPreview";
 import { SettingsView } from "@/components/SettingsView";
 import { WelcomeScreen } from "@/features/welcome/WelcomeScreen";
+import { GitSettingsView } from "@/features/git/GitSettingsView";
 import { useEditor } from "@/hooks/useEditor";
 import { cn } from "@/utils/cn";
 import type { FileType, MdMode } from "@/types";
@@ -136,6 +137,11 @@ export function Editor(props: EditorProps) {
 
         <Show when={props.hasOpenFile && props.fileType === "settings"}>
           <SettingsView />
+        </Show>
+        <Show
+          when={props.hasOpenFile && props.fileType === "git-settings"}
+        >
+          <GitSettingsView tabId={props.tabId!} />
         </Show>
       </div>
     </div>

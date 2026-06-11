@@ -20,6 +20,11 @@ interface UIContextType {
     fields: { id: string; label: string; type?: "text" | "password"; placeholder?: string; defaultValue?: string }[],
     options?: { message?: string; okLabel?: string; cancelLabel?: string }
   ) => Promise<Record<string, string> | null>;
+  showToast: (
+    title: string,
+    description?: string,
+    options?: { variant?: "success" | "error" | "info"; duration?: number }
+  ) => void;
 }
 
 export const UIContext = createContext<UIContextType>();
