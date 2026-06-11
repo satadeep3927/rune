@@ -1,6 +1,6 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "Rune Editor",
+  "productName": "Rune",
   "version": "1.7.0",
   "identifier": "com.rune.dev",
   "build": {
