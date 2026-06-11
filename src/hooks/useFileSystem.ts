@@ -465,7 +465,7 @@ export function useFileSystem() {
     try {
       const entries = await readDirectory(root);
       setTree(entries);
-      window.dispatchEvent(new CustomEvent('fs-change'));
+      window.dispatchEvent(new CustomEvent("fs-change"));
     } finally {
       setLoading(false);
     }

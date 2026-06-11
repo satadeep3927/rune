@@ -50,12 +50,12 @@ export function PromptDialog(props: PromptDialogProps) {
 
   return (
     <>
-      <div 
+      <div
         class="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm"
         onClick={props.onCancel}
       />
-      
-      <div 
+
+      <div
         class="fixed top-[15%] left-1/2 -translate-x-1/2 z-50 w-full max-w-md bg-[var(--color-bg)] border border-[var(--color-border)] rounded-lg shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200"
         onKeyDown={handleKeyDown}
       >
@@ -63,7 +63,7 @@ export function PromptDialog(props: PromptDialogProps) {
           <h2 class="text-lg font-semibold text-[var(--color-fg)] mb-2">
             {props.title}
           </h2>
-          
+
           <Show when={props.message}>
             <p class="text-sm text-[var(--color-fg-muted)] mb-4">
               {props.message}
@@ -84,7 +84,12 @@ export function PromptDialog(props: PromptDialogProps) {
                     type={field.type || "text"}
                     placeholder={field.placeholder}
                     value={values()[field.id] || ""}
-                    onInput={(e) => setValues(prev => ({ ...prev, [field.id]: e.currentTarget.value }))}
+                    onInput={(e) =>
+                      setValues((prev) => ({
+                        ...prev,
+                        [field.id]: e.currentTarget.value,
+                      }))
+                    }
                     class="w-full"
                   />
                 </div>
@@ -94,16 +99,10 @@ export function PromptDialog(props: PromptDialogProps) {
         </div>
 
         <div class="px-5 py-3 bg-[var(--color-bg-secondary)] border-t border-[var(--color-border)] flex items-center justify-end gap-2">
-          <Button 
-            variant="secondary" 
-            onClick={props.onCancel}
-          >
+          <Button variant="secondary" onClick={props.onCancel}>
             {props.cancelLabel || "Cancel"}
           </Button>
-          <Button 
-            variant="primary" 
-            onClick={() => props.onConfirm(values())}
-          >
+          <Button variant="primary" onClick={() => props.onConfirm(values())}>
             {props.okLabel || "OK"}
           </Button>
         </div>

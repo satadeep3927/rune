@@ -62,7 +62,12 @@ export function useExplorerActions(options: ExplorerActionsOptions) {
   }
 
   async function handleFileClick(
-    entry: { path: string; name: string; isDiff?: boolean; diffOriginalContent?: string },
+    entry: {
+      path: string;
+      name: string;
+      isDiff?: boolean;
+      diffOriginalContent?: string;
+    },
     pane: PaneSide = "left",
   ) {
     try {

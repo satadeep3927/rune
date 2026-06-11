@@ -1,7 +1,14 @@
 import { Show, createEffect } from "solid-js";
 import { useFindReplace } from "@/hooks/useFindReplace";
 import { Input } from "@/components/ui/Input";
-import { X, ChevronUp, ChevronDown, Replace, ReplaceAll, ChevronRight } from "lucide-solid";
+import {
+  X,
+  ChevronUp,
+  ChevronDown,
+  Replace,
+  ReplaceAll,
+  ChevronRight,
+} from "lucide-solid";
 
 export function FindReplace() {
   const {
@@ -35,7 +42,7 @@ export function FindReplace() {
 
   return (
     <Show when={isVisible()}>
-      <div 
+      <div
         class="absolute top-22 right-8 z-50 flex gap-1 p-2 rounded-md shadow-xl backdrop-blur-md"
         style={{
           background: "var(--color-bg-secondary)",
@@ -50,10 +57,14 @@ export function FindReplace() {
             title="Toggle Replace"
             onClick={() => setIsReplaceVisible(!isReplaceVisible())}
           >
-            <ChevronRight 
-              size={14} 
+            <ChevronRight
+              size={14}
               class="transition-transform duration-200"
-              style={{ transform: isReplaceVisible() ? "rotate(90deg)" : "rotate(0deg)" }}
+              style={{
+                transform: isReplaceVisible()
+                  ? "rotate(90deg)"
+                  : "rotate(0deg)",
+              }}
             />
           </button>
         </div>
@@ -76,26 +87,28 @@ export function FindReplace() {
             />
             <Show when={matchCount() !== 0 || searchQuery() !== ""}>
               <div class="text-[10px] text-[var(--color-fg-muted)] shrink-0 px-1 font-mono">
-                {matchCount() === 0 ? "No results" : `${currentMatch()} of ${matchCount()}`}
+                {matchCount() === 0
+                  ? "No results"
+                  : `${currentMatch()} of ${matchCount()}`}
               </div>
             </Show>
             <div class="flex items-center gap-1 shrink-0">
               <button
-                class={`p-1 rounded-md hover:bg-[var(--color-bg-tertiary)] transition-colors ${caseSensitive() ? 'text-[var(--color-accent)] bg-[var(--color-bg-tertiary)]' : 'text-[var(--color-fg-muted)]'}`}
+                class={`p-1 rounded-md hover:bg-[var(--color-bg-tertiary)] transition-colors ${caseSensitive() ? "text-[var(--color-accent)] bg-[var(--color-bg-tertiary)]" : "text-[var(--color-fg-muted)]"}`}
                 title="Match Case"
                 onClick={() => setCaseSensitive(!caseSensitive())}
               >
                 <div class="text-[10px] font-bold">Aa</div>
               </button>
               <button
-                class={`p-1 rounded-md hover:bg-[var(--color-bg-tertiary)] transition-colors ${wholeWord() ? 'text-[var(--color-accent)] bg-[var(--color-bg-tertiary)]' : 'text-[var(--color-fg-muted)]'}`}
+                class={`p-1 rounded-md hover:bg-[var(--color-bg-tertiary)] transition-colors ${wholeWord() ? "text-[var(--color-accent)] bg-[var(--color-bg-tertiary)]" : "text-[var(--color-fg-muted)]"}`}
                 title="Match Whole Word"
                 onClick={() => setWholeWord(!wholeWord())}
               >
                 <div class="text-[10px] font-bold">\"\"</div>
               </button>
               <button
-                class={`p-1 rounded-md hover:bg-[var(--color-bg-tertiary)] transition-colors ${useRegex() ? 'text-[var(--color-accent)] bg-[var(--color-bg-tertiary)]' : 'text-[var(--color-fg-muted)]'}`}
+                class={`p-1 rounded-md hover:bg-[var(--color-bg-tertiary)] transition-colors ${useRegex() ? "text-[var(--color-accent)] bg-[var(--color-bg-tertiary)]" : "text-[var(--color-fg-muted)]"}`}
                 title="Use Regular Expression"
                 onClick={() => setUseRegex(!useRegex())}
               >
@@ -103,7 +116,7 @@ export function FindReplace() {
               </button>
             </div>
             <div class="flex items-center gap-1 shrink-0 ml-1 border-l border-[var(--color-border)] pl-2">
-               <button
+              <button
                 class="p-1 rounded-md hover:bg-[var(--color-bg-tertiary)] text-[var(--color-fg-muted)] transition-colors"
                 title="Previous Match (Shift+Enter)"
                 onClick={() => executeSearch("findPrev")}
@@ -142,7 +155,7 @@ export function FindReplace() {
                 }}
               />
               <div class="flex items-center gap-1 shrink-0">
-                 <button
+                <button
                   class="p-1 rounded-md hover:bg-[var(--color-bg-tertiary)] text-[var(--color-fg-muted)] transition-colors flex items-center gap-1"
                   title="Replace (Enter)"
                   onClick={() => executeSearch("replace")}

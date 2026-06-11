@@ -8,9 +8,10 @@ export function getStatusBadge(status: string) {
 }
 
 export function parseGitFile(filePath: string, status: string) {
-  const fileName = filePath.split('/').pop()!;
-  const lastSlashIndex = filePath.lastIndexOf('/');
-  const dirName = lastSlashIndex !== -1 ? filePath.substring(0, lastSlashIndex) : "";
+  const fileName = filePath.split("/").pop()!;
+  const lastSlashIndex = filePath.lastIndexOf("/");
+  const dirName =
+    lastSlashIndex !== -1 ? filePath.substring(0, lastSlashIndex) : "";
   const isDeleted = status.includes("D");
 
   return { fileName, dirName, isDeleted };

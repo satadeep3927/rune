@@ -70,12 +70,15 @@ export function PromptDialog(props: PromptDialogProps) {
             </p>
           </Show>
         </div>
-        
+
         <div class="flex flex-col gap-3">
           <For each={props.fields}>
             {(field, index) => (
               <div class="flex flex-col gap-1.5">
-                <label class="text-xs" style={{ color: "var(--color-fg-muted)" }}>
+                <label
+                  class="text-xs"
+                  style={{ color: "var(--color-fg-muted)" }}
+                >
                   {field.label}
                 </label>
                 <input
@@ -85,7 +88,12 @@ export function PromptDialog(props: PromptDialogProps) {
                   type={field.type || "text"}
                   placeholder={field.placeholder}
                   value={values()[field.id] || ""}
-                  onInput={(e) => setValues({ ...values(), [field.id]: e.currentTarget.value })}
+                  onInput={(e) =>
+                    setValues({
+                      ...values(),
+                      [field.id]: e.currentTarget.value,
+                    })
+                  }
                   class="px-2 py-1.5 text-xs rounded outline-none w-full"
                   style={{
                     background: "var(--color-bg-tertiary)",
@@ -93,7 +101,8 @@ export function PromptDialog(props: PromptDialogProps) {
                     border: "1px solid var(--color-border)",
                   }}
                   onFocus={(e) => {
-                    e.currentTarget.style.borderColor = "var(--color-accent, #CDFF07)";
+                    e.currentTarget.style.borderColor =
+                      "var(--color-accent, #CDFF07)";
                   }}
                   onBlur={(e) => {
                     e.currentTarget.style.borderColor = "var(--color-border)";
@@ -125,7 +134,7 @@ export function PromptDialog(props: PromptDialogProps) {
           >
             {cancelText()}
           </button>
-          
+
           <button
             class="px-3 py-1.5 text-xs rounded transition-colors font-semibold"
             style={{
@@ -140,7 +149,8 @@ export function PromptDialog(props: PromptDialogProps) {
               e.currentTarget.style.color = "var(--color-bg, #000000)";
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.background = "var(--color-accent-dim, rgba(205, 255, 7, 0.15))";
+              e.currentTarget.style.background =
+                "var(--color-accent-dim, rgba(205, 255, 7, 0.15))";
               e.currentTarget.style.color = "var(--color-accent, #CDFF07)";
             }}
           >

@@ -25,7 +25,10 @@ export function Titlebar(props: TitlebarProps) {
         <Show when={props.menus}>
           <MenuBar menus={props.menus!} />
         </Show>
-        <div class="pointer-events-auto no-drag h-full" style={{ "-webkit-app-region": "no-drag" }}>
+        <div
+          class="pointer-events-auto no-drag h-full"
+          style={{ "-webkit-app-region": "no-drag" }}
+        >
           <Show when={props.fs}>
             <BranchPicker fs={props.fs} />
           </Show>

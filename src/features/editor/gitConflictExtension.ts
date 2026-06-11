@@ -4,7 +4,13 @@ import {
   EditorView,
   WidgetType,
 } from "@codemirror/view";
-import { StateField, Extension, Transaction, EditorState, RangeSetBuilder } from "@codemirror/state";
+import {
+  StateField,
+  Extension,
+  Transaction,
+  EditorState,
+  RangeSetBuilder,
+} from "@codemirror/state";
 
 class ConflictWidget extends WidgetType {
   constructor(
@@ -15,7 +21,7 @@ class ConflictWidget extends WidgetType {
     readonly incomingFrom: number,
     readonly incomingTo: number,
     readonly currentName: string,
-    readonly incomingName: string
+    readonly incomingName: string,
   ) {
     super();
   }
@@ -54,14 +60,14 @@ class ConflictWidget extends WidgetType {
       btn.style.borderRadius = "4px";
       btn.style.fontWeight = "500";
       btn.style.transition = "background 0.2s";
-      
+
       btn.onmouseenter = () => {
         btn.style.background = "var(--color-bg-secondary)";
       };
       btn.onmouseleave = () => {
         btn.style.background = "transparent";
       };
-      
+
       btn.onclick = (e) => {
         e.preventDefault();
         onClick();
@@ -73,33 +79,46 @@ class ConflictWidget extends WidgetType {
       const currentText = view.state.sliceDoc(this.currentFrom, this.currentTo);
       view.dispatch({
         changes: { from: this.from, to: this.to, insert: currentText },
-        annotations: Transaction.userEvent.of("input")
+        annotations: Transaction.userEvent.of("input"),
       });
     };
 
     const acceptIncoming = () => {
-      const incomingText = view.state.sliceDoc(this.incomingFrom, this.incomingTo);
+      const incomingText = view.state.sliceDoc(
+        this.incomingFrom,
+        this.incomingTo,
+      );
       view.dispatch({
         changes: { from: this.from, to: this.to, insert: incomingText },
-        annotations: Transaction.userEvent.of("input")
+        annotations: Transaction.userEvent.of("input"),
       });
     };
 
     const acceptBoth = () => {
       const currentText = view.state.sliceDoc(this.currentFrom, this.currentTo);
-      const incomingText = view.state.sliceDoc(this.incomingFrom, this.incomingTo);
-      const insert = currentText + (currentText && incomingText ? "\n" : "") + incomingText;
+      const incomingText = view.state.sliceDoc(
+        this.incomingFrom,
+        this.incomingTo,
+      );
+      const insert =
+        currentText + (currentText && incomingText ? "\n" : "") + incomingText;
       view.dispatch({
         changes: { from: this.from, to: this.to, insert },
-        annotations: Transaction.userEvent.of("input")
+        annotations: Transaction.userEvent.of("input"),
       });
     };
 
-    wrap.appendChild(createBtn("Accept Current Change", "var(--color-success)", acceptCurrent));
+    wrap.appendChild(
+      createBtn("Accept Current Change", "var(--color-success)", acceptCurrent),
+    );
     wrap.appendChild(document.createTextNode("|"));
-    wrap.appendChild(createBtn("Accept Incoming Change", "var(--color-info)", acceptIncoming));
+    wrap.appendChild(
+      createBtn("Accept Incoming Change", "var(--color-info)", acceptIncoming),
+    );
     wrap.appendChild(document.createTextNode("|"));
-    wrap.appendChild(createBtn("Accept Both Changes", "var(--color-fg)", acceptBoth));
+    wrap.appendChild(
+      createBtn("Accept Both Changes", "var(--color-fg)", acceptBoth),
+    );
 
     return wrap;
   }
@@ -117,15 +136,15 @@ function buildConflictDecorations(state: EditorState): DecorationSet {
   let incomingName = "";
 
   const currentLineDeco = Decoration.line({
-    attributes: { style: "background-color: rgba(46, 160, 67, 0.1);" }
+    attributes: { style: "background-color: rgba(46, 160, 67, 0.1);" },
   });
-  
+
   const incomingLineDeco = Decoration.line({
-    attributes: { style: "background-color: rgba(56, 139, 253, 0.1);" }
+    attributes: { style: "background-color: rgba(56, 139, 253, 0.1);" },
   });
 
   const markerLineDeco = Decoration.line({
-    attributes: { style: "color: var(--color-fg-muted); font-weight: bold;" }
+    attributes: { style: "color: var(--color-fg-muted); font-weight: bold;" },
   });
 
   for (let i = 1; i <= lines; i++) {
@@ -144,41 +163,78 @@ function buildConflictDecorations(state: EditorState): DecorationSet {
       } else if (text.startsWith(">>>>>>> ")) {
         if (startLine !== null && middleLine !== null) {
           incomingName = text.slice(8).trim();
-          
+
           // We found a complete conflict block
           const endLine = i;
           const from = doc.line(startLine).from;
           const to = doc.line(endLine).to;
-          
-          const currentFrom = startLine < middleLine - 1 ? doc.line(startLine + 1).from : doc.line(middleLine).from;
-          const currentTo = startLine < middleLine - 1 ? doc.line(middleLine - 1).to : doc.line(middleLine).from;
-          
-          const incomingFrom = middleLine < endLine - 1 ? doc.line(middleLine + 1).from : doc.line(endLine).from;
-          const incomingTo = middleLine < endLine - 1 ? doc.line(endLine - 1).to : doc.line(endLine).from;
+
+          const currentFrom =
+            startLine < middleLine - 1
+              ? doc.line(startLine + 1).from
+              : doc.line(middleLine).from;
+          const currentTo =
+            startLine < middleLine - 1
+              ? doc.line(middleLine - 1).to
+              : doc.line(middleLine).from;
+
+          const incomingFrom =
+            middleLine < endLine - 1
+              ? doc.line(middleLine + 1).from
+              : doc.line(endLine).from;
+          const incomingTo =
+            middleLine < endLine - 1
+              ? doc.line(endLine - 1).to
+              : doc.line(endLine).from;
 
           // Add widget
-          builder.add(from, from, Decoration.widget({
-            widget: new ConflictWidget(from, to, currentFrom, currentTo, incomingFrom, incomingTo, currentName, incomingName),
-            side: -1,
-            block: true
-          }));
+          builder.add(
+            from,
+            from,
+            Decoration.widget({
+              widget: new ConflictWidget(
+                from,
+                to,
+                currentFrom,
+                currentTo,
+                incomingFrom,
+                incomingTo,
+                currentName,
+                incomingName,
+              ),
+              side: -1,
+              block: true,
+            }),
+          );
 
           // Add line decos
-          builder.add(doc.line(startLine).from, doc.line(startLine).from, markerLineDeco);
-          
+          builder.add(
+            doc.line(startLine).from,
+            doc.line(startLine).from,
+            markerLineDeco,
+          );
+
           for (let l = startLine + 1; l < middleLine; l++) {
             builder.add(doc.line(l).from, doc.line(l).from, currentLineDeco);
           }
-          
-          builder.add(doc.line(middleLine).from, doc.line(middleLine).from, markerLineDeco);
-          
+
+          builder.add(
+            doc.line(middleLine).from,
+            doc.line(middleLine).from,
+            markerLineDeco,
+          );
+
           for (let l = middleLine + 1; l < endLine; l++) {
             builder.add(doc.line(l).from, doc.line(l).from, incomingLineDeco);
           }
-          
-          builder.add(doc.line(endLine).from, doc.line(endLine).from, markerLineDeco);
+
+          builder.add(
+            doc.line(endLine).from,
+            doc.line(endLine).from,
+            markerLineDeco,
+          );
         }
-        
+
         // Reset state
         inConflict = false;
         startLine = null;
@@ -200,7 +256,7 @@ const conflictStateField = StateField.define<DecorationSet>({
     }
     return decorations;
   },
-  provide: (f) => EditorView.decorations.from(f)
+  provide: (f) => EditorView.decorations.from(f),
 });
 
 export function gitConflictExtension(): Extension {
@@ -208,8 +264,8 @@ export function gitConflictExtension(): Extension {
     conflictStateField,
     EditorView.theme({
       ".cm-git-conflict-actions button:hover": {
-        background: "var(--color-bg-secondary) !important"
-      }
-    })
+        background: "var(--color-bg-secondary) !important",
+      },
+    }),
   ];
 }

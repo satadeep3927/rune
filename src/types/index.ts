@@ -6,7 +6,14 @@ export interface FileEntry {
   isExpanded?: boolean;
 }
 
-export type FileType = "text" | "image" | "pdf" | "markdown" | "settings" | "agent" | "git-settings";
+export type FileType =
+  | "text"
+  | "image"
+  | "pdf"
+  | "markdown"
+  | "settings"
+  | "agent"
+  | "git-settings";
 
 export type PaneSide = "left" | "right";
 

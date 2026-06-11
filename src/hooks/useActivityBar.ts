@@ -8,18 +8,33 @@ export function useActivityBar(width: () => number) {
   let containerRef!: HTMLDivElement;
 
   const coreTabs = [
-    { id: "files" as SidebarTab, label: "Files", iconLucide: Folder, isTab: true, action: null, iconSvg: null },
-    { id: "git" as SidebarTab, label: "Git", iconLucide: GitBranch, isTab: true, action: null, iconSvg: null },
+    {
+      id: "files" as SidebarTab,
+      label: "Files",
+      iconLucide: Folder,
+      isTab: true,
+      action: null,
+      iconSvg: null,
+    },
+    {
+      id: "git" as SidebarTab,
+      label: "Git",
+      iconLucide: GitBranch,
+      isTab: true,
+      action: null,
+      iconSvg: null,
+    },
   ];
 
-  const pluginItems = () => pluginRegistry.getExplorerToolbarItems().map(item => ({
-    id: item.id,
-    label: item.label || item.title,
-    iconSvg: item.icon,
-    action: item.action,
-    isTab: false,
-    iconLucide: null,
-  }));
+  const pluginItems = () =>
+    pluginRegistry.getExplorerToolbarItems().map((item) => ({
+      id: item.id,
+      label: item.label || item.title,
+      iconSvg: item.icon,
+      action: item.action,
+      isTab: false,
+      iconLucide: null,
+    }));
 
   const allItems = () => [...coreTabs, ...pluginItems()];
 
@@ -35,7 +50,11 @@ export function useActivityBar(width: () => number) {
 
   onMount(() => {
     const onClickOutside = (e: MouseEvent) => {
-      if (showDropdown() && containerRef && !containerRef.contains(e.target as Node)) {
+      if (
+        showDropdown() &&
+        containerRef &&
+        !containerRef.contains(e.target as Node)
+      ) {
         setShowDropdown(false);
       }
     };
@@ -48,6 +67,8 @@ export function useActivityBar(width: () => number) {
     setShowDropdown,
     visibleItems,
     hiddenItems,
-    setContainerRef: (el: HTMLDivElement) => { containerRef = el; }
+    setContainerRef: (el: HTMLDivElement) => {
+      containerRef = el;
+    },
   };
 }

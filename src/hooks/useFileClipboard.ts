@@ -23,9 +23,9 @@ export function useFileClipboard() {
 
   async function handlePaste(destinationFolder: string) {
     try {
-      const sysFiles: string[] = await invoke<string[]>("read_clipboard_files").catch(
-        () => [],
-      );
+      const sysFiles: string[] = await invoke<string[]>(
+        "read_clipboard_files",
+      ).catch(() => []);
 
       let pathsToPaste = sysFiles;
       let currentAction = "copy" as ClipboardAction;

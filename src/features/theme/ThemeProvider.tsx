@@ -41,7 +41,10 @@ function applyThemeToDOM(t: ThemeColors, isLight: boolean) {
 
   // Automatically compute ideal foreground text color for the accent background
   const accentLuma = getLuminance(t.accent);
-  root.style.setProperty("--color-accent-fg", accentLuma > 150 ? "#0F1318" : "#FFFFFF");
+  root.style.setProperty(
+    "--color-accent-fg",
+    accentLuma > 150 ? "#0F1318" : "#FFFFFF",
+  );
 
   // Derived properties
   root.style.setProperty("--color-sidebar-bg", t.bgSecondary);

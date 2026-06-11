@@ -3,7 +3,10 @@ import { cn } from "@/utils/cn";
 import { X } from "lucide-solid";
 import { Button } from "./Button";
 
-export interface ToastProps extends Omit<JSX.HTMLAttributes<HTMLDivElement>, "title"> {
+export interface ToastProps extends Omit<
+  JSX.HTMLAttributes<HTMLDivElement>,
+  "title"
+> {
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
   title?: JSX.Element;
@@ -14,7 +17,13 @@ export interface ToastProps extends Omit<JSX.HTMLAttributes<HTMLDivElement>, "ti
 
 export function Toast(props: ToastProps) {
   const [local, others] = splitProps(props, [
-    "class", "open", "onOpenChange", "title", "description", "action", "icon"
+    "class",
+    "open",
+    "onOpenChange",
+    "title",
+    "description",
+    "action",
+    "icon",
   ]);
 
   return (
@@ -22,7 +31,7 @@ export function Toast(props: ToastProps) {
       <div
         class={cn(
           "fixed bottom-6 right-6 w-[22rem] z-50 animate-in slide-in-from-bottom-5 fade-in-0 flex flex-col gap-3 rounded-xl border border-[var(--color-border)] bg-[var(--color-bg-secondary)] p-4 shadow-2xl text-[var(--color-fg)]",
-          local.class
+          local.class,
         )}
         {...others}
       >
@@ -35,7 +44,9 @@ export function Toast(props: ToastProps) {
             </Show>
             <div class="flex flex-col gap-0.5">
               <Show when={local.title}>
-                <div class="text-sm font-bold tracking-tight">{local.title}</div>
+                <div class="text-sm font-bold tracking-tight">
+                  {local.title}
+                </div>
               </Show>
             </div>
           </div>
@@ -54,7 +65,9 @@ export function Toast(props: ToastProps) {
           <div class="text-sm">{local.description}</div>
         </Show>
         <Show when={local.action}>
-          <div class="mt-1 flex items-center justify-end gap-2">{local.action}</div>
+          <div class="mt-1 flex items-center justify-end gap-2">
+            {local.action}
+          </div>
         </Show>
       </div>
     </Show>

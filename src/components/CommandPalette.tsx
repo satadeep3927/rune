@@ -56,7 +56,12 @@ export function CommandPalette(props: CommandPaletteProps) {
     totalItems,
     handleKeydown,
     fetchFiles,
-  } = useCommandPalette(props.commands, props.initialPrefix, props.onClose, props.rootPath);
+  } = useCommandPalette(
+    props.commands,
+    props.initialPrefix,
+    props.onClose,
+    props.rootPath,
+  );
 
   let inputRef!: HTMLInputElement;
   let listRef!: HTMLDivElement;

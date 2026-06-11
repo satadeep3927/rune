@@ -19,7 +19,10 @@ export function useGitView(fs: any) {
     } catch (e: any) {
       console.error("Commit failed:", e);
       ui.showConfirmDialog("Commit Failed", {
-        detail: typeof e === "string" && e.trim() ? e : "No files staged or working tree clean.",
+        detail:
+          typeof e === "string" && e.trim()
+            ? e
+            : "No files staged or working tree clean.",
         okLabel: "Close",
         hideCancel: true,
       });
@@ -32,7 +35,8 @@ export function useGitView(fs: any) {
   const [isPushing, setIsPushing] = createSignal(false);
   const [isPulling, setIsPulling] = createSignal(false);
 
-  const isRepo = () => gitStore.gitState() !== null && gitStore.gitState() !== undefined;
+  const isRepo = () =>
+    gitStore.gitState() !== null && gitStore.gitState() !== undefined;
   const isLoading = () => gitStore.gitState.loading;
 
   const handlePush = async () => {
@@ -42,7 +46,10 @@ export function useGitView(fs: any) {
       return true;
     } catch (e: any) {
       ui.showConfirmDialog("Push Failed", {
-        detail: typeof e === "string" && e.trim() ? e : "An error occurred during push.",
+        detail:
+          typeof e === "string" && e.trim()
+            ? e
+            : "An error occurred during push.",
         okLabel: "Close",
         hideCancel: true,
       });
@@ -59,7 +66,10 @@ export function useGitView(fs: any) {
       return true;
     } catch (e: any) {
       ui.showConfirmDialog("Pull Failed", {
-        detail: typeof e === "string" && e.trim() ? e : "An error occurred during pull.",
+        detail:
+          typeof e === "string" && e.trim()
+            ? e
+            : "An error occurred during pull.",
         okLabel: "Close",
         hideCancel: true,
       });
@@ -80,6 +90,6 @@ export function useGitView(fs: any) {
     handlePush,
     handlePull,
     isRepo,
-    isLoading
+    isLoading,
   };
 }

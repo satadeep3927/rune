@@ -23,14 +23,14 @@ export function useActiveFileWatcher() {
       if (!watchers.has(tab.filePath)) {
         // Set a dummy function immediately so we don't start multiple watches concurrently
         watchers.set(tab.filePath, () => {});
-        
+
         let isHandlingEvent = false;
-        
+
         watch(
           tab.filePath,
           async () => {
             if (isHandlingEvent) return;
-            
+
             const currentTab = tabStore.tabs().find((t) => t.id === tab.id);
             if (!currentTab || currentTab.diskHash === undefined) return;
 
@@ -47,17 +47,23 @@ export function useActiveFileWatcher() {
               if (update) {
                 const [newHash, newContent] = update;
                 tabStore.setTabDiskHash(tab.id, newHash);
-                window.dispatchEvent(new CustomEvent('fs-change'));
-                
+                window.dispatchEvent(new CustomEvent("fs-change"));
+
                 if (!currentTab.isDirty) {
                   // Clean: silent auto reload
                   tabStore.updateTabContent(tab.id, newContent);
                   tabStore.markTabClean(tab.id);
 
                   // If it's a diff tab and now matches the original content perfectly, auto-close it
-                  if (currentTab.isDiff && currentTab.diffOriginalContent !== undefined) {
+                  if (
+                    currentTab.isDiff &&
+                    currentTab.diffOriginalContent !== undefined
+                  ) {
                     // Check if newContent perfectly matches diffOriginalContent (accounting for potential CRLF vs LF)
-                    if (newContent.replace(/\r\n/g, "\n") === currentTab.diffOriginalContent.replace(/\r\n/g, "\n")) {
+                    if (
+                      newContent.replace(/\r\n/g, "\n") ===
+                      currentTab.diffOriginalContent.replace(/\r\n/g, "\n")
+                    ) {
                       tabStore.closeTab(tab.id);
                     }
                   }
@@ -72,7 +78,7 @@ export function useActiveFileWatcher() {
               isHandlingEvent = false;
             }
           },
-          { recursive: false, delayMs: 200 }
+          { recursive: false, delayMs: 200 },
         )
           .then((unwatch) => watchers.set(tab.filePath, unwatch))
           .catch((err) => {

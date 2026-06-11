@@ -56,66 +56,83 @@ export function FileTree(props: FileTreeProps) {
       }}
     >
       <Show when={!props.hideHeader}>
-      <div
-        class="flex items-center justify-between px-3 h-[32px] shrink-0 select-none"
-        style={{
-          "border-bottom": "1px solid var(--color-border)",
-          color: "var(--color-fg-muted)",
-        }}
-      >
-        <div class="flex items-center justify-between w-full">
-          <Show when={props.rootPath}>
-            <button
-              class="hover:bg-[var(--color-bg-tertiary)] hover:text-[var(--color-accent)] transition-colors p-1 rounded"
-              onClick={() => props.onStartEdit?.(props.rootPath!, "new-file")}
-              title="New File..."
-              style={{ background: "none", border: "none", cursor: "pointer" }}
-            >
-              <File size={14} style={{ color: "var(--color-fg-muted)" }} />
-            </button>
-            <button
-              class="hover:bg-[var(--color-bg-tertiary)] hover:text-[var(--color-accent)] transition-colors p-1 rounded"
-              onClick={() => props.onStartEdit?.(props.rootPath!, "new-folder")}
-              title="New Folder..."
-              style={{ background: "none", border: "none", cursor: "pointer" }}
-            >
-              <Folder size={14} style={{ color: "var(--color-fg-muted)" }} />
-            </button>
-            <button
-              class="hover:bg-[var(--color-bg-tertiary)] hover:text-[var(--color-accent)] transition-colors p-1 rounded"
-              onClick={props.onRefresh}
-              title="Refresh"
-              style={{ background: "none", border: "none", cursor: "pointer" }}
-            >
-              <RefreshCw size={14} style={{ color: "var(--color-fg-muted)" }} />
-            </button>
-            <For each={pluginRegistry.getExplorerToolbarItems()}>
-              {(item) => (
-                <button
-                  class="hover:bg-[var(--color-bg-tertiary)] hover:text-[var(--color-accent)] transition-colors p-1 rounded flex items-center justify-center"
-                  onClick={item.action}
-                  title={item.title}
-                  style={{
-                    background: "none",
-                    border: "none",
-                    cursor: "pointer",
-                  }}
-                >
-                  <span
-                    innerHTML={item.icon}
-                    class="flex items-center justify-center svg-icon-wrapper"
+        <div
+          class="flex items-center justify-between px-3 h-[32px] shrink-0 select-none"
+          style={{
+            "border-bottom": "1px solid var(--color-border)",
+            color: "var(--color-fg-muted)",
+          }}
+        >
+          <div class="flex items-center justify-between w-full">
+            <Show when={props.rootPath}>
+              <button
+                class="hover:bg-[var(--color-bg-tertiary)] hover:text-[var(--color-accent)] transition-colors p-1 rounded"
+                onClick={() => props.onStartEdit?.(props.rootPath!, "new-file")}
+                title="New File..."
+                style={{
+                  background: "none",
+                  border: "none",
+                  cursor: "pointer",
+                }}
+              >
+                <File size={14} style={{ color: "var(--color-fg-muted)" }} />
+              </button>
+              <button
+                class="hover:bg-[var(--color-bg-tertiary)] hover:text-[var(--color-accent)] transition-colors p-1 rounded"
+                onClick={() =>
+                  props.onStartEdit?.(props.rootPath!, "new-folder")
+                }
+                title="New Folder..."
+                style={{
+                  background: "none",
+                  border: "none",
+                  cursor: "pointer",
+                }}
+              >
+                <Folder size={14} style={{ color: "var(--color-fg-muted)" }} />
+              </button>
+              <button
+                class="hover:bg-[var(--color-bg-tertiary)] hover:text-[var(--color-accent)] transition-colors p-1 rounded"
+                onClick={props.onRefresh}
+                title="Refresh"
+                style={{
+                  background: "none",
+                  border: "none",
+                  cursor: "pointer",
+                }}
+              >
+                <RefreshCw
+                  size={14}
+                  style={{ color: "var(--color-fg-muted)" }}
+                />
+              </button>
+              <For each={pluginRegistry.getExplorerToolbarItems()}>
+                {(item) => (
+                  <button
+                    class="hover:bg-[var(--color-bg-tertiary)] hover:text-[var(--color-accent)] transition-colors p-1 rounded flex items-center justify-center"
+                    onClick={item.action}
+                    title={item.title}
                     style={{
-                      width: "14px",
-                      height: "14px",
-                      color: "var(--color-fg-muted)",
+                      background: "none",
+                      border: "none",
+                      cursor: "pointer",
                     }}
-                  />
-                </button>
-              )}
-            </For>
-          </Show>
+                  >
+                    <span
+                      innerHTML={item.icon}
+                      class="flex items-center justify-center svg-icon-wrapper"
+                      style={{
+                        width: "14px",
+                        height: "14px",
+                        color: "var(--color-fg-muted)",
+                      }}
+                    />
+                  </button>
+                )}
+              </For>
+            </Show>
+          </div>
         </div>
-      </div>
       </Show>
 
       <div
@@ -156,8 +173,7 @@ export function FileTree(props: FileTreeProps) {
             </div>
           }
         >
-          <div
-          >
+          <div>
             <div
               class="px-3 py-1 text-xs font-semibold uppercase tracking-wider"
               style={{ color: "var(--color-fg-muted)" }}

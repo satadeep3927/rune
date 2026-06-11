@@ -20,7 +20,9 @@ export function useAgent(sessionId: string) {
       } else if (registry.getAgentProviders) {
         // Fallback for different plugin API versions
         const providers = registry.getAgentProviders() || [];
-        const provider = providers.find((p: any) => p.id === session.providerId);
+        const provider = providers.find(
+          (p: any) => p.id === session.providerId,
+        );
         if (provider) setProviderName(provider.name);
       }
     }

@@ -1,6 +1,5 @@
 import { useMarkdownPreview } from "@/hooks/useMarkdownPreview";
 
-
 interface MarkdownPreviewProps {
   content: string;
   editorScrollElement?: HTMLElement | null;

@@ -31,7 +31,9 @@ export function AgentChat(props: AgentChatProps) {
         when={agentStore.getSessionMessages(props.sessionId).length > 0}
         fallback={
           <div class="flex items-center justify-center h-full">
-            <span style={{ color: "var(--color-fg-muted)", "font-size": "13px" }}>
+            <span
+              style={{ color: "var(--color-fg-muted)", "font-size": "13px" }}
+            >
               Start a conversation...
             </span>
           </div>

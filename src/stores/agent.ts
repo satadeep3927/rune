@@ -24,9 +24,9 @@ const [sessions, setSessions] = createSignal<Map<string, AgentSessionState>>(
 const [messages, setMessages] = createSignal<Map<string, AgentMessage[]>>(
   new Map(),
 );
-const [streamingSessionId, setStreamingSessionId] = createSignal<
-  string | null
->(null);
+const [streamingSessionId, setStreamingSessionId] = createSignal<string | null>(
+  null,
+);
 const [streamingContent, setStreamingContent] = createSignal("");
 
 function createSessionId(): string {
@@ -42,9 +42,7 @@ function openSession(providerId: string, initialMessage?: string): string {
     next.set(id, {
       id,
       providerId,
-      title: initialMessage
-        ? initialMessage.slice(0, 50)
-        : `Agent Session`,
+      title: initialMessage ? initialMessage.slice(0, 50) : `Agent Session`,
       createdAt: now,
       updatedAt: now,
     });
@@ -60,8 +58,7 @@ function openSession(providerId: string, initialMessage?: string): string {
   tabStore.openTab(
     `agent://${id}`,
     initialMessage
-      ? initialMessage.slice(0, 30) +
-          (initialMessage.length > 30 ? "..." : "")
+      ? initialMessage.slice(0, 30) + (initialMessage.length > 30 ? "..." : "")
       : "Agent",
     "",
     "agent",

@@ -56,7 +56,10 @@ export function useCommandPalette(
         .then((files) => setFileList(files.slice(0, 60)))
         .catch(() => setFileList([]));
     } else {
-      invoke<string[]>("fuzzy_search_files", { query: q, workspacePath: rootPath })
+      invoke<string[]>("fuzzy_search_files", {
+        query: q,
+        workspacePath: rootPath,
+      })
         .then((files) => setFileList(files))
         .catch(() => setFileList([]));
     }
@@ -108,7 +111,7 @@ export function useCommandPalette(
   const filteredSymbols = () => {
     const s = symbols();
     if (mode() === "workspace-symbol") return s;
-    
+
     const q = searchText().toLowerCase();
     if (!q) return s;
     return s.filter((sym) => sym.name.toLowerCase().includes(q));

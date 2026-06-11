@@ -40,7 +40,7 @@ export function useGitSettings(fs: ReturnType<typeof useFileSystem>) {
 
   const [remotes, { mutate: setRemotes }] = createResource(
     () => [fs.rootPath(), lastUpdate()] as const,
-    ([path, ts]) => fetchRemotes(path, ts)
+    ([path, ts]) => fetchRemotes(path, ts),
   );
 
   // Form UI states
@@ -54,9 +54,18 @@ export function useGitSettings(fs: ReturnType<typeof useFileSystem>) {
     const path = fs.rootPath();
     if (!path) return;
     try {
-      const name = await invoke<string>("git_get_config", { path, key: "user.name" });
-      const email = await invoke<string>("git_get_config", { path, key: "user.email" });
-      const helper = await invoke<string>("git_get_config", { path, key: "credential.helper" });
+      const name = await invoke<string>("git_get_config", {
+        path,
+        key: "user.name",
+      });
+      const email = await invoke<string>("git_get_config", {
+        path,
+        key: "user.email",
+      });
+      const helper = await invoke<string>("git_get_config", {
+        path,
+        key: "credential.helper",
+      });
       setUserName(name || "");
       setUserEmail(email || "");
       setLocalNameInput(name || "");
@@ -75,13 +84,15 @@ export function useGitSettings(fs: ReturnType<typeof useFileSystem>) {
     const name = newRemoteName();
     const url = newRemoteUrl();
     if (!name || !url) return false;
-    
+
     const path = fs.rootPath();
     if (!path) return false;
     try {
       await invoke("git_set_remote", { path, remote: name, url });
       setLastUpdate(Date.now());
-      ui.showToast("Remote Added", `Successfully added remote '${name}'`, { variant: "success" });
+      ui.showToast("Remote Added", `Successfully added remote '${name}'`, {
+        variant: "success",
+      });
       setNewRemoteName("origin");
       setNewRemoteUrl("");
       return true;
@@ -97,10 +108,14 @@ export function useGitSettings(fs: ReturnType<typeof useFileSystem>) {
     try {
       await invoke("git_remove_remote", { path, remote: name });
       setLastUpdate(Date.now());
-      ui.showToast("Remote Removed", `Successfully removed remote '${name}'`, { variant: "success" });
+      ui.showToast("Remote Removed", `Successfully removed remote '${name}'`, {
+        variant: "success",
+      });
       return true;
     } catch (e: any) {
-      ui.showToast("Failed to Remove Remote", e.toString(), { variant: "error" });
+      ui.showToast("Failed to Remove Remote", e.toString(), {
+        variant: "error",
+      });
       return false;
     }
   };
@@ -111,11 +126,21 @@ export function useGitSettings(fs: ReturnType<typeof useFileSystem>) {
     const name = localNameInput();
     const email = localEmailInput();
     try {
-      if (name) await invoke("git_set_config", { path, key: "user.name", value: name });
-      if (email) await invoke("git_set_config", { path, key: "user.email", value: email });
+      if (name)
+        await invoke("git_set_config", { path, key: "user.name", value: name });
+      if (email)
+        await invoke("git_set_config", {
+          path,
+          key: "user.email",
+          value: email,
+        });
       setUserName(name);
       setUserEmail(email);
-      ui.showToast("Config Saved", "Workspace Git configuration saved successfully.", { variant: "success" });
+      ui.showToast(
+        "Config Saved",
+        "Workspace Git configuration saved successfully.",
+        { variant: "success" },
+      );
       return true;
     } catch (e: any) {
       ui.showToast("Failed to Save Config", e.toString(), { variant: "error" });
@@ -127,12 +152,22 @@ export function useGitSettings(fs: ReturnType<typeof useFileSystem>) {
     const path = fs.rootPath();
     if (!path) return false;
     try {
-      await invoke("git_set_config", { path, key: "credential.helper", value: helper });
+      await invoke("git_set_config", {
+        path,
+        key: "credential.helper",
+        value: helper,
+      });
       setCredentialHelper(helper);
-      ui.showToast("Credential Helper Set", `Configured Git to use '${helper}'`, { variant: "success" });
+      ui.showToast(
+        "Credential Helper Set",
+        `Configured Git to use '${helper}'`,
+        { variant: "success" },
+      );
       return true;
     } catch (e: any) {
-      ui.showToast("Failed to Set Credential Helper", e.toString(), { variant: "error" });
+      ui.showToast("Failed to Set Credential Helper", e.toString(), {
+        variant: "error",
+      });
       return false;
     }
   };
@@ -159,6 +194,6 @@ export function useGitSettings(fs: ReturnType<typeof useFileSystem>) {
     refresh: () => {
       setLastUpdate(Date.now());
       fetchConfig();
-    }
+    },
   };
 }

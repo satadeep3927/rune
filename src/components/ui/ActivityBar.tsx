@@ -16,7 +16,7 @@ export function ActivityBar(props: ActivityBarProps) {
     setShowDropdown,
     visibleItems,
     hiddenItems,
-    setContainerRef
+    setContainerRef,
   } = useActivityBar(() => props.width);
 
   return (
@@ -32,8 +32,14 @@ export function ActivityBar(props: ActivityBarProps) {
               variant="ghost"
               class="flex items-center gap-1.5 px-3 h-full rounded-none transition-colors text-[12px] font-semibold tracking-wide border-0 outline-none shrink-0"
               style={{
-                background: (item.isTab && props.activeTab === item.id) ? "rgba(150, 150, 150, 0.15)" : "transparent",
-                color: (item.isTab && props.activeTab === item.id) ? "var(--color-fg)" : "var(--color-fg-muted)",
+                background:
+                  item.isTab && props.activeTab === item.id
+                    ? "rgba(150, 150, 150, 0.15)"
+                    : "transparent",
+                color:
+                  item.isTab && props.activeTab === item.id
+                    ? "var(--color-fg)"
+                    : "var(--color-fg-muted)",
               }}
               onClick={() => {
                 if (item.isTab) {
@@ -44,13 +50,20 @@ export function ActivityBar(props: ActivityBarProps) {
               }}
               title={item.label}
             >
-              <Show when={item.iconLucide} fallback={
-                <span
-                  innerHTML={item.iconSvg!}
-                  class="flex items-center justify-center svg-icon-wrapper"
-                  style={{ width: "14px", height: "14px", color: "currentColor" }}
-                />
-              }>
+              <Show
+                when={item.iconLucide}
+                fallback={
+                  <span
+                    innerHTML={item.iconSvg!}
+                    class="flex items-center justify-center svg-icon-wrapper"
+                    style={{
+                      width: "14px",
+                      height: "14px",
+                      color: "currentColor",
+                    }}
+                  />
+                }
+              >
                 {item.iconLucide && <item.iconLucide size={14} />}
               </Show>
               <span>{item.label}</span>
@@ -62,10 +75,14 @@ export function ActivityBar(props: ActivityBarProps) {
           <Button
             variant="ghost"
             class="flex items-center justify-center px-2 h-full rounded-none transition-colors text-xs"
-            style={{ 
-              background: showDropdown() ? "var(--color-sidebar-bg)" : "transparent",
-              color: showDropdown() ? "var(--color-fg)" : "var(--color-fg-muted)",
-              outline: "none" 
+            style={{
+              background: showDropdown()
+                ? "var(--color-sidebar-bg)"
+                : "transparent",
+              color: showDropdown()
+                ? "var(--color-fg)"
+                : "var(--color-fg-muted)",
+              outline: "none",
             }}
             onClick={() => setShowDropdown(!showDropdown())}
           >
@@ -91,7 +108,10 @@ export function ActivityBar(props: ActivityBarProps) {
                 variant="ghost"
                 class="flex items-center justify-start gap-2 px-3 py-2 text-[12px] rounded-none font-medium text-left w-full outline-none"
                 style={{
-                  color: (item.isTab && props.activeTab === item.id) ? "var(--color-accent)" : "var(--color-fg)",
+                  color:
+                    item.isTab && props.activeTab === item.id
+                      ? "var(--color-accent)"
+                      : "var(--color-fg)",
                 }}
                 onClick={() => {
                   if (item.isTab) {
@@ -102,13 +122,20 @@ export function ActivityBar(props: ActivityBarProps) {
                   setShowDropdown(false);
                 }}
               >
-                <Show when={item.iconLucide} fallback={
-                  <span
-                    innerHTML={item.iconSvg!}
-                    class="flex items-center justify-center svg-icon-wrapper"
-                    style={{ width: "14px", height: "14px", color: "currentColor" }}
-                  />
-                }>
+                <Show
+                  when={item.iconLucide}
+                  fallback={
+                    <span
+                      innerHTML={item.iconSvg!}
+                      class="flex items-center justify-center svg-icon-wrapper"
+                      style={{
+                        width: "14px",
+                        height: "14px",
+                        color: "currentColor",
+                      }}
+                    />
+                  }
+                >
                   {item.iconLucide && <item.iconLucide size={14} />}
                 </Show>
                 <span>{item.label}</span>

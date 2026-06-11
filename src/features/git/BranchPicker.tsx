@@ -8,7 +8,9 @@ interface BranchPickerProps {
 }
 
 export function BranchPicker(props: BranchPickerProps) {
-  const { gitState, listBranches, checkoutBranch, createBranch } = useGit(props.fs);
+  const { gitState, listBranches, checkoutBranch, createBranch } = useGit(
+    props.fs,
+  );
   const ui = useUI();
   const [isOpen, setIsOpen] = createSignal(false);
   const [branches, setBranches] = createSignal<string[]>([]);
@@ -43,10 +45,18 @@ export function BranchPicker(props: BranchPickerProps) {
 
   const handleCreateBranch = async () => {
     closeMenu();
-    const result = await ui.showPromptDialog("Create Branch", [
-      { id: "branchName", label: "Branch Name", placeholder: "e.g., feature/new-idea" }
-    ], { okLabel: "Create" });
-    
+    const result = await ui.showPromptDialog(
+      "Create Branch",
+      [
+        {
+          id: "branchName",
+          label: "Branch Name",
+          placeholder: "e.g., feature/new-idea",
+        },
+      ],
+      { okLabel: "Create" },
+    );
+
     if (result && result.branchName && result.branchName.trim() !== "") {
       await createBranch(result.branchName.trim());
     }
@@ -59,7 +69,8 @@ export function BranchPicker(props: BranchPickerProps) {
           class="h-full flex items-center gap-1.5 px-3 tracking-wide transition-colors text-[12px]"
           classList={{
             "bg-[var(--color-menu-hover)] text-[var(--color-fg)]": isOpen(),
-            "text-[var(--color-fg-muted)] hover:text-[var(--color-fg)] hover:bg-[var(--color-menu-hover)]": !isOpen(),
+            "text-[var(--color-fg-muted)] hover:text-[var(--color-fg)] hover:bg-[var(--color-menu-hover)]":
+              !isOpen(),
           }}
           title="Switch Branch"
           onClick={toggleOpen}
@@ -86,7 +97,10 @@ export function BranchPicker(props: BranchPickerProps) {
               <Plus size={12} class="opacity-70" />
               <span>Create new branch...</span>
             </button>
-            <div class="my-1 mx-2" style={{ height: "1px", background: "var(--color-border)" }} />
+            <div
+              class="my-1 mx-2"
+              style={{ height: "1px", background: "var(--color-border)" }}
+            />
             <For each={branches()}>
               {(b) => (
                 <button
@@ -94,8 +108,14 @@ export function BranchPicker(props: BranchPickerProps) {
                   style={{ color: "var(--color-fg)" }}
                   onClick={() => handleSelectBranch(b)}
                 >
-                  <Show when={b === gitState()?.branch} fallback={<div class="w-3" />}>
-                    <Check size={12} style={{ color: "var(--color-success)" }} />
+                  <Show
+                    when={b === gitState()?.branch}
+                    fallback={<div class="w-3" />}
+                  >
+                    <Check
+                      size={12}
+                      style={{ color: "var(--color-success)" }}
+                    />
                   </Show>
                   <span>{b}</span>
                 </button>

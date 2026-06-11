@@ -28,15 +28,15 @@ export function useGit(fs: ReturnType<typeof useFileSystem>) {
 
   const [gitState] = createResource(
     () => [fs.rootPath(), lastUpdate()] as const,
-    ([path, ts]) => fetchGitState(path, ts)
+    ([path, ts]) => fetchGitState(path, ts),
   );
 
   const refreshGit = () => setLastUpdate(Date.now());
 
   onMount(() => {
     const handleFsChange = () => refreshGit();
-    window.addEventListener('fs-change', handleFsChange);
-    onCleanup(() => window.removeEventListener('fs-change', handleFsChange));
+    window.addEventListener("fs-change", handleFsChange);
+    onCleanup(() => window.removeEventListener("fs-change", handleFsChange));
   });
 
   const commit = async (message: string) => {
@@ -159,11 +159,18 @@ export function useGit(fs: ReturnType<typeof useFileSystem>) {
     }
   };
 
-  const getFileDiff = async (file: string, refName: string = "HEAD"): Promise<string> => {
+  const getFileDiff = async (
+    file: string,
+    refName: string = "HEAD",
+  ): Promise<string> => {
     const root = fs.rootPath();
     if (!root) return "";
     try {
-      return await invoke<string>("git_show_file", { path: root, file, refName });
+      return await invoke<string>("git_show_file", {
+        path: root,
+        file,
+        refName,
+      });
     } catch (err) {
       console.error(`Failed to get diff for ${file}:`, err);
       return "";

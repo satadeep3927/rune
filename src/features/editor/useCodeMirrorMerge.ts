@@ -1,10 +1,20 @@
 import { onMount, onCleanup, createEffect } from "solid-js";
 import { MergeView } from "@codemirror/merge";
-import { EditorView, lineNumbers, highlightActiveLineGutter, drawSelection } from "@codemirror/view";
+import {
+  EditorView,
+  lineNumbers,
+  highlightActiveLineGutter,
+  drawSelection,
+} from "@codemirror/view";
 import { EditorState, Compartment } from "@codemirror/state";
 import { history } from "@codemirror/commands";
 import { highlightSelectionMatches } from "@codemirror/search";
-import { foldGutter, bracketMatching, syntaxHighlighting, defaultHighlightStyle } from "@codemirror/language";
+import {
+  foldGutter,
+  bracketMatching,
+  syntaxHighlighting,
+  defaultHighlightStyle,
+} from "@codemirror/language";
 import { getLanguageExtension } from "@/hooks/useCodeMirror";
 import { createRuneTheme } from "@/features/editor/cmTheme";
 import { globalSettings } from "@/stores/settings";
@@ -65,7 +75,7 @@ export function useCodeMirrorMerge(options: UseCodeMirrorMergeOptions) {
           wordWrapCompartmentA.of(wrapExt),
           EditorState.readOnly.of(true),
           EditorView.editable.of(false),
-        ]
+        ],
       },
       b: {
         doc: options.currentContent(),
@@ -74,9 +84,9 @@ export function useCodeMirrorMerge(options: UseCodeMirrorMergeOptions) {
           languageCompartmentB.of(getLanguageExtension(lang)),
           wordWrapCompartmentB.of(wrapExt),
           getUpdateListenerB(),
-        ]
+        ],
       },
-      parent: el
+      parent: el,
     });
   });
 
@@ -91,8 +101,12 @@ export function useCodeMirrorMerge(options: UseCodeMirrorMergeOptions) {
   createEffect(() => {
     const lang = options.language();
     if (view && languageCompartmentA.get(view.a.state)) {
-      view.a.dispatch({ effects: languageCompartmentA.reconfigure(getLanguageExtension(lang)) });
-      view.b.dispatch({ effects: languageCompartmentB.reconfigure(getLanguageExtension(lang)) });
+      view.a.dispatch({
+        effects: languageCompartmentA.reconfigure(getLanguageExtension(lang)),
+      });
+      view.b.dispatch({
+        effects: languageCompartmentB.reconfigure(getLanguageExtension(lang)),
+      });
     }
   });
 
@@ -114,7 +128,7 @@ export function useCodeMirrorMerge(options: UseCodeMirrorMergeOptions) {
     if (view.a.state.doc.toString() !== orig) {
       settingContent = true;
       view.a.dispatch({
-        changes: { from: 0, to: view.a.state.doc.length, insert: orig }
+        changes: { from: 0, to: view.a.state.doc.length, insert: orig },
       });
       settingContent = false;
     }
@@ -122,7 +136,7 @@ export function useCodeMirrorMerge(options: UseCodeMirrorMergeOptions) {
     if (view.b.state.doc.toString() !== curr) {
       settingContent = true;
       view.b.dispatch({
-        changes: { from: 0, to: view.b.state.doc.length, insert: curr }
+        changes: { from: 0, to: view.b.state.doc.length, insert: curr },
       });
       settingContent = false;
     }

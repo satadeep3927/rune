@@ -49,7 +49,13 @@ export function useMainLayout() {
   const [promptState, setPromptState] = createSignal<{
     title: string;
     message?: string;
-    fields: { id: string; label: string; type?: "text" | "password"; placeholder?: string; defaultValue?: string }[];
+    fields: {
+      id: string;
+      label: string;
+      type?: "text" | "password";
+      placeholder?: string;
+      defaultValue?: string;
+    }[];
     okLabel?: string;
     cancelLabel?: string;
     onConfirm: (values: Record<string, string>) => void;
@@ -120,7 +126,13 @@ export function useMainLayout() {
 
   function showPromptDialog(
     title: string,
-    fields: { id: string; label: string; type?: "text" | "password"; placeholder?: string; defaultValue?: string }[],
+    fields: {
+      id: string;
+      label: string;
+      type?: "text" | "password";
+      placeholder?: string;
+      defaultValue?: string;
+    }[],
     options?: { message?: string; okLabel?: string; cancelLabel?: string },
   ): Promise<Record<string, string> | null> {
     return new Promise((resolve) => {
@@ -145,16 +157,19 @@ export function useMainLayout() {
   function showToast(
     title: string,
     description?: string,
-    options?: { variant?: "success" | "error" | "info"; duration?: number }
+    options?: { variant?: "success" | "error" | "info"; duration?: number },
   ) {
     if (options?.duration === 0) {
       setToastState(null);
       return;
     }
     setToastState({ title, description, variant: options?.variant });
-    setTimeout(() => {
-      setToastState(null);
-    }, options?.duration !== undefined ? options.duration : 3000);
+    setTimeout(
+      () => {
+        setToastState(null);
+      },
+      options?.duration !== undefined ? options.duration : 3000,
+    );
   }
 
   function confirmDelete(name: string, onConfirm: () => void) {

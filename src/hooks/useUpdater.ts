@@ -4,7 +4,10 @@ import { relaunch } from "@tauri-apps/plugin-process";
 import { openUrl } from "@tauri-apps/plugin-opener";
 
 export function useUpdater() {
-  const [updateInfo, setUpdateInfo] = createSignal<{ version: string; body: string } | null>(null);
+  const [updateInfo, setUpdateInfo] = createSignal<{
+    version: string;
+    body: string;
+  } | null>(null);
   const [isDownloading, setIsDownloading] = createSignal(false);
   const [downloadProgress, setDownloadProgress] = createSignal(0);
   const [isVisible, setIsVisible] = createSignal(false);
@@ -39,16 +42,18 @@ export function useUpdater() {
       let contentLength = 0;
       await update.downloadAndInstall((event: any) => {
         switch (event.event) {
-          case 'Started':
+          case "Started":
             contentLength = event.data.contentLength || 0;
             break;
-          case 'Progress':
+          case "Progress":
             downloaded += event.data.chunkLength;
             if (contentLength > 0) {
-              setDownloadProgress(Math.round((downloaded / contentLength) * 100));
+              setDownloadProgress(
+                Math.round((downloaded / contentLength) * 100),
+              );
             }
             break;
-          case 'Finished':
+          case "Finished":
             break;
         }
       });
@@ -61,7 +66,8 @@ export function useUpdater() {
 
   const closePopup = () => setIsVisible(false);
 
-  const openReleaseNotes = () => openUrl("https://github.com/satadeep3927/rune/releases/latest");
+  const openReleaseNotes = () =>
+    openUrl("https://github.com/satadeep3927/rune/releases/latest");
 
   return {
     updateInfo,

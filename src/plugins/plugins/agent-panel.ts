@@ -18,7 +18,9 @@ const agentPanelPlugin: RunePlugin = {
       action: () => {
         const providers = (pluginRegistry as any).getAgentProviders?.() || [];
         if (providers.length === 0) {
-          api.ui.showMessage("No agent providers registered. Configure a provider in Settings.");
+          api.ui.showMessage(
+            "No agent providers registered. Configure a provider in Settings.",
+          );
           return;
         }
         agentStore.openSession(providers[0]!.id);
@@ -32,7 +34,9 @@ const agentPanelPlugin: RunePlugin = {
       action: async () => {
         const providers = (pluginRegistry as any).getAgentProviders?.() || [];
         if (providers.length === 0) {
-          api.ui.showMessage("No agent providers registered. Configure a provider in Settings.");
+          api.ui.showMessage(
+            "No agent providers registered. Configure a provider in Settings.",
+          );
           return;
         }
         if (providers.length === 1) {

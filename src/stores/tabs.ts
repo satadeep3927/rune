@@ -75,10 +75,12 @@ function openTab(
   dataUrl?: string,
   pane: PaneSide = "left",
   isDiff?: boolean,
-  diffOriginalContent?: string
+  diffOriginalContent?: string,
 ): string {
   // For diffs, we might want to allow opening a diff tab alongside a regular tab, but for now we'll just check by filePath
-  const existing = tabs().find((t) => t.filePath === filePath && t.isDiff === isDiff);
+  const existing = tabs().find(
+    (t) => t.filePath === filePath && t.isDiff === isDiff,
+  );
   if (existing) {
     if (existing.pane === "left") setActiveTabId(existing.id);
     else setRightActiveTabId(existing.id);

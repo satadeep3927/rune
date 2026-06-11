@@ -12,12 +12,12 @@ export function useIndexerProgress() {
     listen<string>("indexing-progress", (e) => {
       setIsIndexing(true);
       setProgress(e.payload);
-    }).then(un => unlistenProgress = un);
+    }).then((un) => (unlistenProgress = un));
 
     listen<string>("indexing-done", (e) => {
       setProgress(e.payload);
       setTimeout(() => setIsIndexing(false), 2000);
-    }).then(un => unlistenDone = un);
+    }).then((un) => (unlistenDone = un));
 
     onCleanup(() => {
       if (unlistenProgress) unlistenProgress();

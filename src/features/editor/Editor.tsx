@@ -79,14 +79,17 @@ export function Editor(props: EditorProps) {
         <Show
           when={props.hasOpenFile && props.fileType === "text" && props.tabId}
         >
-          <Show when={props.isDiff} fallback={
-            <CodeMirrorView
-              tabId={props.tabId}
-              content={props.content}
-              language={props.language}
-              onChange={props.onChange}
-            />
-          }>
+          <Show
+            when={props.isDiff}
+            fallback={
+              <CodeMirrorView
+                tabId={props.tabId}
+                content={props.content}
+                language={props.language}
+                onChange={props.onChange}
+              />
+            }
+          >
             <CodeMirrorMergeView
               tabId={props.tabId}
               originalContent={props.diffOriginalContent ?? ""}
@@ -138,9 +141,7 @@ export function Editor(props: EditorProps) {
         <Show when={props.hasOpenFile && props.fileType === "settings"}>
           <SettingsView />
         </Show>
-        <Show
-          when={props.hasOpenFile && props.fileType === "git-settings"}
-        >
+        <Show when={props.hasOpenFile && props.fileType === "git-settings"}>
           <GitSettingsView tabId={props.tabId!} />
         </Show>
       </div>

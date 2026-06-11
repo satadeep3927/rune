@@ -8,7 +8,7 @@ import { GitView } from "@/features/git/GitView";
 
 export interface SidebarProps {
   width: number;
-  
+
   // FileTree Props (passthrough)
   fs: any;
   handleFileTreeSelect: (entry: any) => void;
@@ -40,7 +40,11 @@ export function Sidebar(props: SidebarProps) {
         "border-right": "1px solid var(--color-border)",
       }}
     >
-      <ActivityBar activeTab={activeTab()} onSwitchTab={switchTab} width={props.width} />
+      <ActivityBar
+        activeTab={activeTab()}
+        onSwitchTab={switchTab}
+        width={props.width}
+      />
 
       <div class="flex-1 overflow-hidden relative">
         <Show when={activeTab() === "files"}>
@@ -68,9 +72,19 @@ export function Sidebar(props: SidebarProps) {
         </Show>
 
         <Show when={activeTab() === "git"}>
-          <GitView fs={props.fs} width={props.width} onOpenFile={(path, options) => props.handleFileTreeSelect({ path, isDirectory: false, name: path.split('/').pop(), ...options })} />
+          <GitView
+            fs={props.fs}
+            width={props.width}
+            onOpenFile={(path, options) =>
+              props.handleFileTreeSelect({
+                path,
+                isDirectory: false,
+                name: path.split("/").pop(),
+                ...options,
+              })
+            }
+          />
         </Show>
-
       </div>
     </aside>
   );
