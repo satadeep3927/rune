@@ -45,12 +45,12 @@ export function ConfirmDialog(props: ConfirmDialogProps) {
         }}
         onClick={(e) => e.stopPropagation()}
       >
-        <div class="space-y-1.5">
+        <div class="space-y-1.5 max-h-[60vh] overflow-y-auto pr-2">
           <p class="text-sm font-semibold" style={{ color: "var(--color-fg)" }}>
             {props.message}
           </p>
           <Show when={props.detail}>
-            <p class="text-xs" style={{ color: "var(--color-fg-muted)" }}>
+            <p class="text-xs whitespace-pre-wrap" style={{ color: "var(--color-fg-muted)" }}>
               {props.detail}
             </p>
           </Show>
