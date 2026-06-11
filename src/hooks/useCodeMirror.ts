@@ -148,14 +148,20 @@ async function globalWordCompletion(
   }
 }
 
+
 const editorStateCache = new Map<string, EditorState>();
 const scrollStateCache = new Map<string, { top: number; left: number }>();
+
+const languageCompartment = new Compartment();
+const wordWrapCompartment = new Compartment();
+const updateListenerCompartment = new Compartment();
 
 interface UseCodeMirrorOptions {
   containerRef: () => HTMLDivElement | undefined;
   content: () => string;
   language: () => string;
   tabId: () => string | null | undefined;
+  isActive?: () => boolean | undefined;
   onChange?: (content: string) => void;
   onScrollerRef?: (el: HTMLElement | null) => void;
   setCtxMenu: (
@@ -167,11 +173,6 @@ export function useCodeMirror(options: UseCodeMirrorOptions) {
   let view: EditorView | undefined;
   let currentContent = options.content();
   let settingContent = false;
-  let lastTabId = options.tabId();
-
-  const languageCompartment = new Compartment();
-  const wordWrapCompartment = new Compartment();
-  const updateListenerCompartment = new Compartment();
 
   let updateIndexTimeout: number | undefined;
   let gotoLineHandler: ((e: Event) => void) | undefined;
@@ -194,23 +195,19 @@ export function useCodeMirror(options: UseCodeMirrorOptions) {
 
   function getUpdateListener() {
     return EditorView.updateListener.of((update) => {
+      if (update.docChanged && !settingContent) {
+        currentContent = update.state.doc.toString();
+        options.onChange?.(currentContent);
+        scheduleIndexUpdate(currentContent);
+      }
       const tId = options.tabId();
       if (tId) {
         editorStateCache.set(tId, update.state);
       }
-      if (update.docChanged && !settingContent) {
-        const isUserEdit = update.transactions.some(
-          (t) => t.annotation(Transaction.userEvent) !== undefined,
-        );
-        if (isUserEdit) {
-          currentContent = update.state.doc.toString();
-          options.onChange?.(currentContent);
-          scheduleIndexUpdate(currentContent);
-        }
-      }
 
       if (update.docChanged || update.selectionSet) {
         const query = getSearchQuery(update.state);
+        const tId = options.tabId();
         if (query && query.valid && query.search) {
           let count = 0;
           let currentIndex = 0;
@@ -335,32 +332,48 @@ export function useCodeMirror(options: UseCodeMirrorOptions) {
     const el = options.containerRef();
     if (!el) return;
 
-    let state: EditorState;
     const tId = options.tabId();
     const cached = tId ? editorStateCache.get(tId) : undefined;
-    const initialContent = options.content();
+    const rawInitialContent = options.content();
+    const initialContent = rawInitialContent.replace(/\r\n/g, "\n");
     const exts = buildExtensions(options.language());
 
+    let state: EditorState;
     if (cached) {
-      if (cached.doc.toString() === initialContent) {
-        state = cached;
-      } else {
-        state = EditorState.create({ doc: initialContent, extensions: exts });
-      }
+      state = cached;
     } else {
       state = EditorState.create({ doc: initialContent, extensions: exts });
     }
-
     view = new EditorView({ state, parent: el });
-
     if (cached) {
-      view.dispatch({
-        effects: updateListenerCompartment.reconfigure(getUpdateListener()),
-      });
+      view.dispatch({ effects: updateListenerCompartment.reconfigure(getUpdateListener()) });
+    }
+    if (tId && !cached) {
+      editorStateCache.set(tId, view.state);
     }
 
     view.focus();
     options.onScrollerRef?.(view.scrollDOM);
+
+    const scrollPos = tId ? scrollStateCache.get(tId) : undefined;
+    if (scrollPos) {
+      requestAnimationFrame(() => {
+        if (view) {
+          view.scrollDOM.scrollTop = scrollPos.top;
+          view.scrollDOM.scrollLeft = scrollPos.left;
+        }
+      });
+    }
+
+    view.scrollDOM.addEventListener("scroll", () => {
+      const currentTId = options.tabId();
+      if (currentTId && view) {
+        scrollStateCache.set(currentTId, {
+          top: view.scrollDOM.scrollTop,
+          left: view.scrollDOM.scrollLeft,
+        });
+      }
+    });
 
     gotoLineHandler = (e: Event) => {
       const { path, line } = (e as CustomEvent).detail;
@@ -398,7 +411,6 @@ export function useCodeMirror(options: UseCodeMirrorOptions) {
           return;
         }
 
-        // Always update query before executing
         view.dispatch({
           effects: setSearchQuery.of(
             new SearchQuery({
@@ -420,7 +432,6 @@ export function useCodeMirror(options: UseCodeMirrorOptions) {
         } else if (action === "replaceAll") {
           replaceAll(view);
         }
-        // Do not call view.focus() here, otherwise the search input loses focus on every keystroke
       }
     };
     window.addEventListener("rune-search-execute", searchExecuteHandler);
@@ -469,14 +480,6 @@ export function useCodeMirror(options: UseCodeMirrorOptions) {
         findReplaceShortcutHandler,
       );
     }
-    const tId = options.tabId();
-    if (view && tId) {
-      editorStateCache.set(tId, view.state);
-      scrollStateCache.set(tId, {
-        top: view.scrollDOM.scrollTop,
-        left: view.scrollDOM.scrollLeft,
-      });
-    }
     view?.destroy();
     view = undefined;
   });
@@ -501,73 +504,26 @@ export function useCodeMirror(options: UseCodeMirrorOptions) {
   });
 
   createEffect(() => {
-    const newContent = options.content();
-    const tId = options.tabId();
-    if (!view) return;
-    if (currentContent === newContent && tId === lastTabId) return;
-
-    if (tId !== lastTabId) {
-      if (lastTabId && view) {
-        editorStateCache.set(lastTabId, view.state);
-        scrollStateCache.set(lastTabId, {
-          top: view.scrollDOM.scrollTop,
-          left: view.scrollDOM.scrollLeft,
-        });
-      }
-
-      lastTabId = tId;
-      currentContent = newContent;
-
-      const cached = tId ? editorStateCache.get(tId) : undefined;
-      let state: EditorState;
-      if (cached) {
-        if (cached.doc.toString() === newContent) {
-          state = cached;
-        } else {
-          state = EditorState.create({
-            doc: newContent,
-            extensions: buildExtensions(options.language()),
-          });
-        }
-      } else {
-        state = EditorState.create({
-          doc: newContent,
-          extensions: buildExtensions(options.language()),
-        });
-      }
-      view.setState(state);
-
-      if (cached) {
-        view.dispatch({
-          effects: updateListenerCompartment.reconfigure(getUpdateListener()),
-        });
-      }
-
-      const scrollPos = tId ? scrollStateCache.get(tId) : undefined;
-      if (scrollPos) {
-        requestAnimationFrame(() => {
-          if (view) {
-            view.scrollDOM.scrollTop = scrollPos.top;
-            view.scrollDOM.scrollLeft = scrollPos.left;
-          }
-        });
-      } else {
-        requestAnimationFrame(() => {
-          if (view) {
-            view.scrollDOM.scrollTop = 0;
-            view.scrollDOM.scrollLeft = 0;
-          }
-        });
-      }
-      return;
+    if (options.isActive?.() && view) {
+      view.focus();
     }
+  });
+
+  createEffect(() => {
+    const rawContent = options.content();
+    const newContent = rawContent.replace(/\r\n/g, "\n");
+    if (!view) return;
+    if (currentContent === newContent) return;
 
     currentContent = newContent;
-    settingContent = true;
-    view.dispatch({
-      changes: { from: 0, to: view.state.doc.length, insert: newContent },
-    });
-    settingContent = false;
+    if (view.state.doc.toString() !== newContent) {
+      settingContent = true;
+      view.dispatch({
+        changes: { from: 0, to: view.state.doc.length, insert: newContent },
+        annotations: Transaction.addToHistory.of(false),
+      });
+      settingContent = false;
+    }
   });
 
   function handleContextMenu(e: MouseEvent) {

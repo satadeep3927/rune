@@ -3,13 +3,12 @@ import { useFileSystem } from "@/hooks/useFileSystem";
 import { NewFileIcon } from "@/components/ui/icons/NewFileIcon";
 import { FolderOpenIcon } from "@/components/ui/icons/FolderOpenIcon";
 import { TerminalIcon } from "@/components/ui/icons/TerminalIcon";
-
-interface WelcomeScreenProps {
-  onOpenCommandPalette: () => void;
-}
-
-export function WelcomeScreen(props: WelcomeScreenProps) {
+export function WelcomeScreen() {
   const fs = useFileSystem();
+
+  const handleOpenCommandPalette = () => {
+    window.dispatchEvent(new CustomEvent("rune-open-command-palette"));
+  };
 
   return (
     <div
@@ -82,7 +81,7 @@ export function WelcomeScreen(props: WelcomeScreenProps) {
 
             <button
               class="w-full text-left p-4 rounded-lg transition-all flex items-center gap-4 group cursor-pointer border border-[var(--color-border)] bg-[var(--color-bg-secondary)] hover:border-[var(--color-accent)] hover:bg-[var(--color-bg-tertiary)]"
-              onClick={props.onOpenCommandPalette}
+              onClick={handleOpenCommandPalette}
             >
               <div class="p-2 rounded transition-colors bg-[var(--color-bg)] border border-[var(--color-border)]">
                 <TerminalIcon class="w-[18px] h-[18px] text-[var(--color-fg-muted)] group-hover:text-[var(--color-accent)] transition-colors" />

@@ -5,36 +5,29 @@ import { ImageViewer } from "./ImageViewer";
 import { PdfViewer } from "./PdfViewer";
 import { MarkdownPreview } from "./MarkdownPreview";
 import { SettingsView } from "@/components/SettingsView";
-import { WelcomeScreen } from "@/features/welcome/WelcomeScreen";
 import { GitSettingsView } from "@/features/git/GitSettingsView";
 import { useEditor } from "@/hooks/useEditor";
 import { cn } from "@/utils/cn";
-import type { FileType, MdMode } from "@/types";
+import type { MdMode } from "@/types";
+import { tabStore } from "@/stores/tabs";
 
 interface EditorProps {
-  content: string;
-  language: string;
-  isDirty: boolean;
-  onChange?: (content: string) => void;
-  hasOpenFile: boolean;
-  tabId: string | null;
-  fileType: FileType;
-  dataUrl?: string;
-  fileName?: string;
-  isDiff?: boolean;
-  diffOriginalContent?: string;
-  onCreateFile?: () => void;
-  onOpenFolder?: () => void;
-  onOpenCommandPalette?: () => void;
-  onSearchWorkspace?: () => void;
+  tabId: string;
+  isActive?: boolean;
 }
 
 export function Editor(props: EditorProps) {
   const { mdMode, setMdMode, editorScroller, setEditorScroller } = useEditor();
+  const tab = () => tabStore.tabs().find((t) => t.id === props.tabId);
+
+  const handleEditorChange = (content: string) => {
+    tabStore.updateTabContent(props.tabId, content);
+  };
 
   return (
-    <div class="flex-1 h-full overflow-hidden flex flex-col">
-      <Show when={props.hasOpenFile && props.fileType === "markdown"}>
+    <Show when={tab()}>
+      <div class="flex-1 h-full overflow-hidden flex flex-col">
+        <Show when={tab()!.fileType === "markdown"}>
         <div class="flex items-center gap-1 px-2 h-[28px] shrink-0 border-b border-[var(--color-border)] bg-[var(--color-bg-secondary)]">
           {(["edit", "preview", "split"] as MdMode[]).map((mode) => (
             <button
@@ -53,56 +46,51 @@ export function Editor(props: EditorProps) {
       </Show>
 
       <div class="flex-1 overflow-hidden">
-        <Show when={!props.hasOpenFile}>
-          <div class="h-full">
-            <WelcomeScreen onOpenCommandPalette={props.onOpenCommandPalette!} />
-          </div>
-        </Show>
-
         <Show
           when={
-            props.hasOpenFile && props.fileType === "image" && props.dataUrl
+            tab()!.fileType === "image" && tab()!.dataUrl
           }
         >
           <ImageViewer
-            dataUrl={props.dataUrl!}
-            fileName={props.fileName ?? ""}
+            dataUrl={tab()!.dataUrl!}
+            fileName={tab()!.fileName ?? ""}
           />
         </Show>
 
         <Show
-          when={props.hasOpenFile && props.fileType === "pdf" && props.dataUrl}
+          when={tab()!.fileType === "pdf" && tab()!.dataUrl}
         >
-          <PdfViewer dataUrl={props.dataUrl!} fileName={props.fileName ?? ""} />
+          <PdfViewer dataUrl={tab()!.dataUrl!} fileName={tab()!.fileName ?? ""} />
         </Show>
 
         <Show
-          when={props.hasOpenFile && props.fileType === "text" && props.tabId}
+          when={tab()!.fileType === "text" && props.tabId}
         >
           <Show
-            when={props.isDiff}
+            when={tab()!.isDiff}
             fallback={
               <CodeMirrorView
                 tabId={props.tabId}
-                content={props.content}
-                language={props.language}
-                onChange={props.onChange}
+                content={tab()!.content}
+                language={tab()!.language}
+                onChange={handleEditorChange}
+                isActive={props.isActive}
               />
             }
           >
             <CodeMirrorMergeView
               tabId={props.tabId}
-              originalContent={props.diffOriginalContent ?? ""}
-              currentContent={props.content}
-              language={props.language}
-              onChange={props.onChange}
+              originalContent={tab()!.diffOriginalContent ?? ""}
+              currentContent={tab()!.content}
+              language={tab()!.language}
+              onChange={handleEditorChange}
             />
           </Show>
         </Show>
 
         <Show
           when={
-            props.hasOpenFile && props.fileType === "markdown" && props.tabId
+            tab()!.fileType === "markdown" && props.tabId
           }
         >
           <div class="flex h-full">
@@ -116,9 +104,9 @@ export function Editor(props: EditorProps) {
               >
                 <CodeMirrorView
                   tabId={props.tabId}
-                  content={props.content}
+                  content={tab()!.content}
                   language="markdown"
-                  onChange={props.onChange}
+                  onChange={handleEditorChange}
                   onScrollerRef={
                     mdMode() === "split" ? setEditorScroller : undefined
                   }
@@ -128,7 +116,7 @@ export function Editor(props: EditorProps) {
             <Show when={mdMode() === "preview" || mdMode() === "split"}>
               <div class={mdMode() === "split" ? "w-1/2" : "w-full"}>
                 <MarkdownPreview
-                  content={props.content}
+                  content={tab()!.content}
                   editorScrollElement={
                     mdMode() === "split" ? editorScroller() : undefined
                   }
@@ -138,13 +126,14 @@ export function Editor(props: EditorProps) {
           </div>
         </Show>
 
-        <Show when={props.hasOpenFile && props.fileType === "settings"}>
+        <Show when={tab()!.fileType === "settings"}>
           <SettingsView />
         </Show>
-        <Show when={props.hasOpenFile && props.fileType === "git-settings"}>
+        <Show when={tab()!.fileType === "git-settings"}>
           <GitSettingsView tabId={props.tabId!} />
         </Show>
       </div>
     </div>
+    </Show>
   );
 }

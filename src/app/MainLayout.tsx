@@ -31,7 +31,7 @@ export function MainLayout() {
     showCommandPalette,
     setShowCommandPalette,
     palettePrefix,
-    setPalettePrefix,
+
     showWorkspaceSearch,
     setShowWorkspaceSearch,
     showTerminal,
@@ -43,7 +43,7 @@ export function MainLayout() {
     promptState,
     selectedPaths,
     setSelectedPaths,
-    handleEditorChange,
+
     handleFileTreeSelect,
     handleFileTreeContextMenu,
     handleEmptyContextMenu,
@@ -55,7 +55,7 @@ export function MainLayout() {
     commands,
     windowTitle,
     leftActiveTab,
-    handleWelcomeOpenPalette,
+
     handleSidebarResize,
     handleSplitResize,
     handleCloseSplit,
@@ -87,9 +87,7 @@ export function MainLayout() {
             tabStore.leftTabs().length > 0 ||
             tabStore.rightTabs().length > 0
           }
-          fallback={
-            <WelcomeScreen onOpenCommandPalette={handleWelcomeOpenPalette} />
-          }
+          fallback={<WelcomeScreen />}
         >
           <div class="flex flex-1 overflow-hidden">
             {settingsStore.sidebarVisible() && (
@@ -123,12 +121,7 @@ export function MainLayout() {
                 {/* Left Pane */}
                 <EditorPane
                   pane="left"
-                  fs={fs}
                   onTabContextMenu={handleTabContextMenu}
-                  handleEditorChange={handleEditorChange}
-                  setPalettePrefix={setPalettePrefix}
-                  setShowCommandPalette={setShowCommandPalette}
-                  setShowWorkspaceSearch={setShowWorkspaceSearch}
                   onCloseSplit={
                     settingsStore.splitActive() ? handleCloseSplit : undefined
                   }
@@ -147,12 +140,8 @@ export function MainLayout() {
                 <Show when={settingsStore.splitActive()}>
                   <EditorPane
                     pane="right"
-                    fs={fs}
                     onTabContextMenu={handleTabContextMenu}
-                    handleEditorChange={handleEditorChange}
-                    setPalettePrefix={setPalettePrefix}
-                    setShowCommandPalette={setShowCommandPalette}
-                    setShowWorkspaceSearch={setShowWorkspaceSearch}
+                    onCloseSplit={handleCloseSplit}
                   />
                 </Show>
               </div>

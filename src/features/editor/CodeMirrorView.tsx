@@ -8,6 +8,7 @@ interface CodeMirrorViewProps {
   onChange?: (content: string) => void;
   onScrollerRef?: (el: HTMLElement | null) => void;
   tabId?: string | null;
+  isActive?: boolean;
 }
 
 export function CodeMirrorView(props: CodeMirrorViewProps) {
@@ -23,10 +24,13 @@ export function CodeMirrorView(props: CodeMirrorViewProps) {
     content: () => props.content,
     language: () => props.language,
     tabId: () => props.tabId,
+    isActive: () => props.isActive,
     onChange: props.onChange,
     onScrollerRef: props.onScrollerRef,
     setCtxMenu,
   });
+
+
 
   return (
     <>

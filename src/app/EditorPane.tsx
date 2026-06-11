@@ -1,21 +1,17 @@
 import { TabBar, Editor } from "@/features/editor";
+import { WelcomeScreen } from "@/features/welcome/WelcomeScreen";
 import { tabStore } from "@/stores/tabs";
 import { useEditorPane } from "@/hooks/useEditorPane";
 import type { PaneSide } from "@/types";
 import { XIcon } from "@/components/ui/icons/XIcon";
-import { Show } from "solid-js";
+import { Show, For } from "solid-js";
 import { FindReplace } from "@/components/editor/FindReplace";
 import { Alert } from "@/components/ui/Alert";
 import { Button } from "@/components/ui/Button";
 
 interface EditorPaneProps {
   pane: PaneSide;
-  fs: any;
   onTabContextMenu: (id: string, pane: PaneSide, e: MouseEvent) => void;
-  handleEditorChange: (content: string, tabId: string) => void;
-  setPalettePrefix: (p: string) => void;
-  setShowCommandPalette: (s: boolean) => void;
-  setShowWorkspaceSearch: (s: boolean) => void;
   onCloseSplit?: () => void;
 }
 
@@ -87,29 +83,34 @@ export function EditorPane(props: EditorPaneProps) {
           This file has been modified on disk by another program.
         </Alert>
       </Show>
-      <Editor
-        content={activeTab()?.content ?? ""}
-        language={activeTab()?.language ?? "text"}
-        isDirty={activeTab()?.isDirty ?? false}
-        hasOpenFile={!!activeTab()}
-        onChange={(content) => {
-          const tab = activeTab();
-          if (tab) props.handleEditorChange(content, tab.id);
-        }}
-        tabId={activeTab()?.id ?? null}
-        fileType={activeTab()?.fileType ?? "text"}
-        dataUrl={activeTab()?.dataUrl}
-        fileName={activeTab()?.fileName}
-        isDiff={activeTab()?.isDiff}
-        diffOriginalContent={activeTab()?.diffOriginalContent}
-        onCreateFile={() => tabStore.openUntitledTab()}
-        onOpenFolder={() => props.fs.openFolder()}
-        onOpenCommandPalette={() => {
-          props.setPalettePrefix(">");
-          props.setShowCommandPalette(true);
-        }}
-        onSearchWorkspace={() => props.setShowWorkspaceSearch(true)}
-      />
+      <div class="flex-1 overflow-hidden relative">
+        <Show when={currentTabs().length === 0}>
+          <div class="absolute inset-0">
+            <WelcomeScreen />
+          </div>
+        </Show>
+        <For each={currentTabs().map((t) => t.id)}>
+          {(id) => {
+            const tab = () => currentTabs().find((t) => t.id === id);
+            return (
+              <Show when={tab()}>
+                <div
+                  class="absolute inset-0"
+                  style={{
+                    display: activeTabId() === id ? "block" : "none",
+                    "z-index": activeTabId() === id ? 10 : 1,
+                  }}
+                >
+                  <Editor
+                    tabId={id}
+                    isActive={activeTabId() === id}
+                  />
+                </div>
+              </Show>
+            );
+          }}
+        </For>
+      </div>
     </div>
   );
 }

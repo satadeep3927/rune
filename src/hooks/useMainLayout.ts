@@ -185,9 +185,17 @@ export function useMainLayout() {
     });
   }
 
-  function handleEditorChange(content: string, tabId: string) {
-    tabStore.updateTabContent(tabId, content);
-  }
+  onMount(() => {
+    const handleOpenCommandPalette = () => {
+      setPalettePrefix(">");
+      setShowCommandPalette(true);
+    };
+    window.addEventListener("rune-open-command-palette", handleOpenCommandPalette);
+
+    onCleanup(() => {
+      window.removeEventListener("rune-open-command-palette", handleOpenCommandPalette);
+    });
+  });
 
   const fileClipboard = useFileClipboard();
 
@@ -444,7 +452,7 @@ export function useMainLayout() {
     toastState,
     selectedPaths,
     setSelectedPaths,
-    handleEditorChange,
+
     handleFileTreeSelect,
     handleFileTreeContextMenu,
     handleEmptyContextMenu,

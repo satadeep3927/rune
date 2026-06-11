@@ -1,4 +1,4 @@
-import { createSignal, onMount, onCleanup, createEffect } from "solid-js";
+import { createSignal, onMount, onCleanup, createEffect, untrack } from "solid-js";
 
 export function useFindReplace() {
   const [isVisible, setIsVisible] = createSignal(false);
@@ -11,9 +11,8 @@ export function useFindReplace() {
   const [matchCount, setMatchCount] = createSignal<number | string>(0);
   const [currentMatch, setCurrentMatch] = createSignal(0);
 
-  // Dispatch events to active CodeMirror view
   function executeSearch(
-    action: "findNext" | "findPrev" | "replace" | "replaceAll",
+    action: "findNext" | "findPrev" | "replace" | "replaceAll" | "update",
   ) {
     if (!searchQuery()) return;
 
@@ -22,7 +21,7 @@ export function useFindReplace() {
         detail: {
           action,
           query: searchQuery(),
-          replaceWith: replaceQuery(),
+          replaceWith: untrack(() => replaceQuery()),
           caseSensitive: caseSensitive(),
           regexp: useRegex(),
           wholeWord: wholeWord(),
@@ -89,7 +88,13 @@ export function useFindReplace() {
 
   // Re-run search whenever options change
   createEffect(() => {
-    if (isVisible() && searchQuery()) {
+    const query = searchQuery();
+    const isVis = isVisible();
+    const caseSens = caseSensitive();
+    const regex = useRegex();
+    const word = wholeWord();
+    
+    if (isVis && query) {
       executeSearch("findNext");
     }
   });
