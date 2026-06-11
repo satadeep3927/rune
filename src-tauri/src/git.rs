@@ -1,6 +1,19 @@
 use serde::Serialize;
 use std::process::Command;
 
+#[cfg(target_os = "windows")]
+use std::os::windows::process::CommandExt;
+
+fn git_command() -> Command {
+    let mut cmd = Command::new("git");
+    #[cfg(target_os = "windows")]
+    {
+        const CREATE_NO_WINDOW: u32 = 0x08000000;
+        cmd.creation_flags(CREATE_NO_WINDOW);
+    }
+    cmd
+}
+
 #[derive(Serialize)]
 pub struct GitState {
     pub branch: Option<String>,
@@ -14,7 +27,7 @@ pub struct GitFileStatus {
 }
 
 fn execute_git(args: &[&str], cwd: &str) -> Option<String> {
-    let output = Command::new("git")
+    let output = git_command()
         .args(args)
         .current_dir(cwd)
         .output()
@@ -61,7 +74,7 @@ pub fn get_git_state(path: String) -> Option<GitState> {
 
 #[tauri::command]
 pub async fn git_commit(path: String, message: String) -> Result<String, String> {
-    let output = Command::new("git")
+    let output = git_command()
         .args(["commit", "-m", &message])
         .current_dir(&path)
         .output()
@@ -80,7 +93,7 @@ pub async fn git_commit(path: String, message: String) -> Result<String, String>
 
 #[tauri::command]
 pub fn git_add(path: String, files: Vec<String>) -> Result<String, String> {
-    let mut cmd = Command::new("git");
+    let mut cmd = git_command();
     cmd.arg("add");
     for file in files {
         cmd.arg(&file);
@@ -104,7 +117,7 @@ pub fn git_add(path: String, files: Vec<String>) -> Result<String, String> {
 
 #[tauri::command]
 pub fn git_reset(path: String, files: Vec<String>) -> Result<String, String> {
-    let mut cmd = Command::new("git");
+    let mut cmd = git_command();
     cmd.arg("reset");
     cmd.arg("HEAD");
     for file in files {
@@ -129,7 +142,7 @@ pub fn git_reset(path: String, files: Vec<String>) -> Result<String, String> {
 
 #[tauri::command]
 pub async fn git_push(path: String) -> Result<String, String> {
-    let output = Command::new("git")
+    let output = git_command()
         .args(["push", "-u", "origin", "HEAD"])
         .current_dir(&path)
         .output()
@@ -148,7 +161,7 @@ pub async fn git_push(path: String) -> Result<String, String> {
 
 #[tauri::command]
 pub async fn git_pull(path: String) -> Result<String, String> {
-    let output = Command::new("git")
+    let output = git_command()
         .args(["pull", "origin", "HEAD"])
         .current_dir(&path)
         .output()
@@ -167,7 +180,7 @@ pub async fn git_pull(path: String) -> Result<String, String> {
 
 #[tauri::command]
 pub fn git_init(path: String) -> Result<String, String> {
-    let output = Command::new("git")
+    let output = git_command()
         .args(["init"])
         .current_dir(&path)
         .output()
@@ -182,7 +195,7 @@ pub fn git_init(path: String) -> Result<String, String> {
 
 #[tauri::command]
 pub fn git_discard(path: String, files: Vec<String>) -> Result<String, String> {
-    let mut cmd = Command::new("git");
+    let mut cmd = git_command();
     cmd.arg("checkout");
     cmd.arg("--");
     for file in files {
@@ -197,7 +210,11 @@ pub fn git_discard(path: String, files: Vec<String>) -> Result<String, String> {
     if output.status.success() {
         Ok(String::from_utf8_lossy(&output.stdout).to_string())
     } else {
-        Err(String::from_utf8_lossy(&output.stderr).to_string())
+        let mut err_msg = String::from_utf8_lossy(&output.stderr).to_string();
+        if err_msg.is_empty() {
+            err_msg = String::from_utf8_lossy(&output.stdout).to_string();
+        }
+        Err(err_msg)
     }
 }
 
@@ -210,7 +227,7 @@ pub fn git_list_branches(path: String) -> Result<Vec<String>, String> {
 
 #[tauri::command]
 pub fn git_checkout(path: String, branch: String) -> Result<String, String> {
-    let output = Command::new("git")
+    let output = git_command()
         .args(["checkout", &branch])
         .current_dir(&path)
         .output()
@@ -219,13 +236,17 @@ pub fn git_checkout(path: String, branch: String) -> Result<String, String> {
     if output.status.success() {
         Ok(String::from_utf8_lossy(&output.stdout).to_string())
     } else {
-        Err(String::from_utf8_lossy(&output.stderr).to_string())
+        let mut err_msg = String::from_utf8_lossy(&output.stderr).to_string();
+        if err_msg.is_empty() {
+            err_msg = String::from_utf8_lossy(&output.stdout).to_string();
+        }
+        Err(err_msg)
     }
 }
 
 #[tauri::command]
 pub fn git_create_branch(path: String, branch: String) -> Result<String, String> {
-    let output = Command::new("git")
+    let output = git_command()
         .args(["checkout", "-b", &branch])
         .current_dir(&path)
         .output()
@@ -234,14 +255,18 @@ pub fn git_create_branch(path: String, branch: String) -> Result<String, String>
     if output.status.success() {
         Ok(String::from_utf8_lossy(&output.stdout).to_string())
     } else {
-        Err(String::from_utf8_lossy(&output.stderr).to_string())
+        let mut err_msg = String::from_utf8_lossy(&output.stderr).to_string();
+        if err_msg.is_empty() {
+            err_msg = String::from_utf8_lossy(&output.stdout).to_string();
+        }
+        Err(err_msg)
     }
 }
 
 #[tauri::command]
 pub fn git_show_file(path: String, file: String, ref_name: String) -> Result<String, String> {
     let target = format!("{}:{}", ref_name, file);
-    let output = Command::new("git")
+    let output = git_command()
         .args(["show", &target])
         .current_dir(&path)
         .output()
@@ -257,14 +282,14 @@ pub fn git_show_file(path: String, file: String, ref_name: String) -> Result<Str
 #[tauri::command]
 pub async fn git_set_remote(path: String, remote: String, url: String) -> Result<String, String> {
     // try to set-url first, if fails (remote doesn't exist), try to add it
-    let mut output = Command::new("git")
+    let mut output = git_command()
         .args(["remote", "set-url", &remote, &url])
         .current_dir(&path)
         .output()
         .map_err(|e| e.to_string())?;
 
     if !output.status.success() {
-        output = Command::new("git")
+        output = git_command()
             .args(["remote", "add", &remote, &url])
             .current_dir(&path)
             .output()
@@ -280,7 +305,7 @@ pub async fn git_set_remote(path: String, remote: String, url: String) -> Result
 
 #[tauri::command]
 pub async fn git_get_remote(path: String, remote: String) -> Result<String, String> {
-    let output = Command::new("git")
+    let output = git_command()
         .args(["remote", "get-url", &remote])
         .current_dir(&path)
         .output()
@@ -295,7 +320,7 @@ pub async fn git_get_remote(path: String, remote: String) -> Result<String, Stri
 
 #[tauri::command]
 pub async fn git_get_remotes(path: String) -> Result<Vec<serde_json::Value>, String> {
-    let output = Command::new("git")
+    let output = git_command()
         .args(["remote", "-v"])
         .current_dir(&path)
         .output()
@@ -329,7 +354,7 @@ pub async fn git_get_remotes(path: String) -> Result<Vec<serde_json::Value>, Str
 
 #[tauri::command]
 pub async fn git_remove_remote(path: String, remote: String) -> Result<String, String> {
-    let output = Command::new("git")
+    let output = git_command()
         .args(["remote", "remove", &remote])
         .current_dir(&path)
         .output()
@@ -344,7 +369,7 @@ pub async fn git_remove_remote(path: String, remote: String) -> Result<String, S
 
 #[tauri::command]
 pub async fn git_get_config(path: String, key: String) -> Result<String, String> {
-    let output = Command::new("git")
+    let output = git_command()
         .args(["config", "--local", &key])
         .current_dir(&path)
         .output()
@@ -359,7 +384,7 @@ pub async fn git_get_config(path: String, key: String) -> Result<String, String>
 
 #[tauri::command]
 pub async fn git_set_config(path: String, key: String, value: String) -> Result<String, String> {
-    let output = Command::new("git")
+    let output = git_command()
         .args(["config", "--local", &key, &value])
         .current_dir(&path)
         .output()
