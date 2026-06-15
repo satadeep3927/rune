@@ -1,3 +1,4 @@
+pub mod clipboard;
 pub mod indexer;
 pub mod window;
 pub mod terminal;
@@ -45,7 +46,7 @@ pub fn run() {
             search::get_workspace_symbols, search::get_document_symbols, search::get_definition,
             search::get_indexed_files,
             window::get_window_context, window::register_window_workspace,
-            fs_utils::read_clipboard_files, fs_utils::write_clipboard_files, search::workspace_search,
+            fs_utils::read_clipboard_files, fs_utils::write_clipboard_files, clipboard::read_clipboard_text, clipboard::write_clipboard_text, clipboard::clipboard_has_text, search::workspace_search,
             fs_utils::parse_markdown, fs_utils::batch_copy_files, fs_utils::batch_move_files, search::fuzzy_search_files,
             fs_utils::get_expanded_tree, fs_utils::read_filtered_dir, fs_utils::delete_path_async,
             fs_utils::get_file_hash, fs_utils::check_file_update,

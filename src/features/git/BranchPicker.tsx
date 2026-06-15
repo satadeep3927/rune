@@ -1,66 +1,20 @@
-import { Show, createSignal, onCleanup, onMount, For } from "solid-js";
+import { Show, For } from "solid-js";
 import { GitBranch, ChevronDown, Plus, Check } from "lucide-solid";
-import { useGit } from "@/hooks/useGit";
-import { useUI } from "@/contexts/UIContext";
+import { useBranchPicker } from "@/hooks/useBranchPicker";
 
 interface BranchPickerProps {
   fs: any;
 }
 
 export function BranchPicker(props: BranchPickerProps) {
-  const { gitState, listBranches, checkoutBranch, createBranch } = useGit(
-    props.fs,
-  );
-  const ui = useUI();
-  const [isOpen, setIsOpen] = createSignal(false);
-  const [branches, setBranches] = createSignal<string[]>([]);
-
-  const toggleOpen = async (e: MouseEvent) => {
-    e.stopPropagation();
-    if (!isOpen()) {
-      const b = await listBranches();
-      if (b) setBranches(b);
-    }
-    setIsOpen(!isOpen());
-  };
-
-  const closeMenu = () => setIsOpen(false);
-
-  const handleClickOutside = (e: MouseEvent) => {
-    const target = e.target as HTMLElement;
-    if (!target.closest("[data-branch-picker]")) {
-      closeMenu();
-    }
-  };
-
-  onMount(() => document.addEventListener("click", handleClickOutside));
-  onCleanup(() => document.removeEventListener("click", handleClickOutside));
-
-  const handleSelectBranch = async (b: string) => {
-    closeMenu();
-    if (b !== gitState()?.branch) {
-      await checkoutBranch(b);
-    }
-  };
-
-  const handleCreateBranch = async () => {
-    closeMenu();
-    const result = await ui.showPromptDialog(
-      "Create Branch",
-      [
-        {
-          id: "branchName",
-          label: "Branch Name",
-          placeholder: "e.g., feature/new-idea",
-        },
-      ],
-      { okLabel: "Create" },
-    );
-
-    if (result && result.branchName && result.branchName.trim() !== "") {
-      await createBranch(result.branchName.trim());
-    }
-  };
+  const {
+    gitState,
+    isOpen,
+    branches,
+    toggleOpen,
+    handleSelectBranch,
+    handleCreateBranch,
+  } = useBranchPicker(props.fs);
 
   return (
     <Show when={gitState() && gitState()?.branch}>

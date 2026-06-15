@@ -1,4 +1,5 @@
 import { useCodeMirrorMerge } from "./useCodeMirrorMerge";
+import { settingsStore } from "@/stores/settings";
 
 interface CodeMirrorMergeViewProps {
   originalContent: string;
@@ -20,6 +21,8 @@ export function CodeMirrorMergeView(props: CodeMirrorMergeViewProps) {
     onChange: props.onChange,
   });
 
+  const inverseZoom = () => 1 / settingsStore.zoomLevel();
+
   return (
     <div
       ref={containerRef}
@@ -27,6 +30,10 @@ export function CodeMirrorMergeView(props: CodeMirrorMergeViewProps) {
       style={{
         display: "flex",
         "flex-direction": "column",
+        transform: `scale(${inverseZoom()})`,
+        "transform-origin": "top left",
+        width: `${settingsStore.zoomLevel() * 100}%`,
+        height: `${settingsStore.zoomLevel() * 100}%`,
       }}
     />
   );

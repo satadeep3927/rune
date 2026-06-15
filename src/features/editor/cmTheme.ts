@@ -66,11 +66,7 @@ export function createRuneTheme(): Extension {
       padding: "0",
     },
     ".cm-panel.cm-search": {
-      padding: "6px 8px",
-      display: "flex",
-      flexWrap: "wrap",
-      gap: "4px",
-      alignItems: "center",
+      display: "none !important",
     },
     ".cm-panel.cm-search input": {
       fontFamily: '"Inter", "Segoe UI", system-ui, sans-serif',

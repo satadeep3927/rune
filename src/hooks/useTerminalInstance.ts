@@ -3,7 +3,7 @@ import { invoke } from "@tauri-apps/api/core";
 import { Terminal } from "xterm";
 import { FitAddon } from "xterm-addon-fit";
 import { listen } from "@tauri-apps/api/event";
-import { globalSettings } from "@/stores/settings";
+import { globalSettings, settingsStore } from "@/stores/settings";
 import { throttle } from "@/utils/throttle";
 
 export function useTerminalInstance(
@@ -75,7 +75,9 @@ export function useTerminalInstance(
       if (isModifier && arg.code === "KeyC" && arg.type === "keydown") {
         const selection = term!.getSelection();
         if (selection) {
-          navigator.clipboard.writeText(selection);
+          invoke("write_clipboard_text", { text: selection }).catch(
+            console.error,
+          );
           return false;
         }
       }
@@ -97,6 +99,9 @@ export function useTerminalInstance(
     });
 
     term.onData((data) => {
+      if (data.includes("\r")) {
+        window.dispatchEvent(new CustomEvent("terminal-enter-pressed"));
+      }
       invoke("send_terminal_input", { termId: id, input: data }).catch(
         (err) => {
           term?.write(`\r\nError writing to terminal: ${err}\r\n`);
@@ -142,22 +147,26 @@ export function useTerminalInstance(
     }, 300);
   }
 
-  function handleContextMenu(e: MouseEvent) {
+  async function handleContextMenu(e: MouseEvent) {
     e.preventDefault();
     if (!term) return;
     const selection = term.getSelection();
     if (selection) {
-      navigator.clipboard.writeText(selection).then(() => {
-        term?.clearSelection();
-      });
-    } else {
-      navigator.clipboard.readText().then((text) => {
-        if (text) {
-          invoke("send_terminal_input", { termId: id, input: text }).catch(
-            console.error,
-          );
-        }
-      });
+      await invoke("write_clipboard_text", { text: selection }).catch(
+        console.error,
+      );
+      term?.clearSelection();
+      return;
+    }
+
+    const text = await invoke<string>("read_clipboard_text").catch((err) => {
+      console.error("Failed to read terminal clipboard:", err);
+      return "";
+    });
+    if (text) {
+      invoke("send_terminal_input", { termId: id, input: text }).catch(
+        console.error,
+      );
     }
   }
 
@@ -165,11 +174,15 @@ export function useTerminalInstance(
     throttledFit();
   }
 
+  const handleTerminalContextMenu = (e: MouseEvent) => {
+    void handleContextMenu(e);
+  };
+
   onMount(() => {
     initTerminal();
     window.addEventListener("resize", handleResize);
     window.addEventListener("rune-run-script", handleRunScriptEvent);
-    terminalRef?.addEventListener("contextmenu", handleContextMenu);
+    terminalRef?.addEventListener("contextmenu", handleTerminalContextMenu);
 
     resizeObserver = new ResizeObserver(() => {
       throttledFit();
@@ -182,7 +195,7 @@ export function useTerminalInstance(
   onCleanup(() => {
     window.removeEventListener("resize", handleResize);
     window.removeEventListener("rune-run-script", handleRunScriptEvent);
-    terminalRef?.removeEventListener("contextmenu", handleContextMenu);
+    terminalRef?.removeEventListener("contextmenu", handleTerminalContextMenu);
     resizeObserver?.disconnect();
     unlistenOutput?.();
     unlistenExit?.();
@@ -201,6 +214,13 @@ export function useTerminalInstance(
       term.options.fontSize = globalSettings.terminalFontSize;
       term.options.theme = getTerminalTheme();
       setTimeout(() => fitAddon?.fit(), 10);
+    }
+  });
+
+  createEffect(() => {
+    settingsStore.zoomLevel();
+    if (term && fitAddon) {
+      setTimeout(() => fitAddon?.fit(), 50);
     }
   });
 

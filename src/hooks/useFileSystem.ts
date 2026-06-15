@@ -189,6 +189,7 @@ export function useFileSystem() {
         title: "Open Folder",
       });
       if (selected && typeof selected === "string") {
+        stopAllWatchers();
         setRootPath(selected);
         localStorage.setItem(STORAGE_KEY, selected);
 
@@ -474,6 +475,7 @@ export function useFileSystem() {
   async function openFolderByPath(folderPath: string) {
     setLoading(true);
     try {
+      stopAllWatchers();
       setRootPath(folderPath);
       localStorage.setItem(STORAGE_KEY, folderPath);
 

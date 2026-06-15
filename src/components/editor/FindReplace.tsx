@@ -29,12 +29,14 @@ export function FindReplace() {
     currentMatch,
     executeSearch,
     handleClose,
+    focusTrigger,
   } = useFindReplace();
 
   let searchInputRef: HTMLInputElement | undefined;
 
-  // Auto-focus when it becomes visible
+  // Auto-focus when it becomes visible or when triggered
   createEffect(() => {
+    focusTrigger();
     if (isVisible() && searchInputRef) {
       setTimeout(() => searchInputRef!.focus(), 50);
     }

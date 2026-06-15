@@ -1,5 +1,4 @@
 import { Show, For } from "solid-js";
-import { invoke } from "@tauri-apps/api/core";
 import { remove } from "@tauri-apps/plugin-fs";
 import {
   GitCommit,
@@ -269,9 +268,13 @@ export function GitView(props: GitViewProps) {
                   }
                 >
                   <button
-                    class="opacity-0 group-hover:opacity-100 p-1 hover:text-[var(--color-success)] transition-opacity"
+                    classList={{
+                      "p-1 transition-opacity": true,
+                      "opacity-100 text-[var(--color-success)] cursor-not-allowed": git.isStagingAll(),
+                      "opacity-0 group-hover:opacity-100 hover:text-[var(--color-success)]": !git.isStagingAll()
+                    }}
                     onClick={() =>
-                      git.stageFiles(
+                      git.handleStageAll(
                         git
                           .gitState()
                           ?.status.filter(
@@ -281,8 +284,11 @@ export function GitView(props: GitViewProps) {
                       )
                     }
                     title="Stage All Changes"
+                    disabled={git.isStagingAll()}
                   >
-                    <Plus size={12} />
+                    <Show when={git.isStagingAll()} fallback={<Plus size={12} />}>
+                      <Loader2 size={12} class="animate-spin" />
+                    </Show>
                   </button>
                 </Show>
               </div>

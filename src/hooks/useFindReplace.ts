@@ -8,6 +8,7 @@ export function useFindReplace() {
   const [caseSensitive, setCaseSensitive] = createSignal(false);
   const [useRegex, setUseRegex] = createSignal(false);
   const [wholeWord, setWholeWord] = createSignal(false);
+  const [focusTrigger, setFocusTrigger] = createSignal(0);
   const [matchCount, setMatchCount] = createSignal<number | string>(0);
   const [currentMatch, setCurrentMatch] = createSignal(0);
 
@@ -33,11 +34,13 @@ export function useFindReplace() {
   function handleFind() {
     setIsVisible(true);
     setIsReplaceVisible(false);
+    setFocusTrigger((f) => f + 1);
   }
 
   function handleReplace() {
     setIsVisible(true);
     setIsReplaceVisible(true);
+    setFocusTrigger((f) => f + 1);
   }
 
   function handleClose() {
@@ -86,16 +89,15 @@ export function useFindReplace() {
     window.removeEventListener("rune-search-set-query", handleSetQuery);
   });
 
-  // Re-run search whenever options change
   createEffect(() => {
     const query = searchQuery();
     const isVis = isVisible();
-    const caseSens = caseSensitive();
-    const regex = useRegex();
-    const word = wholeWord();
+    caseSensitive();
+    useRegex();
+    wholeWord();
     
     if (isVis && query) {
-      executeSearch("findNext");
+      executeSearch("update");
     }
   });
 
@@ -117,5 +119,6 @@ export function useFindReplace() {
     currentMatch,
     executeSearch,
     handleClose,
+    focusTrigger,
   };
 }

@@ -1,6 +1,7 @@
 import { createSignal, Show } from "solid-js";
 import { useCodeMirror } from "@/hooks/useCodeMirror";
 import { ContextMenu, type ContextMenuItem } from "@/components/ui/ContextMenu";
+import { settingsStore } from "@/stores/settings";
 
 interface CodeMirrorViewProps {
   content: string;
@@ -30,7 +31,7 @@ export function CodeMirrorView(props: CodeMirrorViewProps) {
     setCtxMenu,
   });
 
-
+  const inverseZoom = () => 1 / settingsStore.zoomLevel();
 
   return (
     <>
@@ -38,6 +39,12 @@ export function CodeMirrorView(props: CodeMirrorViewProps) {
         ref={containerRef}
         class="h-full w-full overflow-hidden"
         onContextMenu={handleContextMenu}
+        style={{
+          transform: `scale(${inverseZoom()})`,
+          "transform-origin": "top left",
+          width: `${settingsStore.zoomLevel() * 100}%`,
+          height: `${settingsStore.zoomLevel() * 100}%`,
+        }}
       />
       <Show when={ctxMenu()}>
         {(cm) => (

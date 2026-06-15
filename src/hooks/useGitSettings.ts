@@ -38,7 +38,7 @@ export function useGitSettings(fs: ReturnType<typeof useFileSystem>) {
     }
   };
 
-  const [remotes, { mutate: setRemotes }] = createResource(
+  const [remotes] = createResource(
     () => [fs.rootPath(), lastUpdate()] as const,
     ([path, ts]) => fetchRemotes(path, ts),
   );

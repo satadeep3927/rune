@@ -1,4 +1,5 @@
 import "xterm/css/xterm.css";
+import { TerminalSurface } from "@/components/ui/TerminalSurface";
 import { useTerminalInstance } from "@/hooks/useTerminalInstance";
 
 interface TerminalInstanceProps {
@@ -17,16 +18,10 @@ export function TerminalInstance(props: TerminalInstanceProps) {
   );
 
   return (
-    <div
-      ref={setTerminalRef}
-      class="absolute inset-0"
+    <TerminalSurface
+      terminalRef={setTerminalRef}
+      active={props.isActive}
       onClick={focus}
-      style={{
-        // No padding — xterm manages its own internal spacing.
-        // Padding breaks the canvas/cell alignment causing garbled text.
-        visibility: props.isActive ? "visible" : "hidden",
-        "pointer-events": props.isActive ? "auto" : "none",
-      }}
     />
   );
 }

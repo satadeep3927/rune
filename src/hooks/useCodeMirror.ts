@@ -14,6 +14,7 @@ import {
   EditorState,
   Compartment,
   Transaction,
+  EditorSelection,
   type Extension,
 } from "@codemirror/state";
 import {
@@ -43,7 +44,6 @@ import {
   replaceNext,
   replaceAll,
   getSearchQuery,
-  selectMatches,
 } from "@codemirror/search";
 import {
   foldGutter,
@@ -74,7 +74,7 @@ import { go } from "@codemirror/legacy-modes/mode/go";
 import { gitConflictExtension } from "@/features/editor/gitConflictExtension";
 import { createRuneTheme } from "@/features/editor/cmTheme";
 import { tabStore } from "@/stores/tabs";
-import { globalSettings } from "@/stores/settings";
+import { globalSettings, settingsStore } from "@/stores/settings";
 import { pluginRegistry } from "@/plugins";
 import type { ContextMenuItem } from "@/components/ui/ContextMenu";
 
@@ -214,7 +214,7 @@ export function useCodeMirror(options: UseCodeMirrorOptions) {
           const currentPos = update.state.selection.main.from;
           const cursor = query.getCursor(update.state);
           let m = cursor.next();
-          while (!m.done && count < 999) {
+          while (!m.done && count < 100) {
             count++;
             if (
               m.value.to <= currentPos ||
@@ -224,7 +224,7 @@ export function useCodeMirror(options: UseCodeMirrorOptions) {
             }
             m = cursor.next();
           }
-          const finalCount = m.done ? count : "999+";
+          const finalCount = m.done ? count : "100+";
 
           if (
             tId &&
@@ -279,7 +279,63 @@ export function useCodeMirror(options: UseCodeMirrorOptions) {
       highlightSelectionMatches({ minSelectionLength: 1 }),
       syntaxHighlighting(defaultHighlightStyle, { fallback: true }),
       keymap.of([
-        { key: "Mod-Shift-l", run: selectMatches, preventDefault: true },
+        {
+          key: "Mod-f",
+          run: () => {
+            window.dispatchEvent(new CustomEvent("rune-editor-find"));
+            return true;
+          },
+          preventDefault: true,
+        },
+        {
+          key: "Mod-h",
+          run: () => {
+            window.dispatchEvent(new CustomEvent("rune-editor-replace"));
+            return true;
+          },
+          preventDefault: true,
+        },
+        {
+          key: "Mod-Shift-l",
+          run: (view) => {
+            const state = view.state;
+            const sel = state.sliceDoc(state.selection.main.from, state.selection.main.to);
+            let queryObj;
+            
+            if (sel) {
+              queryObj = new SearchQuery({ search: sel, caseSensitive: false, regexp: false, wholeWord: false });
+              window.dispatchEvent(
+                new CustomEvent("rune-search-set-query", {
+                  detail: { query: sel },
+                }),
+              );
+            } else {
+              queryObj = getSearchQuery(state);
+              if (!queryObj || !queryObj.valid || !queryObj.search) {
+                return false;
+              }
+            }
+
+            const cursor = queryObj.getCursor(state);
+            let m = cursor.next();
+            const ranges = [];
+            while (!m.done && ranges.length < 1000) {
+              ranges.push(EditorSelection.range(m.value.from, m.value.to));
+              m = cursor.next();
+            }
+
+            if (ranges.length > 0) {
+              const mainIndex = Math.max(0, ranges.findIndex(r => r.from >= state.selection.main.from));
+              view.dispatch({
+                selection: EditorSelection.create(ranges, mainIndex),
+                effects: setSearchQuery.of(queryObj),
+                scrollIntoView: true
+              });
+            }
+            return true;
+          },
+          preventDefault: true
+        },
         { key: "Mod-Shift-z", run: redo, preventDefault: true },
         {
           key: "F12",
@@ -506,6 +562,28 @@ export function useCodeMirror(options: UseCodeMirrorOptions) {
   createEffect(() => {
     if (options.isActive?.() && view) {
       view.focus();
+    }
+  });
+
+  createEffect(() => {
+    // Track dependencies that affect layout
+    globalSettings.editorFontSize;
+    globalSettings.editorFontFamily;
+    settingsStore.zoomLevel();
+    
+    if (view) {
+      // Wait for DOM to actually paint the new CSS variables (requestAnimationFrame is too early)
+      setTimeout(() => {
+        if (view) {
+          // Force CodeMirror to completely invalidate its height cache
+          view.dispatch({
+            effects: wordWrapCompartment.reconfigure(
+              globalSettings.wordWrap ? EditorView.lineWrapping : []
+            )
+          });
+          view.requestMeasure();
+        }
+      }, 50);
     }
   });
 

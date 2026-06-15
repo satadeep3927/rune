@@ -7,7 +7,7 @@ import { SettingRow } from "@/components/settings/SettingRow";
 import { CustomSelect } from "@/components/settings/CustomSelect";
 import { Trash2 } from "lucide-solid";
 
-export function GitSettingsView(props: { tabId: string }) {
+export function GitSettingsView(_props: { tabId: string }) {
   const fs = useFileSystem();
   const git = useGitSettings(fs);
 

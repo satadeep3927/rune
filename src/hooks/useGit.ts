@@ -1,5 +1,6 @@
 import { createSignal, createResource, onMount, onCleanup } from "solid-js";
 import { invoke } from "@tauri-apps/api/core";
+import { getCurrentWindow } from "@tauri-apps/api/window";
 import { useFileSystem } from "@/hooks/useFileSystem";
 
 export interface GitFileStatus {
@@ -12,9 +13,11 @@ export interface GitState {
   status: GitFileStatus[];
 }
 
-export function useGit(fs: ReturnType<typeof useFileSystem>) {
-  const [lastUpdate, setLastUpdate] = createSignal(Date.now());
+// Global update signal so that refreshing git state from the Git panel
+// also updates the BranchPicker in the titlebar.
+const [globalGitUpdate, setGlobalGitUpdate] = createSignal(Date.now());
 
+export function useGit(fs: ReturnType<typeof useFileSystem>) {
   const fetchGitState = async (path: string | null, _timestamp: number) => {
     if (!path) return null;
     try {
@@ -27,16 +30,47 @@ export function useGit(fs: ReturnType<typeof useFileSystem>) {
   };
 
   const [gitState] = createResource(
-    () => [fs.rootPath(), lastUpdate()] as const,
+    () => [fs.rootPath(), globalGitUpdate()] as const,
     ([path, ts]) => fetchGitState(path, ts),
   );
 
-  const refreshGit = () => setLastUpdate(Date.now());
+  const refreshGit = () => setGlobalGitUpdate(Date.now());
 
   onMount(() => {
     const handleFsChange = () => refreshGit();
+    
+    // Refresh when the user presses Enter in the built-in terminal (e.g. running a git command)
+    let terminalTimeoutIds: ReturnType<typeof setTimeout>[] = [];
+    const handleTerminalEnter = () => {
+      // Clear previous timeouts if user is mashing Enter
+      terminalTimeoutIds.forEach(clearTimeout);
+      terminalTimeoutIds = [];
+      
+      // Check for git updates at a few intervals to catch both fast and slow terminal commands
+      terminalTimeoutIds.push(setTimeout(refreshGit, 500));
+      terminalTimeoutIds.push(setTimeout(refreshGit, 1500));
+      terminalTimeoutIds.push(setTimeout(refreshGit, 3000));
+    };
+
     window.addEventListener("fs-change", handleFsChange);
-    onCleanup(() => window.removeEventListener("fs-change", handleFsChange));
+    window.addEventListener("terminal-enter-pressed", handleTerminalEnter);
+
+    // Refresh when the OS window gains focus (e.g. returning from external terminal/git client)
+    let unlistenFocus: (() => void) | undefined;
+    getCurrentWindow().onFocusChanged((event) => {
+      if (event.payload) { // true when focused
+        refreshGit();
+      }
+    }).then(unlisten => {
+      unlistenFocus = unlisten;
+    });
+
+    onCleanup(() => {
+      window.removeEventListener("fs-change", handleFsChange);
+      window.removeEventListener("terminal-enter-pressed", handleTerminalEnter);
+      terminalTimeoutIds.forEach(clearTimeout);
+      if (unlistenFocus) unlistenFocus();
+    });
   });
 
   const commit = async (message: string) => {

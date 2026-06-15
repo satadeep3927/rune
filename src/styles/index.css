@@ -264,12 +264,6 @@ body {
   max-width: 100%;
 }
 
-/* Reset line-height for xterm to fix selection highlight grid */
-.xterm,
-.xterm * {
-  line-height: normal !important;
-}
-
 /* Custom Scrollbar for xterm */
 .xterm-viewport::-webkit-scrollbar {
   width: 8px;

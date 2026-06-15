@@ -34,11 +34,31 @@ export function useGitView(fs: any) {
 
   const [isPushing, setIsPushing] = createSignal(false);
   const [isPulling, setIsPulling] = createSignal(false);
+  const [isStagingAll, setIsStagingAll] = createSignal(false);
 
   const isRepo = () =>
     gitStore.gitState() !== null && gitStore.gitState() !== undefined;
   const isInitialLoading = () => gitStore.gitState() === undefined && gitStore.gitState.loading;
   const isRefreshing = () => gitStore.gitState() !== undefined && gitStore.gitState.loading;
+
+  const handleStageAll = async (files: string[]) => {
+    if (files.length === 0) return;
+    setIsStagingAll(true);
+    try {
+      await gitStore.stageFiles(files);
+    } catch (e: any) {
+      ui.showConfirmDialog("Stage Failed", {
+        detail:
+          typeof e === "string" && e.trim()
+            ? e
+            : "An error occurred while staging files.",
+        okLabel: "Close",
+        hideCancel: true,
+      });
+    } finally {
+      setIsStagingAll(false);
+    }
+  };
 
   const handlePush = async () => {
     setIsPushing(true);
@@ -87,9 +107,11 @@ export function useGitView(fs: any) {
     isCommitting,
     isPushing,
     isPulling,
+    isStagingAll,
     handleCommit,
     handlePush,
     handlePull,
+    handleStageAll,
     isRepo,
     isInitialLoading,
     isRefreshing,
